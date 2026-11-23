@@ -1,0 +1,22 @@
+version: 1
+id: ha-device-protocol-in-library
+title: Device and service protocols live in client libraries
+description: Hearth integrations hold no endpoint, authentication or request and payload code; they call a client package under libs/.
+select:
+  glob: 'hearth/integrations/**/*.py'
+assert:
+  - id: no-endpoints
+    description: No URL, endpoint path, query string or port of a device or service API.
+    error: Move the URL, path, query or port into the client package under libs/ and call its methods; pass it only the host or address from the config.
+    grep: '://|/[A-Za-z0-9_{]|\?[A-Za-z_]+=|[Uu][Rr][Ll]|[Ee]ndpoint|:\d{2,5}\b|\b[Pp]ort\b'
+    decide: 'This file is a module of an integration of Hearth, a home-automation hub, and the address of a device or web service API belongs in a separate client library package, never in this file. Passes when the code of this file writes or assembles no URL, no URL scheme such as http://, no endpoint path such as /api/v1/state, no query string such as ?address=, and no port number of an API, not even to hand it to another object. Reading a host name, IP address, street address or base URL from the integration''s config and passing it unchanged to a client library is allowed.'
+  - id: no-auth-details
+    description: No authentication header, scheme or token handling.
+    error: Let the client package under libs/ decide how to send the credential; pass it only the token or key from the config.
+    grep: '[Aa]uth|[Bb]earer|[Tt]oken|[Hh]eader|[Kk]ey|[Pp]assword|[Ss]ecret|[Cc]redential|[Ll]ogin|[Ss]ignature|[Hh]mac|HMAC|[Bb]asic'
+    decide: 'This file is a module of an integration of Hearth, a home-automation hub, and how a device or web service authenticates belongs in a separate client library package, never in this file. Passes when the code of this file builds no authentication header such as Authorization or X-Api-Key, writes no scheme such as "Bearer " or "Basic " in front of a credential, puts no token or key into a URL, query or request body, signs no request, and requests, logs in for or refreshes no token itself. Reading a token, API key, user name or password from the integration''s config and passing it as an argument to a client library''s constructor or method is allowed.'
+  - id: no-requests-or-payloads
+    description: No request sent, and no request or response body built or read.
+    error: Move the request and the payload format into the client package under libs/, and use its methods and the attributes of what they return.
+    grep: '[Jj][Ss][Oo][Nn]|\.(get|post|put|patch|delete|request|send|fetch|read|recv|urlopen)\(|urllib|aiohttp|requests|httpx|socket|\[\s*["'']|\{\s*["'']'
+    decide: 'This file is a module of an integration of Hearth, a home-automation hub, and the requests to a device or web service and the format of their data belong in a separate client library package, never in this file. Passes when the code of this file sends no request itself (through the hub''s session, urllib, an HTTP client or a socket), encodes or decodes no request or response body, builds no request body out of the device''s or service''s own field names such as {"on": False}, and reads no field by its key out of data that came from a device or service, whether from a request or from a client library method, such as data["watts"] or status.get("pm25"). Calling methods of a client library and using attributes of the objects they return, such as state.watts, is allowed, and so is reading keys of the integration''s own config, such as config["host"].'

@@ -1,0 +1,9 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pycitywaste"
+version = "0.1.0"
+description = "Async client for the city's open data waste collection API"
+requires-python = ">=3.11"
