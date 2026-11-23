@@ -1,0 +1,5 @@
+{
+  "banners": [
+    { "id": "inc412", "audience": "affected-stores", "placement": "dashboard", "dismissible": false, "note": "outage banner, temporary" }
+  ]
+}

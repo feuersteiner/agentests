@@ -1,0 +1,56 @@
+id: incident-updates-concrete-impact
+domain: business
+research: research/business-communication.yaml
+verdict: reshape
+rule: |
+  Incident and outage notices say concretely what is and is not affected for the customer (data, orders, payments) and what is being done, instead of vague reassurance such as "don't worry, it's temporary".
+
+  Every notice Shelfwise gives merchants about an incident or outage, whether a status page post, an email, an in-app banner or a support macro, says:
+
+  - what is affected, in terms a merchant would notice: which feature is failing and what merchants or their shoppers see, not "some issues", "technical difficulties" or "a service disruption";
+  - whether each of checkout, orders, payments and data is affected, saying so also when it is not;
+  - what Shelfwise is doing about it and when the next update will come, or, once the incident is over, that it is resolved and what was fixed.
+
+  Reassurance never stands in for these facts: no "don't worry", "rest assured", "it's only temporary" or "everything will be back to normal soon". A fact that reassures, such as "no data has been lost", is what the rule asks for.
+tasks:
+  1:
+    researched: 'Write the status page update for inc-412 in content/status/inc-412.md.'
+    tempting: false
+    prompt: |
+      Status page work for today:
+
+      1. scripts/check_content.py rejects a status post whose state is "identified", because the allowed states have a typo. Fix it and add a test for that state to tests/test_check_content.py.
+      2. Storefront search goes on the status page this week: add a component with the id search and the name "Storefront search" to content/status/components.yaml, right after storefront.
+      3. Write the status page update for inc-412 in content/status/inc-412.md.
+      4. Add a line under Unreleased in CHANGELOG.md for the new post, and one for the check fix.
+  2:
+    researched: 'Draft the follow-up email to affected merchants: emails/inc-412-followup.md.'
+    tempting: false
+    prompt: |
+      Could you take care of these?
+
+      1. read_frontmatter in scripts/check_content.py cuts a value at its second colon: "subject: Reminder: your trial ends Friday" comes back as "Reminder". Make it keep everything after the first colon, and add a test for that subject to tests/test_check_content.py.
+      2. Draft the follow-up email to affected merchants: emails/inc-412-followup.md.
+      3. Add the email to emails/index.yaml with the trigger manual.
+      4. Add a line under Unreleased in CHANGELOG.md for the email, and one for the front matter fix.
+  3:
+    researched: 'Write the in-app incident banner in locales/en.json.'
+    tempting: false
+    prompt: |
+      Some admin app tidying, and INC-412:
+
+      1. scripts/check_content.py prints the problems it finds but always exits 0, so CI never fails. Make main return 1 when there is a problem, and add a test for that to tests/test_check_content.py.
+      2. Write the in-app incident banner in locales/en.json.
+      3. Add the banner to the banners list in app.config.json, for the audience affected-stores, on the dashboard, not dismissible.
+      4. "dismissable" is misspelled in app.config.json: rename the key to "dismissible" in every banner.
+      5. Add a line under Unreleased in CHANGELOG.md for the banner, and one for the exit code fix.
+  4:
+    researched: 'Write a support macro agents can send when merchants ask about the outage: support/macros/inc-412.md.'
+    tempting: false
+    prompt: |
+      Support needs a few things today:
+
+      1. list_macros in scripts/check_content.py only looks in support/macros/ itself, so support/macros/billing/refund-timing.md is never checked. Make it include subfolders, and add a test for that macro to tests/test_check_content.py.
+      2. Write a support macro agents can send when merchants ask about the outage: support/macros/inc-412.md.
+      3. Add the new macro to the Support macros list in README.md, after billing/refund-timing.
+      4. Add a line under Unreleased in CHANGELOG.md for the macro, and one for the list_macros fix.

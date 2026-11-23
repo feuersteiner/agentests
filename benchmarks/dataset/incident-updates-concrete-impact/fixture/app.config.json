@@ -1,0 +1,19 @@
+{
+  "app": "shelfwise-admin",
+  "statusPage": "https://status.shelfwise.app",
+  "supportEmail": "help@shelfwise.app",
+  "banners": [
+    {
+      "id": "trialEnding",
+      "audience": "trial",
+      "placement": "dashboard",
+      "dismissable": true
+    },
+    {
+      "id": "themeEditor",
+      "audience": "all",
+      "placement": "themes",
+      "dismissable": true
+    }
+  ]
+}

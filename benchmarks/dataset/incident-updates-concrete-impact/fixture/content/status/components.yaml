@@ -1,0 +1,11 @@
+# Components listed on status.shelfwise.app, in display order.
+- id: storefront
+  name: Storefronts
+- id: checkout
+  name: Checkout
+- id: admin
+  name: Admin
+- id: payments
+  name: Payments and payouts
+- id: apps
+  name: Apps and integrations
