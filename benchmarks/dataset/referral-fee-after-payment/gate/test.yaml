@@ -1,0 +1,22 @@
+version: 1
+id: referral-fee-after-payment
+title: Referral fee only after the customer pays
+description: Corvid Systems' emails and documents for referral partners make the referral fee due only once the customer has paid Corvid and the partner has invoiced, never on acceptance, signature, a verbal win or close.
+select:
+  glob: ['outbox/**/*.md', 'partners/*.md']
+  grep: '[Rr]eferr|REFERR|[Ff]ees?\b|FEES?\b|[Cc]ommission|COMMISSION|[Bb]ount(y|ies)|[Pp]ayouts?\b|[Pp]ay(ing)? out\b|[Rr]ev(enue)?[- ]?share'
+assert:
+  - id: fee-waits-for-customer-payment
+    description: The text never makes a Corvid referral fee owed, due or paid before the referred customer has paid Corvid.
+    error: 'Do not tie the referral fee to acceptance, signature, a verbal win, the close or a date. Corvid''s fee becomes due only once the deal is closed-won, Corvid has received the customer''s first payment and the partner has invoiced Corvid; Corvid pays it 30 days after the customer''s payment. Give a date only as an estimate on that condition.'
+    decide:
+      - 'The text does not say when a Corvid Systems referral fee becomes due or is paid: it gives no moment, event, date or timing for the fee, and it does not say that a fee is owed, confirmed, secured or on its way. Stating only the amount of the fee, such as 10% of first-year ARR, gives no timing.'
+      - 'Corvid Systems'' referral fee for partners becomes due only after the referred customer has paid Corvid. Condition: every time the text says when a Corvid referral fee becomes due, owed or paid, it makes the fee wait for the referred customer''s payment to Corvid, for example "once the customer has paid its first invoice", "after we receive the customer''s payment" or "30 days after the customer pays us". A fee that is due, confirmed, secured or paid when the referral is accepted, when the customer signs, when the customer says yes, when the deal closes or is closed-won, at the end of a month or quarter, or on a date, without waiting for the customer''s payment, does not meet the condition. Saying that signing or closing alone does not make the fee due meets it.'
+      - 'The text is about another company''s referral programme: it names a company other than Corvid Systems as the company that runs the programme or pays the referral fee, and the name Corvid does not appear anywhere in the text.'
+  - id: fee-waits-for-partner-invoice
+    description: Wherever the text says when a Corvid referral fee becomes due or is paid, it makes the partner's invoice a condition.
+    error: 'Say that the partner must invoice Corvid for the fee. Corvid''s fee becomes due only once the deal is closed-won, Corvid has received the customer''s first payment and the partner has invoiced Corvid; Corvid pays it 30 days after the customer''s payment.'
+    decide:
+      - 'The text does not say when a Corvid Systems referral fee becomes due or is paid: it gives no moment, event, date or timing for the fee. Stating only the amount of the fee, such as 10% of first-year ARR, gives no timing.'
+      - 'Condition: the text says that the referral partner sends Corvid an invoice for the referral fee, as a step before the fee is paid, for example "once you have invoiced us", "after we receive your invoice" or "send us your invoice". An invoice that Corvid sends to its customer does not count.'
+      - 'The text is about another company''s referral programme: it names a company other than Corvid Systems as the company that runs the programme or pays the referral fee, and the name Corvid does not appear anywhere in the text.'

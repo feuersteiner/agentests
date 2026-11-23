@@ -1,0 +1,18 @@
+[
+  {
+    "slug": "harlow-retail-advisory",
+    "name": "Harlow Retail Advisory",
+    "contact": "Sam Whitlock",
+    "email": "sam.whitlock@harlowadvisory.example",
+    "partner_since": "2024-09-16",
+    "partner_manager": "Ana Ferreira"
+  },
+  {
+    "slug": "thornbury-consulting",
+    "name": "Thornbury Consulting",
+    "contact": "Dana Okafor",
+    "email": "dana.okafor@thornbury.example",
+    "partner_since": "2025-03-03",
+    "partner_manager": "Ellis Marsh"
+  }
+]

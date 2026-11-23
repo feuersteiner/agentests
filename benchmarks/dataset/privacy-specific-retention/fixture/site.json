@@ -1,0 +1,21 @@
+{
+  "name": "Chalkline",
+  "base_url": "https://chalkline.example",
+  "contact": {
+    "web": "web@chalkline.example",
+    "privacy": "privacy@chalkline.example",
+    "support": "support@chalkline.example",
+    "careers": "careers@chalkline.example"
+  },
+  "nav": [
+    { "label": "Home", "url": "/" },
+    { "label": "Help", "url": "/help/getting-started" }
+  ],
+  "footer": [
+    { "label": "Privacy notice", "url": "/privacy" },
+    { "label": "App privacy", "url": "/app-privacy" }
+  ],
+  "help": [
+    { "title": "Getting started with Chalkline", "url": "/help/getting-started" }
+  ]
+}
