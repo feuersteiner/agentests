@@ -14,7 +14,7 @@
 		"prepare": "lefthook install",
 		"build": "cp README.md LICENSE core/ && bun --no-env-file run --cwd core build",
 		"check": "bun --no-env-file run --workspaces --if-present check",
-		"test": "bun --no-env-file run --workspaces --if-present test",
+		"test": "bun --no-env-file run --cwd core test && bun --no-env-file run --filter agentests-benchmarks --filter agentests-backend-pilot --filter video --if-present test",
 		"test:models": "bun run build && cd core/tests/models && node --env-file-if-exists=../../../.env ../../dist/cli/index.js eval",
 		"lint": "bun --no-env-file run format:check && eslint .",
 		"pack": "bun --no-env-file run build && cd core && npm pack",

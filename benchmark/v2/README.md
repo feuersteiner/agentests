@@ -37,8 +37,9 @@ bun --env-file=../../../.env --no-install cli.ts run --models luna,jev --repeat 
 That command schedules 30 logical decisions and may incur provider charges.
 The pilot has **not been run**. No model calls are part of verification.
 The workbench declares its runtime and build dependencies in the root workspace.
-Root checks and tests include this pilot; the declared core dependency orders
-workspace tests after core builds. The harness never builds or modifies core.
+Root checks and tests include this pilot. The root test command completes core's
+build and tests before starting the other workspace tests, preventing concurrent
+rebuilds from removing the pilot's runtime. The harness never builds or modifies core.
 
 The labels are **synthetic, provisional, and not human reviewed**. Agreement is
 a development diagnostic, not calibrated quality or evidence of generalization.
