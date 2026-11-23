@@ -1,0 +1,28 @@
+name: Vulnerability check
+
+on:
+  schedule:
+    - cron: '17 6 * * 1'
+
+permissions:
+  contents: read
+
+jobs:
+  govulncheck:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Install govulncheck
+        run: go install golang.org/x/vuln/cmd/govulncheck@latest
+      - name: Check
+        run: govulncheck ./...
+      - name: Tell the team when it fails
+        if: failure()
+        env:
+          WEBHOOK_URL: ${{ secrets.CHAT_WEBHOOK_URL }}
+        run: |
+          curl -fsS -X POST "$WEBHOOK_URL" -H 'Content-Type: application/json' \
+            -d '{"text": "govulncheck found a problem in slipway"}'
