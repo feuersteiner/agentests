@@ -1,0 +1,8 @@
+[package]
+name = "kvstore"
+version = "0.3.0"
+edition = "2021"
+description = "A small embedded key-value store with a write-ahead log"
+license = "MIT"
+
+[dependencies]

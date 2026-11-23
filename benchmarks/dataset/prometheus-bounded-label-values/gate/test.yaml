@@ -1,0 +1,23 @@
+version: 1
+id: prometheus-bounded-label-values
+title: Metric labels take bounded values
+description: Metrics declared and recorded in the app modules use labels whose values come from a small fixed set, never ids, emails, raw paths or URLs, or exception messages.
+select:
+  glob: 'app/**/*.py'
+  grep: '\.labels\(|labelnames\s*=|\b(Counter|Gauge|Histogram|Summary)\(\s*(f?[''"]|name\s*=)'
+assert:
+  - id: declared-label-names-bounded
+    description: No metric is declared with a label meant for an id, an email, a raw path or URL, or a message.
+    error: Declare labels only for small fixed sets (plan, route template, method, status class, error code); log ids, paths and messages instead.
+    grep: 'labelnames\s*=|\b(Counter|Gauge|Histogram|Summary)\(\s*(f?[''"]|name\s*=)'
+    decide: 'This is a Python module that may declare metrics with `Counter(...)`, `Gauge(...)`, `Histogram(...)` or `Summary(...)`, each taking a name, a help text and an optional list of label names (the third argument or `labelnames=`). No metric declared in this file has a label whose name or help text shows that it holds an unbounded value: an identifier of one user, customer, account, order, cart, payment, session or row, an email address, a raw URL, request path or query string, or free text such as an error or exception message. Labels for a small fixed set of values, such as a plan, a route template, an HTTP method, a status class, an outcome, a size or age bucket, or an error code or reason from a fixed list, are allowed, and a metric without labels has nothing to check.'
+  - id: recorded-values-not-ids
+    description: No .labels(...) call is passed the id or email of one user, customer, order, cart or row.
+    error: Label by a small fixed set such as the plan or a reason code, and put the id or email in a log line.
+    grep: '\.labels\('
+    decide: 'In this Python file, no `.labels(...)` call (a metric label call, such as `METRIC.labels(plan=user.plan).inc()`) is passed the identifier or email address of one user, customer, account, order, cart, payment, session or row, such as `user.id`, `str(customer.id)`, `cart.user_id`, `order_id` or `user.email`, directly or through a variable holding it. Passing a plan, a status, a code or another category is fine.'
+  - id: recorded-values-not-paths-or-messages
+    description: No .labels(...) call is passed a request's raw path or URL, or an error message.
+    error: Label by the route template or an error code, and put the path or message in a log line.
+    grep: '\.labels\('
+    decide: 'In this Python file, no `.labels(...)` call (a metric label call, such as `METRIC.labels(route=route.template).inc()`) is passed the raw path or URL of a request, such as `request.path` or `request.url`, or the text of an exception or error message, such as `str(exc)`, `exc.args[0]`, `repr(exc)` or a string cut or formatted from one, directly or through a variable holding it. Passing a route template with placeholders, an error code or an exception class name is fine.'
