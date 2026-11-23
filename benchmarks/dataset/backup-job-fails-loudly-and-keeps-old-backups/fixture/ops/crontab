@@ -1,0 +1,7 @@
+# Installed on ops-1 as the ops user with: crontab ops/crontab
+# All times are UTC.
+SHELL=/bin/bash
+
+# m  h  dom mon dow  command
+30   2  *   *   *    cd /opt/acme-ops && ops/backup.sh >> /var/log/acme/backup.log 2>&1
+0    6  *   *   1    cd /opt/acme-ops && python3 -m tools.slowlog /var/log/postgresql/slow.log > /var/log/acme/slowlog-$(date +\%F).txt
