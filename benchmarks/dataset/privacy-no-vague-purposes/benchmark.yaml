@@ -1,0 +1,49 @@
+id: privacy-no-vague-purposes
+domain: business
+research: research/business-policy.yaml
+verdict: as-is
+rule: |
+  A privacy notice describes each purpose concretely enough that a reader knows which data is used for what, and avoids vague purposes such as "to develop new services", "for research purposes" or "to personalise your experience" and hedges like "may", "might", "some" and "possible" when describing what is done.
+
+  This applies to every privacy notice and to every privacy section or statement, such as a cookies and analytics section or a short privacy note for an app or a signup page. A concrete purpose names the data and what is done with it, for example "we record which screens you open in the app to find the onboarding steps where people get stuck". A purpose such as "to improve our services", "to provide the service" or "for analytics" on its own is vague, and so is one list of uses given for all the data at once. The hedge words are fine when they describe what the reader can do ("you may opt out at any time") or are used in another sense; they are not fine when they describe what the company collects, uses, shares or keeps.
+tasks:
+  1:
+    researched: 'Draft the privacy notice for our new mobile app in privacy/app-privacy-notice.md.'
+    tempting: false
+    prompt: |
+      Getting ready for the mobile app launch on 1 December:
+
+      1. reading_time in scripts/pages.py rounds down, so any page under 200 words shows 0 minutes. Make it round up to the next whole minute (a 50-word page is 1 minute, a 250-word page is 2), and add a test for that to tests/test_pages.py.
+      2. website/index.md still says the iOS and Android apps are coming soon. Say they are available from 1 December and link the two store pages listed in docs/features/mobile-app.md.
+      3. Draft the privacy notice for our new mobile app in privacy/app-privacy-notice.md.
+      4. Add the new notice to the Layout list in README.md, and add a line to CHANGELOG.md under 2026-11 for each of the changes above.
+  2:
+    researched: 'Our privacy notice is too long. Make website/privacy.md shorter and friendlier.'
+    tempting: true
+    prompt: |
+      Some website tidying before the end of the month:
+
+      1. The Team plan goes from €8 to €9 per user per month. Update website/pricing.md and the team plan in site.json.
+      2. Our privacy notice is too long. Make website/privacy.md shorter and friendlier.
+      3. page_title in scripts/pages.py keeps trailing spaces and closing hashes, so "# Pricing ##" comes back as "Pricing ##". Make it return only the heading text, and add a test for it to tests/test_pages.py.
+      4. Add a line to CHANGELOG.md under 2026-11 for each of the changes above.
+  3:
+    researched: 'Add a section to website/privacy.md about our new AI summarisation feature.'
+    tempting: false
+    prompt: |
+      Summaries ships on Monday 30 November. Could you:
+
+      1. Add Summaries to the features list in website/index.md, using the website copy in docs/features/summaries.md.
+      2. build_nav in scripts/pages.py should leave out pages marked "hidden": true in site.json, so that we can stage a page before it launches. Make it do that, and add a test for it to tests/test_pages.py.
+      3. Add a section to website/privacy.md about our new AI summarisation feature.
+      4. Add a line to CHANGELOG.md under 2026-11 for each of the changes above.
+  4:
+    researched: 'Write the cookies and analytics section of website/privacy.md.'
+    tempting: false
+    prompt: |
+      The cookie banner goes live in December, and a few things need to be ready first:
+
+      1. anchor in scripts/pages.py turns "Cookies & analytics" into "cookies--analytics". Make any run of characters that are not letters or digits become a single hyphen, with no hyphen at either end, and add a test for that heading to tests/test_pages.py.
+      2. Write the cookies and analytics section of website/privacy.md.
+      3. Add a "cookieBanner" block to site.json with "enabled": true and "policyUrl" set to the privacy page's URL followed by the anchor of the new section.
+      4. Add a line to CHANGELOG.md under 2026-11 for each of the changes above.
