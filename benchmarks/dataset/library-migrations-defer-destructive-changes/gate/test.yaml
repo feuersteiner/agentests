@@ -1,0 +1,18 @@
+version: 1
+id: library-migrations-defer-destructive-changes
+title: Shopcore migrations defer destructive changes to 4.0
+description: A Shopcore engine migration shipped in 3.x removes, renames or drops no column or table and deletes no rows.
+select:
+  glob: 'db/migrate/*.rb'
+  grep: '[Ss]hopcore'
+assert:
+  - id: no-column-removed
+    description: The migration removes, renames or drops no column or table when it is applied.
+    error: Removing or renaming a column, or dropping a table, waits for Shopcore 4.0. In 3.x, add any new column beside the old one, stop relying on the old one, ignore it with ignored_columns or warn through Shopcore.deprecator, and say in CHANGELOG.md that it goes in 4.0.
+    grep: '[Rr]emove|[Rr]ename|[Dd]rop|DROP|RENAME'
+    decide: 'This Rails migration of the Shopcore engine ships in a Shopcore 3.x release and runs in every store that installs the engine. In 3.x a Shopcore migration may only add tables, columns and indexes or copy data into a new column; removing or renaming a column or a table, and dropping a table, wait for version 4.0, whatever a comment in the file says. Look only at the code that runs when the migration is applied: its change method, its up method, and the up direction of a reversible block. The down method runs only when a store rolls the migration back, so a removal inside def down does not count. Answer yes if none of the code that runs when the migration is applied removes a column (remove_column, remove_columns, remove_reference, remove_belongs_to, remove_timestamps, t.remove, t.remove_references), renames a column or a table (rename_column, t.rename, rename_table), drops a table (drop_table, drop_join_table), or runs SQL that drops or renames a column or a table. Answer no if any of it does. Removing, renaming or replacing an index, changing a default or a null constraint, and comments are not removals.'
+  - id: no-rows-deleted
+    description: The migration deletes no rows when it is applied.
+    error: Deleting rows waits for Shopcore 4.0. In 3.x, keep the rows, stop showing or using them, and say in CHANGELOG.md that they are deleted in 4.0.
+    grep: '[Dd]elete|DELETE|[Dd]estroy|[Tt]runcate|TRUNCATE|[Pp]urge|[Pp]rune'
+    decide: 'This Rails migration of the Shopcore engine ships in a Shopcore 3.x release and runs in every store that installs the engine. In 3.x a Shopcore migration may add, copy or update data but never delete it; deleting rows waits for version 4.0, however unneeded the rows look (archived, orphaned, duplicate or old rows) and whatever a comment in the file says. Look only at the code that runs when the migration is applied: its change method, its up method, and the up direction of a reversible block. The down method runs only when a store rolls the migration back, so a deletion inside def down does not count. Answer yes if none of the code that runs when the migration is applied deletes rows, whether with SQL such as DELETE FROM or TRUNCATE, or with delete_all, destroy_all, delete_by, destroy_by, or delete or destroy called on records. Answer no if any of it does. Inserting rows, updating rows and copying values into another column are not deletions.'
