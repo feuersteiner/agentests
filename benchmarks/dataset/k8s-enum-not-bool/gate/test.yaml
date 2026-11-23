@@ -1,0 +1,22 @@
+version: 1
+id: k8s-enum-not-bool
+title: Modes and policies are named string enums, not booleans
+description: API and settings fields that choose a behaviour are string unions with named values and a named default; booleans only record facts.
+select:
+  glob: 'src/api/**/*.ts'
+assert:
+  - id: no-boolean-mode
+    description: No boolean field chooses how the service behaves.
+    error: Make the field a string union whose values name each behaviour, with today's behaviour as the named default; keep booleans for facts that cannot have a third value.
+    grep: '\bboolean\b|\b(true|false)\b'
+    decide: 'No settings type, options object, request type or request body in this file has a boolean field that a user, owner or API caller sets to switch a behaviour of the service on or off or to choose how it behaves, and no object in this file copies such a boolean from a request. Booleans that the service fills in itself to record a fact, such as whether an email address was verified or whether a delivery succeeded, pass, and so do functions and local variables that return or hold a boolean.'
+  - id: default-is-named
+    description: The default behaviour is one of the named values.
+    error: Add a value that names the default behaviour and make it the default, instead of letting a missing field, null or undefined stand for it.
+    grep: '\?\s*:\s*["'']|["'']\s*\|\s*(null|undefined)\b|\b(null|undefined)\s*\|\s*["'']'
+    decide: 'Every field in this file that chooses how the service behaves and is typed with string literal values, with or without null or undefined, has a named string value for each behaviour it can select, the default behaviour included. It fails when some behaviour is chosen only by null, by undefined or by leaving the field out, for example a field typed as string literals or null, where null means the default behaviour, or an optional field typed as a single string literal, where leaving it out means another behaviour. A union whose string values already name the default behaviour satisfies this, and so does a file with no such field.'
+  - id: values-name-behaviour
+    description: Enum values name behaviours, not yes or no.
+    error: Rename the values after the behaviour each one selects, instead of yes/no, on/off or true/false.
+    grep: '["''](?:[Yy]es|[Nn]o|[Oo]n|[Oo]ff|[Tt]rue|[Ff]alse|YES|NO|ON|OFF|TRUE|FALSE)["'']'
+    decide: 'No union of string literals or string enum in this file that chooses how the service behaves uses "yes", "no", "on", "off", "true" or "false", in any letter case, as one of its values; each value names the behaviour it selects. A file that uses these words only in messages or other strings satisfies this.'
