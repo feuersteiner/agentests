@@ -1,0 +1,22 @@
+{
+  "reps": [
+    {
+      "name": "Aisha Khan",
+      "email": "aisha.khan@corvid.example",
+      "region": "North America",
+      "quota_q3": 300000
+    },
+    {
+      "name": "Tom Becker",
+      "email": "tom.becker@corvid.example",
+      "region": "North America",
+      "quota_q3": 260000
+    },
+    {
+      "name": "Lena Fischer",
+      "email": "lena.fischer@corvid.example",
+      "region": "EMEA",
+      "quota_q3": 340000
+    }
+  ]
+}
