@@ -6,7 +6,7 @@ import { killAll } from './claude.ts';
 import { runCommand } from './command.ts';
 import { findSkillPlaceholders } from './dataset.ts';
 import type { DatasetEntry } from './dataset.ts';
-import { pickCompanions } from './companions.ts';
+import { createCompanionCheck, pickCompanions } from './companions.ts';
 import { readKeys } from './environment.ts';
 import { toJudgeArgs } from './judge.ts';
 import { loadPrices } from './prices.ts';
@@ -203,8 +203,15 @@ export const runBenchmark = async (settings: HarnessSettings): Promise<void> => 
 		(arm): arm is GateArm => isGateArm(arm) && settings.arms.includes(arm)
 	);
 	const { keys, prices, problems } = checkGates(gateArms, settings.pricesFile);
+	const qualifies = createCompanionCheck();
 	const plans: RunPlan[] = settings.tests.flatMap(({ entry, task }) => {
-		const companions = pickCompanions(entry, task, settings.entries, settings.rulesPerRun - 1);
+		const companions = pickCompanions(
+			entry,
+			task,
+			settings.entries,
+			settings.rulesPerRun - 1,
+			qualifies
+		);
 		return allArms
 			.filter((arm) => settings.arms.includes(arm))
 			.map((arm) => ({ entry, task, arm, companions }));

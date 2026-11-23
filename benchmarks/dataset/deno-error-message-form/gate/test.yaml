@@ -1,0 +1,29 @@
+version: 1
+id: deno-error-message-form
+title: Error messages name the failed action and the current state
+description: Every error message in the library source names the action that failed in active voice, then gives the current state after a colon, in sentence case and without a trailing period.
+select:
+  glob: 'src/**/!(*.test|*.spec).ts'
+assert:
+  - id: names-failed-action
+    description: Each error message opens with the action that failed, as a capitalised verb in active voice.
+    error: 'Open the message with the action that failed, capitalised and in active voice, such as "Cannot parse range", not a noun phrase such as "Invalid range" or "Unknown unit", a passive "could not be parsed", a bare rule or a lower-case first word.'
+    grep: '(?:Error\(|throw|reject\(|super\()\s*[''"\x60](?!Cannot |Failed to |Unable to |Could not )'
+    decide: 'No error message written as text in this file (the text given to any error class, or thrown or rejected as a string; comments are not error messages) starts with anything but a capitalised verb phrase for the operation that failed, such as "Cannot parse ..." or "Cannot open ...". Starts that break this include a noun or adjective phrase such as "Invalid ...", "Unknown ...", "Unsupported ...", "Missing ..." or "Something went wrong"; the passive voice, which starts with the thing acted on, as in "Input x could not be parsed"; a rule such as "Value must not be negative"; and a lower-case first letter, as in "cannot parse ...". One such message breaks this even when the others in the file start well. Rethrowing an error, or passing on a message held in a variable, writes no message.'
+  - id: current-state-after-colon
+    description: Each error message gives the current state after a colon.
+    error: 'After a colon, say what the code actually found, such as "current value is 9" or "unit is missing", and the allowed values where they are known; a rule alone, such as "must be between 0 and 6", does not describe the current state.'
+    grep:
+      - '(?:Error\(|throw|reject\(|super\()\s*(?:''[^'':\n]*''|"[^":\n]*"|\x60[^:\x60]*\x60)'
+      - '(?:Error\(|throw|reject\(|super\()\s*[''"\x60][^\n]*?:\s+(?:\S+\s+){0,3}?(?:must|should|shall|needs?|has to|have to|cannot|can''t|may not)\b'
+      - '(?:Error\(|throw|reject\(|super\()\s*[''"\x60][^\n]*?:\s+(?:\S+\s+)?(?:expect|allow|support|accept|valid|invalid|requir|only|use\b|try\b|please|unknown|unsupported|wrong|bad\b|out of range|between|not\b)'
+      - '(?:Error\(|throw|reject\(|super\()\s*[''"\x60][^\n]*?\b(?:got|received)\b'
+    decide: 'No error message written as text in this file (comments are not error messages) lacks a statement, after a colon, of the value or condition the code found, such as "current value is -1", "value is empty" or "port is 70000, expected 1 to 65535". A message lacks it when it has no colon, when the value found follows a comma or "got" instead of a colon, or when the words after its colon only state a requirement or the allowed values, such as "value must not be negative", "must be between 1 and 10" or "expected 1 to 65535", without saying what was found. Rethrowing an error, or passing on a message held in a variable, writes no message.'
+  - id: sentence-case-no-period
+    description: Each error message keeps its later words in lower case, except names and identifiers, and has no trailing period.
+    error: 'Capitalise only the first word of the message (and names, identifiers and quoted values), including the word after the colon, and drop the period at its end.'
+    grep:
+      - '(?:Error\(|throw|reject\(|super\()\s*[''"\x60][^\n]*?:\s+[A-Z]'
+      - '(?:Error\(|throw|reject\(|super\()\s*[''"\x60][A-Z]\w* [A-Z][a-z]'
+      - '(?:Error\(|throw|reject\(|super\()\s*[''"\x60][^\n]*?[A-Za-z0-9})\]"]\.[''"\x60]'
+    decide: 'No error message written as text in this file (comments are not error messages) has a capital letter at the start of the word right after its colon, even when a full clause follows the colon, unless that word is a name, a code identifier or a quoted value: `Cannot open file "a.txt": value is empty` passes, and `Cannot open file "a.txt": Value is empty` breaks this. Nor does any message capitalise another common word after its first, as in `Cannot Open File "a.txt"`, or end with a period, that is, have "." as its last character before its closing quote or backtick, as in `Cannot open file "a.txt": value is empty.`.'

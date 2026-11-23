@@ -11,6 +11,9 @@
 		"prove": "bun cli/prove.ts",
 		"test": "bun test ./tests"
 	},
+	"dependencies": {
+		"minimatch": "11.0.4"
+	},
 	"devDependencies": {
 		"@types/bun": "^1.4.4",
 		"typescript": "^6.0.3"

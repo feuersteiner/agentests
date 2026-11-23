@@ -53,8 +53,10 @@ All four arms use the same agent.
 | 4. agentests + Jev  | As arm 3, deciding with `jev-latest`.                                                                                                                                                |
 
 The arms are named `baseline`, `skill`, `luna` and `jev` in the harness. A test's **companions** are
-nine other rules of its domain, drawn with a seed made from the test's name, so every arm of a test
-holds the same ten rules: as skills in arm 2 and as Tests in arms 3 and 4. A team's repository holds
+nine other rules of its domain, drawn with a seed made from the test's name from those whose Test
+selects none of the fixture's files as they are before the agent starts (fewer when fewer qualify), so
+that no run is blocked for content the agent did not write, and so every arm of a test holds the same
+ten rules: as skills in arm 2 and as Tests in arms 3 and 4. A team's repository holds
 many rules at once, and an agent rarely loads a skill it is not told to: arm 2 measures a skill as it
 is really met, not one forced on the agent. `--rules-per-run 1` gives each run its own rule only. A
 **finding** is the line the hook prints for a file that breaks a rule: the file, the Test and
