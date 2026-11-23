@@ -2,6 +2,7 @@ import { spawn } from 'node:child_process';
 import {
 	closeSync,
 	existsSync,
+	mkdirSync,
 	openSync,
 	readdirSync,
 	readFileSync,
@@ -54,7 +55,62 @@ export interface ClaudeCall {
 	stdoutPath: string;
 	stderrPath: string;
 	timeoutMs: number;
+	/**
+	 * When set, the process gets a /tmp of its own: in a private mount namespace `scratch` is mounted over /tmp
+	 * with only the `keep` paths bound back in (`ro:` before one makes it read-only; a path outside /tmp stays as
+	 * it is). Runs side by side then neither share scratch files such as `/tmp/notes.md` nor see each other's
+	 * workspaces.
+	 */
+	privateTmp?: { scratch: string; keep: string[] };
 }
+
+/**
+ * The shell script `unshare` runs for `privateTmp`, with arguments `<scratch> <keep>... -- <cwd> <command>...`:
+ * binds each kept path into the scratch folder, mounts the scratch folder over /tmp, then runs the command.
+ */
+const privateTmpScript = `set -eu
+scratch=$1; shift
+while [ "$1" != -- ]; do
+	path=$1; mode=rw
+	case $path in ro:*) path=\${path#ro:}; mode=ro;; esac
+	case $path in /tmp/*) ;; *) shift; continue;; esac
+	target="$scratch/\${path#/tmp/}"
+	if [ -d "$path" ]; then mkdir -p "$target"; else mkdir -p "$(dirname "$target")"; touch "$target"; fi
+	mount --rbind "$path" "$target"
+	if [ $mode = ro ]; then mount -o remount,bind,ro "$target"; fi
+	shift
+done
+shift
+cwd=$1; shift
+mount --rbind "$scratch" /tmp
+cd "$cwd"
+exec "$@"`;
+
+/** The program and arguments that run `claude` for `call`, inside a private /tmp when it asks for one. */
+const toCommand = (call: ClaudeCall): [string, string[]] => {
+	if (call.privateTmp === undefined) return ['claude', call.args];
+	mkdirSync(call.privateTmp.scratch, { recursive: true });
+	const { scratch, keep } = call.privateTmp;
+	return [
+		'unshare',
+		[
+			'--mount',
+			'--propagation',
+			'private',
+			'--',
+			'sh',
+			'-c',
+			privateTmpScript,
+			'private-tmp',
+			scratch,
+			...keep,
+			'--',
+			call.cwd,
+			'claude',
+			...call.args
+		]
+	];
+};
 
 /** How long a process gets to exit after SIGTERM before SIGKILL. */
 const killGraceMs = 10_000;
@@ -96,7 +152,8 @@ export const runClaude = (call: ClaudeCall): Promise<ClaudeExit> => {
 	const started = performance.now();
 	return new Promise((resolve) => {
 		let timedOut = false;
-		const child = spawn('claude', call.args, {
+		const [command, args] = toCommand(call);
+		const child = spawn(command, args, {
 			cwd: call.cwd,
 			env: call.env,
 			detached: true,

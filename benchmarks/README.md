@@ -240,6 +240,12 @@ provider "openai.decision" refused question "criterion".` Jev's response format,
      --disallowedTools Agent Task --max-budget-usd <cap>
    ```
 
+   It runs in a private mount namespace (`unshare --mount`, so the harness runs as root on Linux)
+   whose `/tmp` is a fresh folder of its own, with only its workspace bound back in, plus the hook
+   log and, read-only, the agentests toolchain in a gate arm. Runs side by side thus never share
+   scratch files such as `/tmp/notes.md`, nor see each other's workspaces; long-context agents
+   write such files often.
+
    The agent has no subagent tool in any arm, so everything it reads stays in its own context. Its
    **peak context** is the largest prompt of any of its model calls: uncached input, cache reads and
    cache writes of one assistant message. The run records it, the context window the `result` event

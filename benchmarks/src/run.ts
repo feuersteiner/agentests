@@ -1,6 +1,6 @@
 import { randomBytes } from 'node:crypto';
-import { mkdirSync, writeFileSync } from 'node:fs';
-import { join, relative } from 'node:path';
+import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { dirname, join, relative } from 'node:path';
 import {
 	keepSession,
 	toAgentArgs,
@@ -195,14 +195,24 @@ export const runOne = async (plan: RunPlan, context: RunContext): Promise<RunRes
 			companions,
 			plan.longMaterial
 		);
+		// The agent's /tmp is its own: it holds its workspace and, in a gate arm, the hook log and the toolchain.
+		if (gateArm) writeFileSync(hookLog, '', { flag: 'a' });
+		const scratch = join(context.folder, 'tmp', token);
 		const exit = await runClaude({
 			args: toAgentArgs(toAgentPrompt(prompt), context.agentBudgetUsd),
 			cwd: workspaceDirectory,
 			env: toChildEnv(hookLog),
 			stdoutPath: join(runDirectory, 'transcript.jsonl'),
 			stderrPath: join(runDirectory, 'agent-stderr.log'),
-			timeoutMs: context.timeoutMs
-		});
+			timeoutMs: context.timeoutMs,
+			privateTmp: {
+				scratch,
+				keep: [
+					dirname(workspaceDirectory),
+					...(gateArm ? [hookLog, `ro:${dirname(context.modules!)}`] : [])
+				]
+			}
+		}).finally(() => rmSync(scratch, { recursive: true, force: true }));
 		const records = gateArm ? context.proxy!.close(token) : [];
 		const session = keepSession(exit.events, runDirectory);
 		removeProjectFolder(workspaceDirectory);
