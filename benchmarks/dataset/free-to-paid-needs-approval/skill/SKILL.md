@@ -1,6 +1,6 @@
 ---
 name: free-to-paid-needs-approval
-description: Covers what a Brindle pricing, packaging or monetisation document may change about the Free tier. Use whenever you write or edit a packaging proposal, a tier or plan comparison table, a pricing page, an upgrade or paid-conversion memo, or a pricing announcement or blog post, even if the request does not mention the Free tier.
+description: Covers what Brindle's pricing, packaging and planning documents may change about the Free plan, and the sign-off such a change needs. Use whenever you write or edit a document that proposes, plans, tabulates or announces what Brindle's plans include or cost, such as a packaging or pricing proposal, a growth or conversion memo, a tier comparison table or pricing page, or a pricing announcement (the Markdown files under pricing/, planning/ and blog/), even if the request does not mention the Free tier.
 ---
 
 # Changes to the Free tier need product leadership's confirmation
@@ -11,7 +11,8 @@ A pricing, packaging or monetisation document does not move anything that is fre
 
 Brindle's Free tier today includes code search and navigation, saved searches, the audit log and the community forum, for up to 3 users and 5 projects, with no other limits.
 
-Apply it to every document you write or edit in a pricing or packaging task, for the whole task.
+Apply it to every document you write or edit under `pricing/`, `planning/` and `blog/`, even when
+the document is one step of a longer task.
 
 ## Why
 
@@ -32,8 +33,8 @@ Moves are rarely called that. All of these shrink Free:
   history, or turning Free into a time-limited trial.
 
 These do not: new paid features or add-ons that Free never had, price changes to Team or
-Enterprise, moving features from Enterprise to Team, moving anything to Free, raising Free
-limits, and trials or upgrade prompts that leave Free as it is.
+Enterprise, moving features from Enterprise to Team, moving anything to Free (even with a cap on
+it), raising Free limits, and trials or upgrade prompts that leave Free as it is.
 
 ## How to comply
 
