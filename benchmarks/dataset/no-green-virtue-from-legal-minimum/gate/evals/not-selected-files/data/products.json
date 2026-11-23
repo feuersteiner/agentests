@@ -1,0 +1,32 @@
+{
+  "products": [
+    {
+      "slug": "face-wash",
+      "name": "Exfoliating Face Wash",
+      "size": "150 ml",
+      "price": 16.0,
+      "refill": { "size": "500 ml", "price": 38.0 }
+    },
+    {
+      "slug": "body-wash",
+      "name": "Sea Kelp Body Wash",
+      "size": "250 ml",
+      "price": 14.0,
+      "refill": { "size": "750 ml", "price": 32.0 }
+    },
+    {
+      "slug": "hand-cream",
+      "name": "Sea Buckthorn Hand Cream",
+      "size": "75 ml",
+      "price": 12.0,
+      "refill": null
+    },
+    {
+      "slug": "dry-shampoo",
+      "name": "Dry Shampoo Spray",
+      "size": "200 ml",
+      "price": 9.0,
+      "refill": null
+    }
+  ]
+}
