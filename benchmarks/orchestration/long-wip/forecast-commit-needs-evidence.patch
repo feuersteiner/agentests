@@ -1,0 +1,1979 @@
+diff --git a/benchmarks/dataset/forecast-commit-needs-evidence/long/generate.ts b/benchmarks/dataset/forecast-commit-needs-evidence/long/generate.ts
+new file mode 100644
+index 0000000..4b55210
+--- /dev/null
++++ b/benchmarks/dataset/forecast-commit-needs-evidence/long/generate.ts
+@@ -0,0 +1,1973 @@
++// Writes the long material of this entry's long tasks: the collections cases that Corvid Systems' billing inbox
++// opened between 2 March and 31 July 2026, one Markdown file each, under billing/cases/, as the old billing tool
++// exported them, without reason codes, statuses or owners. Deterministic: fixed seeds, no clock, no network.
++//   bun long/generate.ts <workspace root>
++import { mkdirSync, writeFileSync } from 'node:fs';
++import { join } from 'node:path';
++
++/** How many cases to write. Dates, case numbers and the share of each topic all follow from it. */
++const ITEMS = 120;
++
++const root = process.argv[2];
++if (!root) throw new Error('Usage: bun long/generate.ts <dir>');
++
++const mulberry32 = (seed: number) => () => {
++	seed = (seed + 0x6d2b79f5) | 0;
++	let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
++	t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
++	return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
++};
++type Rand = () => number;
++const int = (r: Rand, low: number, high: number) => low + Math.floor(r() * (high - low + 1));
++const pick = <T>(r: Rand, items: readonly T[]): T => items[Math.floor(r() * items.length)]!;
++const shuffle = <T>(r: Rand, items: readonly T[]): T[] => {
++	const copy = [...items];
++	for (let i = copy.length - 1; i > 0; i--) {
++		const j = Math.floor(r() * (i + 1));
++		[copy[i], copy[j]] = [copy[j]!, copy[i]!];
++	}
++	return copy;
++};
++/** A stable number for a name, so that a customer keeps its people, size and terms from case to case. */
++const hash = (text: string) => [...text].reduce((h, c) => Math.imul(h ^ c.charCodeAt(0), 16777619) >>> 0, 2166136261);
++const pad = (value: number, width = 2) => String(value).padStart(width, '0');
++const usd = (amount: number) => {
++	const [whole, cents] = (Math.round(amount * 100) / 100).toFixed(2).split('.');
++	return `$${whole!.replace(/\B(?=(\d{3})+$)/g, ',')}.${cents}`;
++};
++const round = (amount: number, step: number) => Math.round(amount / step) * step;
++const plain = (text: string) => text.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/ø/g, 'o').replace(/ł/g, 'l').replace(/ß/g, 'ss').toLowerCase();
++const ordinal = (n: number) => `${n}${n % 10 === 1 && n !== 11 ? 'st' : n % 10 === 2 && n !== 12 ? 'nd' : n % 10 === 3 && n !== 13 ? 'rd' : 'th'}`;
++
++// Time is kept in minutes since 00:00 on 1 March 2026, US Eastern time.
++const DAY = 1440;
++const EPOCH = Date.UTC(2026, 2, 1);
++const LAST_MESSAGE = 157 * DAY + 17 * 60; // Wednesday 5 August, 17:00
++const HOLIDAYS = new Set([85, 124]); // Memorial Day, 25 May; Independence Day observed, 3 July
++const at = (m: number) => new Date(EPOCH + m * 60000);
++const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
++const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
++const weekday = (m: number) => dayNames[at(m).getUTCDay()]!;
++const clock = (m: number) => `${pad(at(m).getUTCHours())}:${pad(at(m).getUTCMinutes())}`;
++const dateLong = (m: number) => `${at(m).getUTCDate()} ${monthNames[at(m).getUTCMonth()]} ${at(m).getUTCFullYear()}`;
++const dateShort = (m: number) => `${at(m).getUTCDate()} ${monthNames[at(m).getUTCMonth()]!.slice(0, 3)} ${at(m).getUTCFullYear()}`;
++const dayMonth = (m: number) => `${at(m).getUTCDate()} ${monthNames[at(m).getUTCMonth()]}`;
++const iso = (m: number) => at(m).toISOString().slice(0, 10);
++const stamp = (m: number) => `${weekday(m).slice(0, 3)} ${at(m).getUTCDate()} ${monthNames[at(m).getUTCMonth()]!.slice(0, 3)}, ${clock(m)}`;
++const stampLong = (m: number) => `${weekday(m)} ${dateLong(m)}, ${clock(m)}`;
++const minuteOfDay = (m: number) => ((m % DAY) + DAY) % DAY;
++const startOfDay = (m: number) => m - minuteOfDay(m);
++const dayIndex = (m: number) => Math.floor(m / DAY);
++const isWorkday = (m: number) => at(m).getUTCDay() % 6 !== 0 && !HOLIDAYS.has(dayIndex(m));
++const nextWorkday = (m: number) => {
++	let x = m;
++	while (!isWorkday(x)) x += DAY;
++	return x;
++};
++const monthOf = (m: number) => monthNames[at(m).getUTCMonth()]!;
++
++/** Keeps a message from Corvid inside its office hours: 08:30 to 17:30 Eastern on working days. */
++const office = (r: Rand, t: number) => {
++	let m = t;
++	if (minuteOfDay(m) > 17 * 60 + 15) m = startOfDay(m) + DAY + 8 * 60 + 30 + int(r, 0, 100);
++	if (minuteOfDay(m) < 8 * 60 + 30) m = startOfDay(m) + 8 * 60 + 30 + int(r, 0, 100);
++	while (!isWorkday(m)) m += DAY;
++	return m;
++};
++/** Customers write in their own working day: 07:30 to 18:30 in North America, 02:30 to 12:00 Eastern from Europe. */
++const working = (r: Rand, t: number, emea: boolean) => {
++	const [from, to] = emea ? [2 * 60 + 30, 12 * 60] : [7 * 60 + 30, 18 * 60 + 30];
++	let m = t;
++	if (minuteOfDay(m) > to) m = startOfDay(m) + DAY + from + int(r, 0, 150);
++	if (minuteOfDay(m) < from) m = startOfDay(m) + from + int(r, 0, 150);
++	while (at(m).getUTCDay() % 6 === 0) m += DAY;
++	return m;
++};
++
++// People at Corvid. The account executives are the ones in data/reps.json.
++const billers: [string, string][] = [['Nadia', 'Rahman'], ['Kofi', 'Asante']];
++const csms = ['Hannah Price', 'Mateo Ruiz'];
++
++// Customers. Those in the Q3 forecast and the Q4 renewals never appear here.
++interface Customer {
++	name: string;
++	legal: string;
++	city: string;
++	country: string;
++	exempt: string;
++	card: boolean;
++}
++const countries: Record<string, string> = { 'United Kingdom': 'GB', Ireland: 'IE', Germany: 'DE', Netherlands: 'NL', Sweden: 'SE', Norway: 'NO', Denmark: 'DK', Portugal: 'PT', Spain: 'ES', France: 'FR', Italy: 'IT', Poland: 'PL' };
++const customers: Customer[] = (
++	[
++		['Alder Creek Foods', 'Alder Creek Foods, Inc.', 'Boise, ID'],
++		['Bellhaven Property Group', 'Bellhaven Property Group LLC', 'Charlotte, NC'],
++		['Blue Heron Outfitters', 'Blue Heron Outfitters, Inc.', 'Portland, ME', 'card'],
++		['Cobalt Ridge Manufacturing', 'Cobalt Ridge Manufacturing Co.', 'Dayton, OH'],
++		['Copperline Utilities', 'Copperline Utilities Corp.', 'Tucson, AZ'],
++		['Driftwood Hospitality', 'Driftwood Hospitality Group, Inc.', 'Savannah, GA'],
++		['Eastlake Medical Supply', 'Eastlake Medical Supply, Inc.', 'Cleveland, OH'],
++		['Evergreen Title', 'Evergreen Title Company', 'Spokane, WA', 'card'],
++		['Fairmount Staffing', 'Fairmount Staffing Solutions LLC', 'Philadelphia, PA'],
++		['Foxglove Pharmacy', 'Foxglove Pharmacy Holdings, Inc.', 'Raleigh, NC'],
++		['Granite Bay Logistics', 'Granite Bay Logistics, Inc.', 'Oakland, CA'],
++		['Harborview Dental Partners', 'Harborview Dental Partners PLLC', 'Seattle, WA', 'card'],
++		['Highline Fitness', 'Highline Fitness Clubs, Inc.', 'Denver, CO', 'card'],
++		['Ironwood Construction', 'Ironwood Construction Group, Inc.', 'Omaha, NE'],
++		['Juniper Lane Senior Living', 'Juniper Lane Senior Living, Inc.', 'Madison, WI'],
++		['Keystone Parcel', 'Keystone Parcel Services, Inc.', 'Harrisburg, PA'],
++		['Lakeshore Credit Union', 'Lakeshore Community Credit Union', 'Milwaukee, WI'],
++		['Lantern Hill Schools', 'Lantern Hill Unified School District', 'Fresno, CA', 'school district'],
++		['Marigold Home Health', 'Marigold Home Health Services, Inc.', 'Tampa, FL'],
++		['Meadowbrook Veterinary', 'Meadowbrook Veterinary Group, P.C.', 'Lexington, KY', 'card'],
++		['Millstone Bakeries', 'Millstone Bakeries, Inc.', 'Minneapolis, MN'],
++		['Northwind Charter Air', 'Northwind Charter Air, LLC', 'Anchorage, AK'],
++		['Oakmont Insurance Agency', 'Oakmont Insurance Agency, Inc.', 'Hartford, CT'],
++		['Pacific Rim Imports', 'Pacific Rim Imports Corp.', 'Long Beach, CA'],
++		['Palisade Security Services', 'Palisade Security Services, Inc.', 'Newark, NJ'],
++		['Redwood Animal Hospital', 'Redwood Animal Hospital, Inc.', 'Santa Rosa, CA', 'card'],
++		['Prairie Wind Energy', 'Prairie Wind Energy Cooperative', 'Bismarck, ND'],
++		['Quill & Ink Printing', 'Quill & Ink Printing Co.', 'Providence, RI', 'card'],
++		['Riverbend Hospital', 'Riverbend Community Hospital', 'Chattanooga, TN', 'nonprofit hospital'],
++		['Rockport Marine Services', 'Rockport Marine Services, Inc.', 'Gloucester, MA'],
++		['Saddleback Ranch Supply', 'Saddleback Ranch Supply LLC', 'Amarillo, TX'],
++		['Silverline Transit', 'Silverline Transit Authority', 'Albuquerque, NM', 'public transit authority'],
++		['Stonefield Brewing', 'Stonefield Brewing Company', 'Asheville, NC', 'card'],
++		['Summit Peak Rentals', 'Summit Peak Rentals, Inc.', 'Salt Lake City, UT'],
++		['Tallgrass Insurance', 'Tallgrass Mutual Insurance Company', 'Wichita, KS'],
++		['Thornbury Legal Services', 'Thornbury Legal Services LLP', 'Richmond, VA'],
++		['Timberline Packaging', 'Timberline Packaging Corp.', 'Tacoma, WA'],
++		['Union Square Clinics', 'Union Square Clinics, P.C.', 'New York, NY'],
++		['Verdant Landscaping', 'Verdant Landscaping, Inc.', 'Austin, TX', 'card'],
++		['Westbrook Community College', 'Westbrook Community College District', 'Sacramento, CA', 'community college'],
++		['Whitecap Seafood', 'Whitecap Seafood Company', 'New Bedford, MA'],
++		['Willow Creek Dairy', 'Willow Creek Dairy Cooperative', 'Fond du Lac, WI'],
++		['Yellowtail Freightways', 'Yellowtail Freightways, Inc.', 'Reno, NV'],
++		['Bayside Animal Rescue', 'Bayside Animal Rescue League', 'Baltimore, MD', 'charity'],
++		['Canyon State Plumbing', 'Canyon State Plumbing & Heating, Inc.', 'Phoenix, AZ', 'card'],
++		['Clearwater Labs', 'Clearwater Laboratories, Inc.', 'St. Petersburg, FL'],
++		['Delta Point Distribution', 'Delta Point Distribution LLC', 'Memphis, TN'],
++		['Elm Street Credit Union', 'Elm Street Federal Credit Union', 'Nashua, NH'],
++		['Gateway Auto Group', 'Gateway Automotive Group, Inc.', 'St. Louis, MO'],
++		['Hollis County Library', 'Hollis County Public Library', 'Lansing, MI', 'public library'],
++		['Marlowe Event Rentals', 'Marlowe Event Rentals, Inc.', 'Chicago, IL'],
++		['Aldgate Couriers', 'Aldgate Couriers Ltd', 'London, United Kingdom'],
++		['Brennan & Shaw', 'Brennan & Shaw Solicitors LLP', 'Manchester, United Kingdom'],
++		['Kaskade Logistik', 'Kaskade Logistik GmbH', 'Hamburg, Germany'],
++		['Lindqvist Marin', 'Lindqvist Marin AB', 'Gothenburg, Sweden'],
++		['Moerman Bouw', 'Moerman Bouw B.V.', 'Utrecht, Netherlands'],
++		['Nordlys Energi', 'Nordlys Energi AS', 'Bergen, Norway'],
++		['Rheinblick Vermietung', 'Rheinblick Vermietung GmbH', 'Cologne, Germany'],
++		['Porto Verde Hotéis', 'Porto Verde Hotéis, S.A.', 'Porto, Portugal'],
++		['Rasmussen Fragt', 'Rasmussen Fragt ApS', 'Aarhus, Denmark'],
++		['Severn Valley Care', 'Severn Valley Care Homes Ltd', 'Worcester, United Kingdom'],
++		['Tamarind Retail', 'Tamarind Retail Ltd', 'Leeds, United Kingdom'],
++		['Uppsala Byggtjänst', 'Uppsala Byggtjänst AB', 'Uppsala, Sweden'],
++		['Vasquez Logística', 'Vasquez Logística S.L.', 'Valencia, Spain'],
++		['Wexford Dairies', 'Wexford Dairies Ltd', 'Wexford, Ireland'],
++		['Zeeland Havendiensten', 'Zeeland Havendiensten B.V.', 'Vlissingen, Netherlands'],
++		['Ashmoor Housing', 'Ashmoor Housing Association Ltd', 'Bristol, United Kingdom'],
++		['Carrow Facilities', 'Carrow Facilities Ltd', 'Norwich, United Kingdom'],
++		['Dunmore Hospitality', 'Dunmore Hospitality Group Ltd', 'Galway, Ireland'],
++		['Elbe Kühllogistik', 'Elbe Kühllogistik GmbH', 'Dresden, Germany'],
++		['Hartmann Medizintechnik', 'Hartmann Medizintechnik GmbH', 'Stuttgart, Germany'],
++		['Juhl Entreprenør', 'Juhl Entreprenør A/S', 'Odense, Denmark'],
++		['Krakowska Logistyka', 'Krakowska Logistyka sp. z o.o.', 'Kraków, Poland'],
++		['Brabant Zorggroep', 'Stichting Brabant Zorggroep', 'Eindhoven, Netherlands'],
++		['Lyon Froid Services', 'Lyon Froid Services SAS', 'Lyon, France'],
++		['Ancona Trasporti', 'Ancona Trasporti S.r.l.', 'Ancona, Italy']
++	] as [string, string, string, string?][]
++).map(([name, legal, city, flag]) => {
++	const tail = city.split(', ')[1]!;
++	return { name, legal, city, country: tail.length === 2 ? 'US' : countries[tail]!, exempt: flag && flag !== 'card' ? flag : '', card: flag === 'card' };
++});
++const emea = (c: Customer) => c.country !== 'US';
++
++const namePools: Record<string, [string[], string[]]> = {
++	US: [
++		['Kerry', 'Marisol', 'Derek', 'Tanya', 'Brandon', 'Lauren', 'Hector', 'Monica', 'Grant', 'Felicia', 'Andre', 'Courtney', 'Wesley', 'Rachel', 'Darnell', 'Megan', 'Victor', 'Alicia', 'Trent', 'Jasmine', 'Curtis', 'Erin', 'Raymond', 'Bianca', 'Glenn', 'Natalie', 'Luis', 'Shannon', 'Corey', 'Denise'],
++		['Doyle', 'Alvarez', 'Brennan', 'Whitfield', 'Chung', 'Patel', 'Moreno', 'Hughes', 'Castillo', 'Novak', 'Sullivan', 'Greer', 'Okafor', 'Lindgren', 'Russo', 'Tran', 'Halverson', 'Delgado', 'Pruitt', 'Kim', 'Fontaine', 'Mahoney', 'Ellison', 'Washington', 'Reyes', 'Carver', 'Stanton', 'Ibarra', 'Gallo', 'Yates']
++	],
++	GB: [
++		['Siobhan', 'Gareth', 'Fiona', 'Rory', 'Imogen', 'Callum', 'Nisha', 'Declan', 'Harriet', 'Owain', 'Aoife', 'Liam'],
++		['Pritchard', 'Kavanagh', 'Hollis', 'Bainbridge', 'Okonjo', 'Fairclough', 'McGrath', 'Ashworth', 'Dunne', 'Rees', 'Lowry', 'Thakkar']
++	],
++	DE: [
++		['Katrin', 'Jörg', 'Anke', 'Matthias', 'Sabine', 'Florian', 'Ute', 'Henrik'],
++		['Brandt', 'Kessler', 'Vogt', 'Lehmann', 'Wendt', 'Hoffmeister', 'Seidel', 'Krause']
++	],
++	NL: [
++		['Femke', 'Joost', 'Marieke', 'Bram', 'Sanne', 'Pieter'],
++		['de Vries', 'Bakker', 'Janssen', 'Visser', 'Smit', 'van Dijk']
++	],
++	NORD: [
++		['Annika', 'Lars', 'Sigrid', 'Mikkel', 'Freja', 'Henrik', 'Ingeborg', 'Nils'],
++		['Andersson', 'Nyberg', 'Halvorsen', 'Mortensen', 'Lund', 'Dahl', 'Eriksen', 'Sandberg']
++	],
++	IB: [
++		['Inês', 'Tiago', 'Lucía', 'Javier', 'Marta', 'Rui'],
++		['Ferreira', 'Gómez', 'Carvalho', 'Ruiz', 'Moura', 'Navarro']
++	],
++	FR: [
++		['Camille', 'Thomas', 'Élodie', 'Julien'],
++		['Moreau', 'Lefèvre', 'Garnier', 'Roux']
++	],
++	IT: [
++		['Giulia', 'Marco', 'Chiara', 'Davide'],
++		['Bianchi', 'Ferraro', 'Galli', 'Conti']
++	],
++	PL: [
++		['Agata', 'Tomasz', 'Magda', 'Paweł'],
++		['Nowak', 'Mazur', 'Wójcik', 'Krawczyk']
++	]
++};
++const poolOf = (country: string) => namePools[{ IE: 'GB', SE: 'NORD', NO: 'NORD', DK: 'NORD', PT: 'IB', ES: 'IB' }[country] ?? country]!;
++const streets: Record<string, string[]> = {
++	US: ['Commerce Drive', 'Industrial Parkway', 'Harbor Way', 'Market Street', 'Lakeview Road', 'Enterprise Boulevard', 'Riverside Avenue', 'Depot Street'],
++	GB: ['Wharf Road', 'Mill Lane', 'Station Approach', 'Canal Street', 'Albion Way'],
++	IE: ['Dock Road', 'Quay Street', 'Mill Lane'],
++	DE: ['Hafenstraße', 'Industriestraße', 'Am Speicher', 'Lindenallee'],
++	NL: ['Havenweg', 'Industrieweg', 'Stationsplein', 'Kanaalstraat'],
++	SE: ['Hamngatan', 'Industrivägen', 'Kungsgatan'],
++	NO: ['Strandkaien', 'Industriveien', 'Kongens gate'],
++	DK: ['Havnegade', 'Industrivej', 'Vestergade'],
++	PT: ['Rua do Porto', 'Avenida da Boavista', 'Rua Nova'],
++	ES: ['Calle del Puerto', 'Avenida del Mar', 'Calle Mayor'],
++	FR: ['Rue du Port', 'Avenue Jean Jaurès', 'Quai Perrache'],
++	IT: ['Via del Porto', 'Via Marconi', 'Via Roma'],
++	PL: ['ulica Portowa', 'ulica Przemysłowa', 'ulica Długa']
++};
++const vatFormat: Record<string, (d: string) => string> = {
++	GB: (d) => `GB ${d.slice(0, 3)} ${d.slice(3, 7)} ${d.slice(7, 9)}`,
++	IE: (d) => `IE ${d.slice(0, 7)}V`,
++	DE: (d) => `DE ${d.slice(0, 9)}`,
++	NL: (d) => `NL ${d.slice(0, 9)}B01`,
++	SE: (d) => `SE ${d.slice(0, 10)}01`,
++	NO: (d) => `NO ${d.slice(0, 9)} MVA`,
++	DK: (d) => `DK ${d.slice(0, 8)}`,
++	PT: (d) => `PT ${d.slice(0, 9)}`,
++	ES: (d) => `ES B${d.slice(0, 8)}`,
++	FR: (d) => `FR ${d.slice(0, 2)} ${d.slice(2, 11)}`,
++	IT: (d) => `IT ${d.slice(0, 11)}`,
++	PL: (d) => `PL ${d.slice(0, 10)}`
++};
++const taxRates: Record<string, number> = { CA: 7.25, TN: 7, NM: 5.125, MD: 6, MI: 6 };
++const apTitles = ['Accounts Payable Specialist', 'AP Manager', 'Staff Accountant', 'Controller', 'Office Manager', 'Finance Manager', 'Senior Accountant', 'Bookkeeper'];
++const apTitlesEmea = ['Accounts Payable', 'Finance Manager', 'Financial Controller', 'Purchase Ledger Clerk', 'Head of Finance', 'Office Manager'];
++const opsTitles = ['Director of Operations', 'Head of Operations', 'Operations Manager', 'VP Operations', 'Process Improvement Lead', 'Operations Excellence Manager'];
++const addons: [string, number][] = [['Analytics add-on', 12000], ['Connectors Pack', 6000], ['Premium Support', 8400], ['Audit Log add-on', 4800]];
++
++/** What stays the same for a customer across its cases. */
++const profile = (c: Customer) => {
++	const r = mulberry32(hash(c.name));
++	const [firsts, lasts] = poolOf(c.country);
++	const people = shuffle(r, firsts);
++	const families = shuffle(r, lasts);
++	const words = c.name.replace(/&/g, '').split(/\s+/).filter(Boolean);
++	const slug = plain(words[0]!.length < 7 && words[1] ? words[0]! + words[1] : words[0]!).replace(/[^a-z]/g, '');
++	const mail = (first: string, last: string) => `${plain(first)}.${plain(last).replace(/[^a-z]/g, '')}@${slug}.example`;
++	const person = (i: number) => ({ first: people[i % people.length]!, full: `${people[i % people.length]} ${families[i % families.length]}`, email: mail(people[i % people.length]!, families[i % families.length]!) });
++	const seats = c.card ? int(r, 4, 9) * 10 : int(r, 6, 36) * 10;
++	const state = c.country === 'US' ? c.city.split(', ')[1]! : '';
++	const digits = String(hash(c.legal) * 7 + 1000000000).padStart(11, '7').slice(0, 11);
++	return {
++		contact: person(0),
++		ops: person(1),
++		former: person(2),
++		title: pick(r, emea(c) ? apTitlesEmea : apTitles),
++		opsTitle: pick(r, opsTitles),
++		ap: `${pick(r, ['ap', 'invoices', 'payables', 'accounts.payable', 'finance'])}@${slug}.example`,
++		slug,
++		owner: emea(c) ? 'Lena Fischer' : hash(c.name + 'owner') % 2 ? 'Aisha Khan' : 'Tom Becker',
++		seats,
++		perSeat: pick(r, [600, 600, 570, 540, 510]),
++		termsDays: c.card ? 30 : pick(r, [30, 30, 30, 45, 60]),
++		quarterly: c.card || r() < 0.2,
++		method: c.card ? 'card' : emea(c) ? 'wire' : pick(r, ['ACH', 'ACH', 'ACH', 'ACH', 'check', 'wire']),
++		state,
++		address: `${int(r, 12, 980)} ${pick(r, streets[c.country] ?? streets.US!)}, ${c.city}`,
++		vat: vatFormat[c.country]?.(digits) ?? '',
++		poStyle: int(r, 0, 3),
++		card: String(int(r, 1000, 9999)),
++		runDay: pick(r, [15, 20, 25, 28, 10])
++	};
++};
++
++// Topics. A case follows one path of one topic: what really held the money up, and how it ended. Nothing about
++// either is written into the file except through the messages themselves.
++// c: the customer's billing contact, o: their operations lead, b: Corvid billing, n: billing's internal note,
++// f: the controller's note, r: revenue operations' note, l: legal's note, e: the account owner's note,
++// m: customer success's note, s: the billing system, x: an automatic reply.
++type Who = 'c' | 'o' | 'b' | 'n' | 'f' | 'r' | 'l' | 'e' | 'm' | 's' | 'x';
++type Msg = [Who, string];
++type Paste = 'invoice' | 'ledger' | 'remit' | 'bank' | 'usage' | 'clause' | 'portal' | 'headers' | 'cardlog' | 'aging' | 'po' | 'check' | 'sla' | 'services' | 'none';
++type Kind = 'annual' | 'quarterly' | 'trueup' | 'addon' | 'services';
++interface Path {
++	detail: string[];
++	detailWho?: 'c' | 'o';
++	/** Pasted by the customer under the detail. */
++	paste?: Paste;
++	look: string[];
++	lookWho?: Who;
++	/** Pasted under the note; the ledger when left out. */
++	lookPaste?: Paste;
++	ends: Msg[][];
++	flags?: string[];
++}
++interface Topic {
++	id: string;
++	/** The first day, counted from 1 March, on which a case on this topic can be opened. */
++	since?: number;
++	kinds: Kind[];
++	fit?: (c: Customer) => boolean;
++	flags?: string[];
++	/** Messages before the first reminder. */
++	lead?: Msg[];
++	reminder?: string[];
++	/** Pasted by the customer in the first reply. */
++	shows?: Paste;
++	subjects: string[];
++	open: string[];
++	more: string[];
++	ask: string[];
++	askPaste?: Paste;
++	paths: Path[];
++}
++
++// System lines. {today}, {method} and {ref} are filled when the line is written.
++const paid = (amount: string, doc = '{inv}', left = '$0.00', method = '{method}') => `Payment received: ${amount} by ${method} on {today}, reference “{ref}”, applied to ${doc}. Open balance on ${doc}: ${left}.`;
++const credited = (amount: string, doc = '{inv}') => `Credit note {credNote} for ${amount} issued against ${doc}.`;
++const writtenOff = (amount: string) => `Balance of ${amount} on {inv} written off (bank charges). Open balance on {inv}: $0.00.`;
++
++const topics: Topic[] = [
++	// No PO number on the invoice, or an old one.
++	{
++		id: 'po',
++		kinds: ['annual', 'quarterly', 'addon'],
++		flags: ['noPo'],
++		subjects: ['Overdue invoice {inv}', 'RE: Payment reminder: {inv}', 'Invoice {inv}', 'RE: {inv} past due'],
++		open: [
++			'I can’t find this invoice anywhere in our system, which is strange, because I’m fairly sure I saw it come in. Could you resend it? It may have gone somewhere odd.',
++			'Thanks for the reminder. This has been sitting with our accounts payable team for a few weeks. I’ll chase them and get back to you.',
++			'Apologies, I thought this had been paid. Our AP team tells me it was returned to you weeks ago. Did nobody on your side get the notice?'
++		],
++		more: ['We usually pay within a week of an invoice being coded, so something has gone wrong somewhere.', 'I’m only covering accounts payable for a few weeks, so bear with me while I find my way around.', 'Our CFO asked me about it this morning, so I’m keen to get it cleared.'],
++		ask: [
++			'Thanks, {name}. I’ve attached a fresh copy. If your AP team sent the first one back, could you find out why? Nothing reached us here, and I’d rather fix whatever it was than send the same thing again.',
++			'Thanks for looking. We didn’t receive anything back from your AP team. Could you ask them whether the invoice is missing something they need?'
++		],
++		paths: [
++			{
++				detail: [
++					'I asked AP. Their system rejects any invoice without a purchase order number on it, and it sends the rejection to a no-reply address, which is why you never saw it. {opsFirst} in operations needs to raise a PO first. I’ve asked for it this week.',
++					'Mystery solved: AP can’t match an invoice without a PO number, and our system bounces those automatically. Nobody raised a PO for this one. {ops} in operations is raising it now.'
++				],
++				look: ['No PO on the account or on the order form dated {orderDate}. Will reissue with the PO once {opsFirst} has it.', 'Their AP needs a PO on every invoice now; nothing in our account notes about it. Added a note so the next invoice waits for one.'],
++				lookPaste: 'invoice',
++				ends: [
++					[['c', 'PO {po} has been raised for {total}. Could you reissue the invoice with it?'], ['b', 'Done: {newInv} replaces {inv}, same amount, with PO {po} on it. I’ve cancelled the old one so it won’t confuse anyone.'], ['c', 'It has gone through the matching this time. It’s on our payment run for {day}.'], ['s', paid('{total}', '{newInv}')]],
++					[['c', '{opsFirst} has raised PO {po}, but only for {received}. Apparently that is all that was set aside for us this year, and the rest needs a second PO.'], ['b', 'Thanks. I’ve reissued it as {newInv} with PO {po} for the full {total}, which is the amount on the order form. Could AP pay what the PO covers in the meantime?'], ['s', paid('{received}', '{newInv}', '{balance}')], ['c', 'AP has paid what the PO covers. The second PO, for {balance}, goes to our finance committee on {date1}, so nothing more until then, I’m afraid.']]
++				]
++			},
++			{
++				detail: [
++					'Our AP team started rejecting any invoice without a PO number in January, and nobody raised one for you, because our order form with you is older than the new rule. I’ve asked purchasing for one.',
++					'It turns out every supplier invoice needs a PO number now, and yours has none. I’ve asked our purchasing team to raise one; they say it’s quick.'
++				],
++				look: ['Their AP brought in POs for every supplier in January. Order form dated {orderDate} has no PO. Waiting on their purchasing team.'],
++				lookPaste: 'invoice',
++				ends: [
++					[['c', 'Still no PO, I’m afraid. Purchasing want a copy of the order form before they’ll raise it.'], ['b', 'Of course: the order form dated {orderDate} is attached. Let me know if they need anything else from us.'], ['c', 'Thanks, I’ve passed it on. They’ve told me to expect the PO by the end of next week.']],
++					[['c', 'PO {po} is attached. Please reissue the invoice quoting it.'], ['b', 'Thanks, {name}. I’ll reissue it today.'], ['c', 'Hi again. AP still has nothing from you, and our payment run closes on {day}.'], ['n', 'Can’t reissue: the billing tool won’t cancel {inv} while it is in the reminder sequence. Asked Diego to take it out so I can credit and reissue.']]
++				]
++			},
++			{
++				flags: ['oldPo'],
++				detail: ['AP tells me the invoice quotes PO {po2}, which was last year’s and is closed. This year’s PO is {po}. Their system won’t match an invoice to a closed PO.', 'Found it. The invoice has our old PO number, {po2}, which was closed at our year-end. The current one is {po}.'],
++				look: ['Billing tool carried last year’s PO {po2} onto the invoice. Account updated to {po}.'],
++				lookPaste: 'invoice',
++				ends: [
++					[['b', 'You’re quite right: our system copied last year’s PO onto the invoice. I’ve reissued it as {newInv} with PO {po}, same amount.'], ['c', 'Matched straight away this time, thank you.'], ['s', paid('{total}', '{newInv}')]],
++					[['b', 'Sorry about that: our system copied last year’s PO. {newInv} replaces {inv} and quotes {po}.'], ['s', paid('{total}', '{newInv}')], ['c', 'That’s paid. Could you make sure the true-up invoices use the new PO as well? We had exactly this problem last year.'], ['b', 'I’ve put {po} on your account, so every invoice from now on will carry it.']]
++				]
++			}
++		]
++	},
++	// The invoice went to someone who has left, or never reached a person.
++	{
++		id: 'contact',
++		kinds: ['annual', 'quarterly', 'trueup', 'addon'],
++		subjects: ['Overdue invoice {inv}', 'RE: Payment reminder: {inv}', 'Unknown invoice {inv}?', 'Invoice {inv}'],
++		open: [
++			'We have no record of this invoice at all. Are you sure it was sent to us? I’ve searched the AP inbox, and nothing from Corvid has come in for months.',
++			'Sorry, who is this for? I don’t recognise the invoice number, and I look after all our software suppliers.',
++			'Thanks for getting in touch. I’ve only recently taken over supplier payments here, and I don’t have this invoice. Could you tell me where it was sent?'
++		],
++		more: ['If it was posted rather than emailed, it may be sitting in our old mailroom.', 'We do want to pay it; I just need a copy that our system will accept.'],
++		ask: ['It went by email on {issued} to {sentTo}, which is the billing contact we have for you. Is that address still in use?', 'We emailed it on {issued} to {sentTo}. If that isn’t the right address any more, tell me which one to use and I’ll resend it straight away.'],
++		paths: [
++			{
++				flags: ['oldContact'],
++				detail: ['{oldFirst} left in {month} and the mailbox was closed, so anything sent there has gone nowhere. Please send invoices to {ap} from now on.', '{oldFull} left us in {month}. Nobody set up forwarding, so I imagine there’s a pile of invoices in that mailbox. Please use {ap} for everything.'],
++				look: ['Billing contact was still {oldFull}. Changed to {ap} and resent {inv}.', 'Updated the billing contact to {ap}; {oldEmail} removed. No bounce ever came back to us, so the mailbox must have been closed without one.'],
++				lookPaste: 'invoice',
++				ends: [
++					[['b', 'Thanks, {name}. I’ve resent {inv} to {ap} and changed your billing contact, so future invoices will go there.'], ['c', 'Got it. It’s scheduled for {day}.'], ['s', paid('{total}')]],
++					[['b', 'Thanks, {name}. {inv} is on its way to {ap}, and I’ve updated your billing contact.'], ['s', paid('{total}')], ['c', 'That’s paid now. One more thing: your system sent a reminder about another invoice to {oldEmail} again this morning. Could you check the contact really has changed?'], ['n', 'The billing tool takes the contact from the CRM every night, and the CRM still has {oldFull}. Asked Diego to change it there.'], ['c', 'Another email went to {oldEmail} today, I’m afraid.']]
++				]
++			},
++			{
++				flags: ['oldContact'],
++				detail: ['{oldFirst} moved to another team in {month}. Apparently the invoice was forwarded to {ops} to code to the operations cost centre, and it stopped there.'],
++				look: ['Contact changed to {name}. The invoice did arrive after all; it is waiting for their operations team to code it.'],
++				ends: [
++					[['c', '{opsFirst} has coded it at last. Sorry about that; it will go out with the next payment run on {day}.'], ['s', paid('{total}')]],
++					[['c', '{opsFirst} is on leave until {date1}, and nobody else can code to that cost centre. I’m afraid it will have to wait until then.'], ['b', 'Thanks for letting me know. I’ll pause reminders until {date1}.']]
++				]
++			},
++			{
++				detail: ['That address is right, but our mail filter quarantines anything with a payment link in it. I’ve just found your invoice in quarantine, along with two of your reminders.', 'The address is fine. Our IT team checked, and our filter has been holding every email from your billing system because of the link in it.'],
++				look: ['Their filter quarantines our invoice emails because of the payment link. Switched the account to PDF attachments.'],
++				lookPaste: 'none',
++				ends: [
++					[['b', 'I’ve switched your account so invoices come as PDF attachments with no link. A copy of {inv} is attached.'], ['c', 'Thank you. AP has it now.'], ['s', paid('{total}')]],
++					[['b', 'I’ve switched your account to PDF attachments, which shouldn’t trip the filter. {inv} is attached.'], ['c', 'AP has it, but they say the PDF has no remit-to address, which they need. Could you send one that does?'], ['n', 'Right: the PDF template lost the remit-to block in the January migration. Raised with Diego; no date for a fix yet.'], ['c', 'Hello again. AP is still waiting for a version with the remit-to address.']]
++				]
++			}
++		]
++	},
++	// Billed to the wrong legal entity.
++	{
++		id: 'entity',
++		kinds: ['annual', 'quarterly'],
++		flags: ['wrongEntity'],
++		subjects: ['Overdue invoice {inv}', 'RE: {inv}', 'Invoice returned by AP', 'RE: Payment reminder: {inv}'],
++		open: [
++			'Our AP team keeps sending this invoice back to me, and I honestly don’t understand why. Can you take a look at it from your side?',
++			'AP can’t process this one. They say it isn’t addressed to us.',
++			'This is the second time I’ve been asked about this invoice. As far as I can tell our accounts team rejected it, but I’m not sure what they want changed.'
++		],
++		more: ['Everything else about it looks right to me.', 'It may be something to do with our reorganisation earlier in the year.'],
++		ask: ['Could you find out exactly what AP needs changed? If something on the invoice is wrong, we can credit it and issue a new one.', 'Happy to look. Do you know which detail they object to? The more precise they can be, the quicker I can fix it.'],
++		paths: [
++			{
++				detail: ['AP says the invoice is made out to {entityOld}, but since our reorganisation in January the subscription belongs to {legal}, which has its own ledger. They can’t pay one company’s invoice from the other’s account.'],
++				look: ['Invoice is to {entityOld}. The order form dated {orderDate} is with {legal}; the account record had the old entity from before. Credit and reissue need Ruth’s approval.'],
++				lookPaste: 'invoice',
++				ends: [
++					[['f', 'Approved. Credit {inv} in full and reissue to {legal}.'], ['b', 'I’ve issued credit note {credNote} for {total} against {inv} and a new invoice, {newInv}, to {legal} for the same amount.'], ['c', 'Perfect, AP has accepted the new one.'], ['s', paid('{total}', '{newInv}')]],
++					[['f', 'Fine, credit and reissue.'], ['b', 'Credit note {credNote} cancels {inv}, and {newInv} is issued to {legal} for {total}.'], ['c', 'AP has the new invoice, but it still shows our old address. Could you correct that too? Sorry to be a pain.'], ['b', 'Not at all. Corrected and attached; the number stays {newInv}.'], ['s', paid('{total}', '{newInv}')]]
++				]
++			},
++			{
++				detail: ['It turns out the invoice is to {entityOld}, which was merged into {legal} in {month} and no longer has a bank account. AP has nothing to pay it from.'],
++				look: ['The order form is with {entityOld}. Nobody told us about the merger, so on paper our customer is still {entityOld}. Before we bill {legal} we need a short letter from them confirming the merger and that {legal} takes over the agreement.'],
++				lookWho: 'l',
++				lookPaste: 'none',
++				ends: [
++					[['b', 'Our agreement is with {entityOld}, so before we can bill {legal} we need a short letter on your letterhead confirming the merger and that {legal} takes over the agreement. Once we have it, I’ll reissue straight away.'], ['c', 'I’ve asked our legal team for the letter.'], ['c', 'Still waiting on legal, I’m afraid. They have dozens of these to do.']],
++					[['b', 'Our agreement is with {entityOld}. If you can send a short letter confirming the merger and that {legal} takes it over, I’ll reissue the invoice to {legal}.'], ['c', 'Letter attached.'], ['l', 'Letter is fine. Agreement now with {legal}.'], ['b', 'Thank you. Credit note {credNote} cancels {inv}, and {newInv} is issued to {legal}.'], ['s', paid('{total}', '{newInv}')]]
++				]
++			}
++		]
++	},
++	// The customer's supplier portal.
++	{
++		id: 'portal',
++		kinds: ['annual', 'quarterly', 'trueup'],
++		subjects: ['Overdue invoice {inv}', 'RE: Payment reminder: {inv}', 'Supplier registration', 'Invoice {inv}'],
++		open: [
++			'I can see your invoice in our inbox, but it isn’t showing in our payments system, so I can’t schedule it. I’ll look into why.',
++			'We moved all supplier invoices into {portal} in {month}. Emailed invoices are no longer processed, I’m afraid.',
++			'Thanks for the reminder. Has your team finished registering with us as a supplier? I believe an invitation went out a while ago.'
++		],
++		more: ['Our finance team has been strict about this since the audit.', 'Sorry that nobody told you sooner.'],
++		ask: ['We’re happy to use the portal. I can’t find an invitation in our inbox, though. Could you send one to billing@corvid.example?', 'No problem at all. Could you ask for the invitation to be sent again to billing@corvid.example? I’ll get the profile done as soon as it arrives.'],
++		paths: [
++			{
++				detail: ['Invitation re-sent. You’ll need to fill in the company profile, upload {taxForm} and a letter from your bank confirming the account, then submit the invoice through the portal.'],
++				look: ['Portal profile started. Everything done except the bank letter, which Ruth has to provide.', 'Started the profile in {portal}. Only the bank letter is missing.'],
++				lookPaste: 'portal',
++				ends: [
++					[['n', 'Bank letter uploaded and the profile submitted.'], ['c', 'Your supplier profile has been accepted. Please submit {inv} in the portal now.'], ['b', 'Submitted this morning, reference {portalRef}.'], ['s', paid('{total}')]],
++					[['n', 'The portal rejected our bank letter: they want one issued by the bank, not by us. Asked Meridian for one; they quote five to seven business days.'], ['c', 'Just a reminder that the invitation expires on {date1} if the profile isn’t complete.'], ['b', 'Thanks, {name}. We’re waiting for a letter from our bank and will upload it the day it arrives.']]
++				]
++			},
++			{
++				detail: ['Our supplier team says your profile was accepted last week, but the invoice you submitted was rejected: {portal} needs every invoice to match an open PO line, and we haven’t raised one.'],
++				look: ['Profile fine. Invoice rejected in the portal for lack of a PO line. Nothing more to do until they raise the PO.'],
++				lookPaste: 'portal',
++				ends: [
++					[['c', '{opsFirst} has raised PO {po}. Please resubmit the invoice against it.'], ['b', 'Resubmitted against PO {po}, reference {portalRef}.'], ['s', paid('{total}')]],
++					[['c', 'The PO is with our purchasing team. They’re short-staffed this month, so it may be a while.'], ['b', 'Thanks for keeping me posted. I’ll check in again on {day2}.'], ['c', 'No news on the PO yet, sorry.']]
++				]
++			},
++			{
++				detail: ['There is already a profile for Corvid in {portal}, registered to jordan.pike@corvid.example. Is that still someone at your end? Nobody seems able to get into it.'],
++				look: ['Jordan left in January. Asked the portal’s support desk to move the profile to billing@corvid.example; they need a form from an officer of the company.'],
++				lookPaste: 'none',
++				ends: [
++					[['f', 'Form completed and sent to the portal’s support desk.'], ['c', 'The profile is now under billing@corvid.example, so you can submit the invoice.'], ['b', 'Submitted, reference {portalRef}.'], ['s', paid('{total}')]],
++					[['f', 'Form completed and sent.'], ['c', 'Any news on the profile? Our month-end is close.'], ['n', 'The portal’s support desk says a transfer takes ten business days. Chased them again today.']]
++				]
++			}
++		]
++	},
++	// Paid to the account Corvid closed on 1 April.
++	{
++		id: 'oldbank',
++		since: 36,
++		kinds: ['annual', 'quarterly', 'trueup'],
++		fit: (c) => !c.card,
++		flags: ['oldBank'],
++		shows: 'remit',
++		subjects: ['RE: Payment reminder: {inv}', 'Paid: {inv}', 'Overdue invoice {inv}'],
++		open: ['We paid this on {payDate}. Please check again; the remittance is below.', 'Our system shows this as paid on {payDate}. Could you check your bank account?', 'I’m surprised to get a reminder. The payment left our account on {payDate}.'],
++		more: ['It cleared on our side the same day.', 'I’d appreciate it if you could look before sending more reminders, as they go to our CFO as well.'],
++		ask: ['Thanks, {name}. I can’t see it on our account yet. Could you send me the bank details the payment was sent to? That usually tells us where it went.', 'Thanks for the remittance. Nothing has arrived on our account under that reference. Which bank account did it go to?'],
++		paths: [
++			{
++				detail: ['From our payment record: First Harbor Bank, account ending 2208.', 'It went to First Harbor Bank, account ending 2208, which is what we have on file for you.'],
++				look: ['Paid to our old First Harbor account, closed on 1 April. Our letter about the new account went out on 16 March; their vendor record was never changed. First Harbor returns payments to closed accounts, usually within ten business days.'],
++				lookPaste: 'none',
++				ends: [
++					[['b', 'That was our old bank account, which closed on 1 April; we wrote to customers about it in March. The payment will be returned to you. Once it is, please send it to Meridian Commerce Bank, account ending 4471, and update your records. Our bank letter is attached.'], ['c', 'The money has come back to us. Resent today to Meridian, and our records are updated.'], ['s', paid('{total}')]],
++					[['b', 'That account closed on 1 April, when we moved to Meridian Commerce Bank. The payment will go back to you, and once it does, please send it to Meridian, account ending 4471. The letter with the details is attached.'], ['c', 'Our bank still hasn’t received the returned payment, and we can’t pay you twice.'], ['f', 'Called First Harbor: the return is being processed, but they won’t give a date. Trace number {trace}.'], ['b', 'Our old bank confirms the return is under way, trace number {trace}, but can’t give a date. I’ll let you know as soon as I hear more.']],
++					[['n', 'First Harbor forwarded it to Meridian under our forwarding arrangement instead of returning it. Arrived today.'], ['s', paid('{total}')], ['b', 'Good news: our old bank forwarded your payment, and it has reached us. Please change your records to Meridian Commerce Bank, account ending 4471, for next time; the letter is attached.'], ['c', 'Thanks, done.']]
++				]
++			}
++		]
++	},
++	// Held while the customer checks Corvid's new bank details.
++	{
++		id: 'verify',
++		since: 16,
++		kinds: ['annual', 'quarterly', 'trueup'],
++		fit: (c) => !c.card,
++		subjects: ['Overdue invoice {inv}', 'RE: Payment reminder: {inv}', 'Change of bank details'],
++		open: [
++			'Payment of this invoice is on hold with our treasury team, and I don’t know why. I’ll find out.',
++			'We received a letter saying your bank details have changed. Our policy is to check any change by phone before we pay. Who can we call?',
++			'Before we pay anything else: we had an email last week asking us to send your payments to a new account. Was that really you?'
++		],
++		more: ['We have been caught out before, so we’re careful.', 'I’m sure you understand why.'],
++		ask: ['Our bank did change on 1 April, and you’re right to check. Ruth Calloway, our controller, can confirm the details by phone on (617) 555-0142. Please don’t use any number given in an email.', 'Thank you for checking with us. Our controller, Ruth Calloway, will confirm our bank details by phone; her number is (617) 555-0142, as on our website.'],
++		paths: [
++			{
++				detail: ['Treasury says the hold is because of the change of bank. They’ll call Ruth this week.', 'Thank you. Our treasury team will call Ruth to check the new details.'],
++				look: ['Treasury at {short} called. Confirmed Meridian, account ending 4471.'],
++				lookWho: 'f',
++				lookPaste: 'none',
++				ends: [
++					[['c', 'Treasury has checked the details with Ruth and released the payment.'], ['s', paid('{total}')]],
++					[['c', 'Treasury spoke to Ruth. Now they want a letter from your bank, on its letterhead, confirming the new account before they release anything.'], ['b', 'Attached is Meridian’s letter confirming the account.'], ['s', paid('{total}')]]
++				]
++			},
++			{
++				detail: ['Here it is. The email came from accounts@corvid-billing.example and asked us to pay a bank in another country. It had your logo on it.'],
++				paste: 'headers',
++				look: ['Not ours: corvid-billing.example is not our domain. Reported to IT. Ruth to call their treasury.'],
++				lookPaste: 'none',
++				ends: [
++					[['f', 'Spoke to their treasury. Confirmed our real details and that we sent no such email.'], ['c', 'Thank you both. We’ve blocked that sender and paid to the Meridian account.'], ['s', paid('{total}')]],
++					[['f', 'Spoke to their treasury and confirmed our real details.'], ['c', 'Our treasury policy says that after an attempt like this, a supplier’s bank change has to be confirmed on a form completed by an officer of the supplier. Form attached.'], ['n', 'The form needs Ruth or the CFO. Ruth is out until {date1}.'], ['c', 'Just checking on the form. Treasury won’t release the payment without it.']]
++				]
++			},
++			{
++				detail: ['Our treasury team tried the phone number on our file for you twice. It rings out.'],
++				look: ['Their file has (617) 555-0190, our old Canal Street number, disconnected in January.'],
++				lookPaste: 'none',
++				ends: [
++					[['b', 'That’s our old office number, which was disconnected when we moved in January. Ruth’s number is (617) 555-0142; you can check it against our website.'], ['c', 'Treasury reached Ruth. Payment released.'], ['s', paid('{total}')]],
++					[['b', 'That was our old office line. Ruth is on (617) 555-0142, as on our website.'], ['c', 'Treasury can only call the number on file, and to change it they need a vendor change form from you.'], ['b', 'Understood. I’ll get it completed and sent back.'], ['c', 'Any news on the form? Treasury asked me about it again today.']]
++				]
++			}
++		]
++	},
++	// A wire from Europe that arrived short.
++	{
++		id: 'fees',
++		kinds: ['annual', 'quarterly', 'trueup'],
++		fit: (c) => emea(c),
++		flags: ['short'],
++		shows: 'remit',
++		subjects: ['RE: Payment reminder: {inv}', 'Remaining balance on {inv}', 'Overdue invoice {inv}'],
++		open: ['We paid this in full on {payDate}. Please see the remittance below.', 'I believe this was settled on {payDate}. Is there a problem?', 'Our records show this as paid. Why are we still receiving reminders?'],
++		more: ['Our bank confirmed the transfer the same day.', 'Please check before sending further reminders.'],
++		ask: ['Thanks, {name}. The payment did arrive, but it was {fee} short of the invoice, so the system keeps reminding you about the balance. It looks as if bank charges were taken along the way.', 'Thank you. We received {received}, which is {fee} less than the invoice. That usually means a bank took its charges out of the payment on the way.'],
++		paths: [
++			{
++				detail: ['Our bank says we sent the full amount and chose shared charges, so any fees at your end are for you to bear.', 'We sent {total} with shared charges. Our bank says the receiving side pays its own fees.'],
++				look: ['Received {received} on {payDate}. Short by {fee}, under the $100 write-off limit, but Ruth decides.'],
++				lookPaste: 'bank',
++				ends: [
++					[['f', 'Write off the {fee}. Ask them to choose “our” charges next time.'], ['s', writtenOff('{fee}')], ['b', 'We’ve written off the {fee} this time, so your account is clear. For future payments, could you ask your bank to send them with all charges paid by the sender? Then the full amount reaches us.'], ['c', 'Will do. Thanks for being reasonable about it.']],
++					[['f', 'No write-off: this is the third time with them. Ask for the difference.'], ['b', 'I’m afraid we can’t write it off this time, as it has happened on several payments. Could you send the {fee}?'], ['c', 'We’ll add it to our next payment to you, if that’s acceptable.'], ['b', 'That’s fine. I’ll leave the {fee} open until then.']]
++				]
++			},
++			{
++				detail: ['We sent it with all charges on our side. If something was taken, it must have been an intermediary bank.'],
++				look: ['Received {received}. A correspondent bank took {fee} even though the payment was sent with all charges paid by the sender, so their bank can claim it back.'],
++				lookPaste: 'bank',
++				ends: [
++					[['b', 'The payment shows your bank chose to pay all charges, but an intermediary bank still took {fee}. Your bank can claim it back from them. Could you ask?'], ['c', 'Our bank has sent the {fee} separately.'], ['s', paid('{fee}', '{inv}', '$0.00', 'wire')]],
++					[['b', 'Your bank paid the charges, but an intermediary still took {fee}. Your bank should be able to recover it. Could you ask them?'], ['c', 'Our bank says the claim could take six weeks. Can’t you just write it off?'], ['f', 'Yes, write it off.'], ['s', writtenOff('{fee}')], ['b', 'We’ve written it off, so your account is clear.']]
++				]
++			}
++		]
++	},
++	// Paid, but the money was posted somewhere else.
++	{
++		id: 'unapplied',
++		kinds: ['annual', 'quarterly', 'trueup', 'addon'],
++		fit: (c) => !c.card,
++		subjects: ['RE: Payment reminder: {inv}', 'Already paid', 'Overdue invoice {inv}'],
++		open: ['We paid this weeks ago!', 'This was paid on {payDate}, together with another invoice. Please check your records.', 'Our ledger shows this as cleared on {payDate}. Could you check again before sending more reminders?'],
++		more: ['I’d rather not pay it twice.', 'This is the second reminder we’ve had, and our controller is not pleased.'],
++		ask: ['Could you send me the remittance advice? I can see payments from you around then, but not one against {inv}, so it may have been put against the wrong invoice.', 'Thanks. Could you send the remittance for that payment? It will help me find where it went.'],
++		paths: [
++			{
++				detail: ['Remittance below. It lists {inv} and nothing else.'],
++				paste: 'remit',
++				look: ['Found it: {total} on {payDate} was posted to the account of {otherCust}, which had an invoice for a similar amount. Moved to {short}. {otherCust} now shows its own invoice as open again.'],
++				ends: [
++					[['b', 'Found it, and the mistake was ours: your payment was posted to another customer’s account. I’ve moved it, so {inv} is paid and your account is clear. Sorry for the reminders.'], ['c', 'No harm done. Thanks for sorting it.']],
++					[['b', 'The mistake was ours, I’m sorry to say: your payment was posted to another customer. I’ve moved it, so nothing is owed.'], ['c', 'Thanks. Could you send us a statement showing a zero balance? Our auditors noticed the reminder.'], ['b', 'Statement attached, showing nothing owed.']]
++				]
++			},
++			{
++				flags: ['twoInvoices'],
++				detail: ['Here’s the remittance. We paid {inv} and {otherInv} together.'],
++				paste: 'remit',
++				look: ['The payment covered {inv} and {otherInv}, and all of it was posted to {otherInv}. But {otherInv} had already been paid by card on {otherPaid}. Reapplied: {inv} is paid and they hold a credit of {dup}.'],
++				ends: [
++					[['b', 'Your payment covered both invoices, but {otherInv} had already been paid by card, so you paid it twice. I’ve applied the rest to {inv}, which is now paid, and you have a credit of {dup}. Would you like it refunded?'], ['c', 'Yes, please refund it.'], ['n', 'Refund of {dup} waiting for Ruth’s approval.'], ['c', 'Any news on the refund?']],
++					[['b', 'Your payment covered both invoices, but {otherInv} had been paid already, so I’ve applied the rest to {inv}. That leaves you a credit of {dup}. Shall we refund it or keep it against your next invoice?'], ['c', 'Please keep it against our next invoice.'], ['n', 'Credit of {dup} left on the account against the next invoice.']]
++				]
++			},
++			{
++				flags: ['wrongPayee'],
++				detail: ['Here’s the remittance from our system.'],
++				paste: 'remit',
++				look: ['Remittance is made out to Corvid Freight Services LLC, a haulier, not us. The money went to another supplier.'],
++				lookPaste: 'none',
++				ends: [
++					[['b', 'I think I see the problem: the remittance is made out to Corvid Freight Services, which is a different company. It looks as if the payment went to them.'], ['c', 'Oh no. You’re right: our vendor list has two Corvids, and someone picked the wrong one. We’ll pay you separately and recover it from them.'], ['s', paid('{total}')], ['c', 'Paid you today. Corvid Freight have promised to return the other payment to us.']],
++					[['b', 'The remittance is made out to Corvid Freight Services, which isn’t us. I think the payment went to them.'], ['c', 'You’re right, and I’m embarrassed. We need the money back from them before we can pay you, I’m afraid.'], ['c', 'Corvid Freight still haven’t returned it. I’ve escalated it to our controller.']]
++				]
++			}
++		]
++	},
++	// The reminder crossed a payment, and the customer paid twice.
++	{
++		id: 'double',
++		kinds: ['quarterly', 'trueup', 'addon'],
++		subjects: ['Payment reminder: {inv}', 'RE: Payment reminder: {inv}', 'Paid twice?'],
++		open: ['Sorry about that. I’ve just paid it by card through the link in your email, so you should see it today.', 'Apologies, it must have slipped through. I’ve paid it now by card.', 'That’s odd, I thought it went out last week. Anyway, I’ve paid it again through your link to be safe.'],
++		more: ['Could you send a receipt when it comes through?', 'Let me know if anything else is outstanding.'],
++		ask: ['Thanks, {name}, the card payment has come through. I’ll let you know if anything else turns up.', 'Thank you, we’ve received the card payment.'],
++		paths: [
++			{
++				detail: ['Thanks. Could you send a receipt? Our AP team needs it for the card statement.', 'Great, thanks. A receipt would be helpful for our records.'],
++				look: ['An ACH payment of {total} from {short} arrived today with reference {inv}: their original payment, a week late. They have now paid twice.'],
++				lookPaste: 'bank',
++				ends: [
++					[['b', 'Here’s the receipt. One thing: your original payment has now arrived as well, so you’ve paid {inv} twice. Would you like the second payment refunded, or kept against your next invoice?'], ['c', 'Refund to the card, please.'], ['n', 'Refunded {total} to the card ending {card}.'], ['b', 'Done: {total} refunded to your card ending {card}. It should show within five business days.']],
++					[['b', 'Receipt attached. Your bank payment has arrived too, so {inv} has been paid twice. Shall we refund one, or keep it against your next invoice?'], ['c', 'Please keep it against our next invoice, due in {nextMonth}.'], ['n', 'Left {total} on the account against the next invoice.']],
++					[['b', 'Here’s the receipt. Your original payment has also arrived, so you’ve paid twice. Would you like a refund?'], ['c', 'Yes, please refund it to our bank account rather than the card; the card has a low limit and we need the room.'], ['b', 'Of course. Could you send your bank details on letterhead? We can’t take them from an email alone.'], ['c', 'Attached.'], ['n', 'Bank refunds need two approvers. Ruth is away until {date1}, so it waits.']]
++				]
++			}
++		]
++	},
++	// A true-up invoice for seats above the licence.
++	{
++		id: 'trueup',
++		kinds: ['trueup'],
++		subjects: ['Overdue invoice {inv}', 'Query on invoice {inv}', 'RE: {inv}', 'Seat invoice {inv}'],
++		open: ['This invoice can’t be right. As far as I know, we haven’t added anyone to Perch this year.', 'Before we pay this, can someone explain how the seat count was worked out? It doesn’t match what our team sees.', 'We weren’t expecting an invoice for extra seats at all. What is it for?'],
++		more: ['{opsFirst}, who runs Perch for us, is copied.', 'I’ve held it back from payment until we understand it.'],
++		ask: ['The true-up charges for the highest number of active seats in a quarter above your {licensed} licensed seats, for the rest of the contract year. In {trueMonth} your peak was {peak}. The monthly figures are below.', 'Of course. Each quarter we compare your peak active seats with the {licensed} in your licence and bill the difference for the rest of the contract year. Here are the figures; the peak was {peak}, in {trueMonth}.'],
++		askPaste: 'usage',
++		paths: [
++			{
++				detailWho: 'o',
++				detail: ['The jump in {trueMonth} was {extra} contractors we brought in for a fortnight and then removed. Surely they don’t count for the whole year?'],
++				look: ['Order form: true-up on peak active seats in the quarter, prorated to the end of the contract year. The contractors count as written.'],
++				lookWho: 'r',
++				lookPaste: 'none',
++				ends: [
++					[['m', 'For what it’s worth, I told them at kickoff that removed users stop counting the next month. Not what the order form says, but they may have relied on it.'], ['f', 'Credit half as goodwill.'], ['b', 'The order form does count peak seats, but given what you were told at kickoff we’ve credited half of the true-up: credit note {credNote} for {credit}. The balance is {rest}.'], ['c', 'That’s fair. Paid the balance today.'], ['s', paid('{rest}')]],
++					[['f', 'No credit; the order form is clear.'], ['b', 'I’ve checked with our controller: the order form counts the peak in the quarter, so the contractors do count. I’m sorry it was a surprise.'], ['c', 'Fine. We’ll pay, but please send the order form so I can show our finance director.'], ['b', 'Attached; it’s section 3.'], ['s', paid('{total}')]]
++				]
++			},
++			{
++				detail: ['We deactivated {wrongSeats} users in {month}, but they still appear as active in your figures. Our admin screen shows far fewer.'],
++				look: ['They’re right. The seat report counted deactivated users as active until last week’s fix, so the true-up used the wrong peak.'],
++				lookWho: 'r',
++				lookPaste: 'none',
++				ends: [
++					[['r', 'Recounted without the deactivated users: their peak was within the licence. Nothing to bill.'], ['b', 'You were right, and I’m sorry: our seat report counted deactivated users as active. Your peak was within your licence, so I’ve credited the whole invoice with credit note {credNote}. Nothing is owed.'], ['s', credited('{total}')], ['c', 'Thank you for checking properly.']],
++					[['r', 'Recounted: even without the deactivated users they peaked at {peak2}, so {extra2} seats are over the licence.'], ['b', 'You were partly right: without the deactivated users your peak was {peak2}, not {peak}. Credit note {credNote} for {credit} brings the invoice down to {rest}.'], ['c', 'Thanks for rechecking. That matches our count, and it’s paid.'], ['s', paid('{rest}')]]
++				]
++			},
++			{
++				detailWho: 'o',
++				detail: ['Ah, I see it now. We added the warehouse team in {trueMonth}. That’s right, then. Our AP will need a PO for it, though.'],
++				look: ['Agreed by the customer; waiting for their PO.'],
++				lookPaste: 'invoice',
++				ends: [
++					[['c', 'PO {po} attached for the true-up.'], ['b', 'Thanks, I’ve added it to the invoice.'], ['s', paid('{total}')]],
++					[['c', 'The PO is with purchasing. They say two weeks.'], ['c', 'Purchasing now want a quote rather than an invoice before they’ll raise the PO.'], ['b', 'I’ve attached a quote for the same amount.']]
++				]
++			}
++		]
++	},
++	// A higher fee than last year.
++	{
++		id: 'uplift',
++		kinds: ['annual'],
++		flags: ['uplift'],
++		subjects: ['Overdue invoice {inv}', 'Query: price on {inv}', 'RE: Payment reminder: {inv}'],
++		open: ['The amount on this invoice is {diff} higher than last year, and nobody told us about a price increase.', 'Our AP system flagged this invoice because it doesn’t match the PO, which was raised for last year’s amount.', 'Is this invoice correct? It’s more than we paid last year for the same number of seats.'],
++		more: ['We haven’t changed anything about how we use Perch.', 'I’d like to understand it before I take it to our finance director.'],
++		ask: ['The order form lets us raise the fee at the start of each contract year; this year’s increase is {uplift}%. Let me check the exact terms of your agreement before we go further.', 'Thanks for raising it. The increase is {uplift}%, but I want to check what your agreement says before I explain it.'],
++		paths: [
++			{
++				flags: ['cap'],
++				detail: ['Thanks. Our order form says something about a limit, but I can’t find my copy.', 'Thank you. Please do check, because our finance director remembers agreeing a limit.'],
++				look: ['Their order form caps increases at {cap}% a year. We charged {uplift}%. Credit the difference.'],
++				lookWho: 'l',
++				lookPaste: 'clause',
++				ends: [
++					[['b', 'You were right: your order form caps the increase at {cap}%, and we charged {uplift}%. I’ve issued credit note {credNote} for {credit}, so the amount due is {rest}.'], ['c', 'Thank you. Paid today.'], ['s', paid('{rest}')]],
++					[['b', 'Your order form caps the increase at {cap}%, so we overcharged you. Credit note {credNote} for {credit} brings the invoice to {rest}.'], ['c', 'Thanks. The PO is for last year’s amount, so AP will pay that now and the rest once the PO is amended.'], ['s', paid('{lastYear}', '{inv}', '{capLeft}')], ['c', 'Purchasing are amending the PO, but slowly. I’ll let you know.']]
++				]
++			},
++			{
++				flags: ['notice'],
++				detail: ['I’m not aware of any notice of an increase. Who was it sent to?'],
++				look: ['No cap in their order form. The agreement allows increases with 60 days’ written notice; our notice went to them on {noticeDate}.'],
++				lookWho: 'l',
++				lookPaste: 'clause',
++				ends: [
++					[['b', 'The notice went to {oldFull} on {noticeDate}; a copy is attached.'], ['c', 'Found it in the old mailbox. Fair enough. AP needs the PO increased first, which I’ve asked for.'], ['c', 'PO amended.'], ['s', paid('{total}')]],
++					[['b', 'Our notice of the increase went to {oldFull} on {noticeDate}. I’ve attached it.'], ['c', '{oldFirst} had left by then, so nobody here saw it. We’d like the increase waived for this year.'], ['e', 'I’d support waiving it this once; they have been a good account.'], ['f', 'Agreed, this year only.'], ['b', 'We’ve agreed to waive the increase for this contract year: credit note {credNote} for {diff}, so {lastYear} is due. Next year’s invoice will include it.'], ['s', paid('{lastYear}')]]
++				]
++			}
++		]
++	},
++	// An add-on billed from the wrong date.
++	{
++		id: 'prorate',
++		kinds: ['addon'],
++		subjects: ['Overdue invoice {inv}', 'Query on {inv}', 'RE: Payment reminder: {inv}'],
++		open: ['We added the {addon} in {addonMonth}, but this invoice seems to charge us from much earlier. Can you explain the dates?', 'The amount on this invoice is more than we expected for the {addon}.', 'Our AP team won’t pay this until someone explains the period on it.'],
++		more: ['Everything else on our account looks fine.', 'Our operations team are happy with the add-on; it’s only the invoice.'],
++		ask: ['Let me check the dates against your order form and come back to you.', 'Thanks. I’ll compare the invoice with the order form for the {addon} and let you know.'],
++		paths: [
++			{
++				flags: ['prorWrong'],
++				detail: ['The order form for the {addon} is dated {prorRight}, and that’s when it was switched on.'],
++				look: ['Add-on started {prorRight}; invoice prorated from {prorWrong}, the start of their contract year. Overcharged by {credit}.'],
++				lookPaste: 'invoice',
++				ends: [
++					[['b', 'You’re right: the invoice charged from {prorWrong} instead of {prorRight}. Credit note {credNote} for {credit} is attached, so {rest} is due.'], ['s', paid('{rest}')]],
++					[['b', 'You’re right about the dates. I’ll send a corrected invoice.'], ['c', 'Still waiting for the corrected invoice. AP won’t pay the old one.'], ['n', 'The billing tool can’t prorate from the middle of a month. Diego is working it out by hand.'], ['b', 'Sorry for the delay, {name}. The corrected invoice is being worked out by hand and will follow shortly.']]
++				]
++			},
++			{
++				detail: ['We only started using it on {prorRight}, after the training.'],
++				look: ['Order form for the add-on is dated {prorWrong} and starts it then. They started using it later, but billing follows the order form.'],
++				lookPaste: 'invoice',
++				ends: [
++					[['b', 'The order form for the {addon} is dated {prorWrong} and starts it from that date, which is what we billed. I’ve attached it. I know your team started using it later.'], ['c', 'I see. Fine, we’ll pay.'], ['s', paid('{total}')]],
++					[['b', 'Your order form starts the {addon} on {prorWrong}, so that’s the date we billed from.'], ['e', 'Their go-live slipped because our trainer cancelled twice. Can we meet them halfway?'], ['f', 'Credit the first month.'], ['b', 'Our training dates slipped on our side, so we’ve credited the first month: credit note {credNote} for {monthCredit}, leaving {monthLeft}.'], ['s', paid('{monthLeft}')]]
++				]
++			}
++		]
++	},
++	// Sales tax on an exempt customer's invoice.
++	{
++		id: 'tax',
++		kinds: ['annual', 'quarterly'],
++		fit: (c) => c.exempt !== '' && !c.card,
++		flags: ['tax'],
++		subjects: ['Overdue invoice {inv}', 'Sales tax on {inv}', 'RE: Payment reminder: {inv}'],
++		open: ['We can’t pay this invoice as it stands. AP has rejected it.', 'Why is there sales tax on this invoice? There wasn’t any last year.', 'We’re a {exemptKind} and don’t pay sales tax. Please send a corrected invoice.'],
++		more: ['Everything else on it is fine.', 'Our auditors check every invoice for this.'],
++		ask: ['Thanks for flagging it. We changed our tax software in January, and it now adds tax for every customer without an exemption certificate on file. Could you send yours?'],
++		paths: [
++			{
++				detail: ['Certificate attached.', 'Here is our exemption certificate.'],
++				look: ['Certificate valid. Uploaded to the tax tool. Credit the {tax} of tax.'],
++				lookPaste: 'invoice',
++				ends: [
++					[['b', 'Thank you. I’ve issued credit note {credNote} for the {tax} of tax, so {sub} is due. Future invoices will carry no tax.'], ['s', paid('{sub}')]],
++					[['b', 'Thanks. Credit note {credNote} takes off the {tax} of tax.'], ['c', 'Thanks, but our AP needs a new invoice without the tax rather than a credit note; they can’t match the two.'], ['n', 'Reissuing needs Diego to void the original in the tax tool as well.'], ['c', 'Any news on the invoice without tax?']]
++				]
++			},
++			{
++				detail: ['Our certificate expired in {month}. The state is issuing a new one, but it can take a few weeks.'],
++				look: ['No valid certificate. The tax stays until they send one.'],
++				lookPaste: 'none',
++				ends: [
++					[['c', 'We’ll pay the subscription now and the tax only if the certificate doesn’t come through.'], ['s', paid('{sub}', '{inv}', '{tax}')], ['b', 'Thanks. I’ll leave the {tax} of tax open until the certificate arrives.']],
++					[['b', 'No problem. I’ll pause reminders until {date1}.'], ['c', 'Still waiting on the state, I’m afraid.']]
++				]
++			}
++		]
++	},
++	// VAT details missing from a European invoice.
++	{
++		id: 'vat',
++		kinds: ['annual', 'quarterly', 'trueup'],
++		fit: (c) => emea(c) && c.country !== 'NO',
++		flags: ['vatMissing'],
++		subjects: ['Overdue invoice {inv}', 'Invoice {inv} cannot be booked', 'RE: Payment reminder: {inv}'],
++		open: ['Our accounts team can’t book this invoice. Something to do with the VAT, I think.', 'Please send a correct invoice. This one has been rejected.', 'The invoice is missing our VAT number, so we can’t process it.'],
++		more: ['Our auditors are very particular about this.', 'Sorry for not saying sooner.'],
++		ask: ['Could you tell me exactly what needs to change? I’ll get a corrected invoice to you as soon as I know.'],
++		paths: [
++			{
++				detail: ['It needs our VAT number, {vat}, and a line saying that the reverse charge applies. Without both our auditors won’t accept it.'],
++				look: ['VAT number missing from the account since the migration, so the template left out the reverse charge line. Added; reissuing.'],
++				lookPaste: 'invoice',
++				ends: [
++					[['b', 'Corrected: {newInv} replaces {inv}, with your VAT number and the reverse charge note.'], ['c', 'Thank you, booked.'], ['s', paid('{total}', '{newInv}')]],
++					[['b', '{newInv} replaces {inv} and now shows your VAT number and the reverse charge note.'], ['c', 'Nearly: the VAT number is there but without the country prefix, and our system rejects it again.'], ['n', 'The invoice template drops the prefix. Diego says the template fix goes in next month.'], ['b', 'I’m sorry: our invoice template drops the prefix. We’re fixing it, and I’ll send a corrected invoice as soon as it’s done.']]
++				]
++			},
++			{
++				detail: ['It needs our VAT number, {vat}. And the address is our old office, which our system also flags.'],
++				look: ['Added the VAT number and the new address to the account.'],
++				lookPaste: 'invoice',
++				ends: [
++					[['b', 'Both corrected: {newInv} replaces {inv}.'], ['s', paid('{total}', '{newInv}')]],
++					[['c', 'Our controller has agreed to pay this one as it is, as long as the next invoice is right.'], ['s', paid('{total}')], ['n', 'VAT number and address on the account for future invoices.']]
++				]
++			}
++		]
++	},
++	// A card that was declined.
++	{
++		id: 'card',
++		kinds: ['quarterly'],
++		fit: (c) => c.card,
++		lead: [['s', 'Automatic charge of {total} to the card ending {card} for {inv} declined: {decline}.']],
++		reminder: ['Hello {to},\n\nThe automatic charge for invoice {inv} ({total}) to your card ending {card} was declined, so the invoice is now past due. Could you check the card, or let me know if you’d like to pay another way?', 'Hi {to},\n\nWe weren’t able to charge your card ending {card} for {inv} ({total}). Could you update the card through the link in our earlier email, or let me know if something has changed?'],
++		subjects: ['Card payment failed: {inv}', 'RE: Card payment failed: {inv}', 'Overdue invoice {inv}'],
++		open: ['Sorry, I didn’t see the email about the card. I’ll look into it today.', 'The card on file belonged to {oldFirst}, who has left. I’ll need to set up a new one.', 'Strange, that card should be fine. Can you try it again?'],
++		more: ['It’s a busy time for us, so apologies for the slow reply.', 'We don’t want any interruption to the service.'],
++		ask: ['Thanks. You can update the card from the link in the reminder, or I can send a fresh one.', 'Of course. I’ll try it again tomorrow morning; if it fails again, the link in our email lets you add another card.'],
++		paths: [
++			{
++				detail: ['New card added through the link.', 'I’ve put a new card on the account.'],
++				look: ['New card ending {card2}. Charged.'],
++				lookPaste: 'cardlog',
++				ends: [[['s', paid('{total}', '{inv}', '$0.00', 'card')], ['b', 'That has gone through, thank you.']]]
++			},
++			{
++				flags: ['limit'],
++				detail: ['I’ve added a new card, but it has a limit of {limit}, so it may not take the whole amount.'],
++				look: ['Charged {received} to the card ending {card2}; the rest declined over the limit.'],
++				lookPaste: 'cardlog',
++				ends: [
++					[['b', 'We charged {received} to the new card; the remaining {balance} went over its limit. Could you pay the rest by bank transfer?'], ['c', 'Sent the rest by ACH today.'], ['s', paid('{balance}', '{inv}', '$0.00', 'ACH')]],
++					[['b', 'The new card took {received}; the remaining {balance} was declined over the limit. Could you pay that another way?'], ['c', 'Our finance director has to order a second card, which takes a couple of weeks. Can it wait until then?'], ['b', 'That’s fine. I’ll leave the {balance} open until then.']]
++				]
++			},
++			{
++				detail: ['Actually, we’d like to stop paying by card altogether and pay by bank transfer instead.'],
++				look: ['Switched the account to invoice and ACH, net 30.'],
++				lookPaste: 'cardlog',
++				ends: [
++					[['b', 'Done: your account is now on bank transfer. The invoice is attached with our bank details.'], ['s', paid('{total}', '{inv}', '$0.00', 'ACH')]],
++					[['b', 'Done: you’re on bank transfer now. Our bank details are on the attached invoice.'], ['c', 'Our AP team needs a W-9 and a bank letter before they can set you up as a payee.'], ['b', 'Both attached.'], ['c', 'AP says the W-9 has your old address on it.'], ['n', 'Wrong W-9 sent. Ruth to complete a new one with the Seaport Boulevard address.']]
++				]
++			}
++		]
++	},
++	// Payments paused while the customer changes finance system.
++	{
++		id: 'erp',
++		kinds: ['annual', 'quarterly', 'trueup'],
++		fit: (c) => !c.card,
++		subjects: ['Overdue invoice {inv}', 'RE: Payment reminder: {inv}', 'Statement of account'],
++		open: ['This is scheduled and should be with you soon.', 'Apologies for the delay. Things are a bit chaotic here at the moment.', 'Thanks. I’ll check with our payables team and come back to you.'],
++		more: ['We value working with you, so I’m sorry for the trouble.', 'Bear with us.'],
++		ask: ['Thanks, {name}. Could you give me a rough date?', 'Thanks. Do you know roughly when it will go out?'],
++		paths: [
++			{
++				detail: ['I should have said: we’re moving to a new finance system, and all supplier payments are paused until it goes live on {goLive}. Everything due will be paid in the first run after that.'],
++				look: ['Their payments are paused for a move to a new finance system until {goLive}. Nothing to do until then.'],
++				lookPaste: 'aging',
++				ends: [
++					[['b', 'Thanks for explaining. I’ll pause reminders until then.'], ['c', '>>goLive We’re live. Your invoice is in the first run.'], ['s', paid('{total}')]],
++					[['b', 'Thanks for explaining. Reminders paused until {goLive}.'], ['c', '>>goLive Bad news: our go-live has been pushed back to {goLive2}. I’m sorry.'], ['b', 'Thanks for telling me. I’ll pause reminders until then.']]
++				]
++			},
++			{
++				detail: ['We moved to a new finance system last month, and some supplier records didn’t come across properly. Yours has no bank details.'],
++				look: ['Their new system lost our bank details. Sending the bank letter again.'],
++				lookPaste: 'none',
++				ends: [
++					[['b', 'Our bank letter is attached. Let me know if your team needs anything else.'], ['c', 'Thanks, that did it.'], ['s', paid('{total}')]],
++					[['b', 'Our bank letter is attached.'], ['c', 'Our new system needs you to enter the details yourselves through our supplier portal, not from a letter.'], ['n', 'Need a portal login; asked for one.'], ['c', 'Did you get the portal invitation?'], ['n', 'The invitation went to spam and has expired. Asked for another.']]
++				]
++			}
++		]
++	},
++	// The payment terms in the billing tool are not the agreed ones.
++	{
++		id: 'terms',
++		kinds: ['annual', 'quarterly'],
++		fit: (c) => !c.card,
++		flags: ['terms'],
++		subjects: ['Overdue invoice {inv}', 'RE: Payment reminder: {inv}', 'Not yet due: {inv}'],
++		open: ['Our agreement with you is on {contractTerms}-day terms, so this isn’t due until {dueReal}.', 'I think your reminder is early. Can you check the payment terms in our agreement?', 'This is in our system for payment on {dueReal}, in line with our terms.'],
++		more: ['It will be paid on time.', 'Please don’t send further reminders before then.'],
++		ask: ['Let me check the order form and come back to you.', 'Thanks, {name}. I’ll check what your order form says.'],
++		paths: [
++			{
++				detail: ['Thank you. It’s in the payment section of the order form, if that helps.', 'Thanks. Our copy says {contractTerms} days.'],
++				look: ['Order form says net {contractTerms}. The billing tool has had net {termsDays} for the account since the January migration. Fixed on the account.'],
++				lookPaste: 'clause',
++				ends: [
++					[['b', 'You’re right, and I’m sorry: our system had the wrong terms for your account. I’ve corrected them, so {inv} is due on {dueReal}.'], ['s', `>>dueReal ${paid('{total}')}`]],
++					[['b', 'You’re right: our system had the wrong terms for you. Corrected, so {inv} is due on {dueReal}.'], ['s', `>>dueReal ${paid('{total}')}`], ['c', 'Paid on the due date. But the true-up invoice that came this week still says {termsDays} days.'], ['n', 'The CRM still says net {termsDays} and overwrites the billing tool every night. Asked Diego to change it at the source.']]
++				]
++			},
++			{
++				flags: ['theirTerms'],
++				detail: ['Our AP policy is {contractTerms} days for all suppliers. I assumed that applied to you as well.'],
++				look: ['Order form says net {termsDays}. Their AP pays every supplier on {contractTerms} days regardless.'],
++				lookPaste: 'clause',
++				ends: [
++					[['b', 'Our order form with you says {termsDays} days; I’ve attached it. Could AP pay on those terms?'], ['c', 'AP has agreed to make an exception and pay this week.'], ['s', paid('{total}')]],
++					[['b', 'The order form says {termsDays} days; it’s attached. Could AP pay on those terms?'], ['c', 'I’m afraid our AP won’t change it. They’ll pay on {dueReal}.'], ['f', 'Accept it this time; flag it to the account owner for the next order form.'], ['s', `>>dueReal ${paid('{total}')}`]]
++				]
++			}
++		]
++	},
++	// Waiting for the customer's payment run.
++	{
++		id: 'run',
++		kinds: ['annual', 'quarterly', 'trueup', 'addon'],
++		fit: (c) => !c.card,
++		subjects: ['Overdue invoice {inv}', 'RE: Payment reminder: {inv}', 'Late payment fee', 'Invoice {inv}'],
++		open: ['We pay suppliers once a month, on the {runDay}. Your invoice arrived after the cut-off for {month}, so it goes in the next run.', 'This is ready and will be paid in our next payment run.', 'Noted, thank you. It will go out with our next run.'],
++		more: ['Sorry it can’t be sooner.', 'That’s how we pay everyone.'],
++		ask: ['Thanks, {name}. When is the next run?', 'Thanks for letting me know. Could you tell me the date of the run, so I can stop the reminders until then?'],
++		paths: [
++			{
++				detail: ['The {runDay}. Anything ready by the 20th goes in.', 'It’s on the {runDay} of the month.'],
++				look: ['Monthly payment run on the {runDay}. Reminders paused.'],
++				lookPaste: 'aging',
++				ends: [
++					[['s', `>>run ${paid('{total}')}`], ['b', 'Received, thank you.']],
++					[['s', `>>run ${paid('{total}')}`], ['c', 'Paid on the {runDay}. Our AP noticed a late fee of {lateFee} on your statement. We don’t accept a late fee for a payment run.'], ['f', 'Waive it.'], ['b', 'We’ve waived the late fee; your account is clear.']],
++					[['c', '>>run It missed the run after all: the invoice needed a second person to code it, and they were on holiday. The next run is on {runNext}.'], ['b', 'Thanks for letting me know.']]
++				]
++			},
++			{
++				detail: ['Our runs are every other {runWeekday}. It will go in the one after next.'],
++				look: ['Fortnightly runs. They are {late} days past due already.'],
++				lookPaste: 'aging',
++				ends: [
++					[['b', 'Is there any way to bring it forward? It’s already {late} days past due.'], ['c', 'I asked our controller for a manual payment, and it went out this morning.'], ['s', paid('{total}')]],
++					[['b', 'Could it go in the next run instead? It’s {late} days past due already.'], ['c', 'Our controller won’t make an exception, I’m afraid, but it is definitely in the following one.'], ['s', paid('{total}')]]
++				]
++			}
++		]
++	},
++	// Short-paid for the outage on 12 May.
++	{
++		id: 'sla',
++		since: 74,
++		kinds: ['annual', 'quarterly'],
++		fit: (c) => !c.card,
++		flags: ['slaDeduct'],
++		shows: 'remit',
++		subjects: ['RE: Payment reminder: {inv}', 'Short payment on {inv}', 'Outage on 12 May'],
++		open: ['We’ve paid this invoice less a credit for the outage on 12 May, when our teams couldn’t run any workflows for most of the afternoon.', 'You’ll see we paid {received}. The difference is the service credit we’re owed for the outage in May.', 'We’ve held back part of this payment because of the outage in May.'],
++		more: ['Our warehouse lost an afternoon of dispatches that day.', 'We assumed you would apply the credit automatically.'],
++		ask: ['Thanks, {name}. I’ve asked our team to check your service levels against the outage and will come back to you.'],
++		paths: [
++			{
++				detail: ['We deducted 10% of the invoice, which seemed fair for a lost afternoon.'],
++				look: ['Their order form has the standard service levels: 5% of the monthly fee for each full hour below 99.9% availability in the month, up to 25%. The 12 May outage was 3 hours 39 minutes, so 15% of one month: {slaCredit}. They deducted {claimed}.'],
++				lookWho: 'r',
++				lookPaste: 'sla',
++				ends: [
++					[['b', 'Your order form gives a credit of 15% of one month’s fee for that outage, which is {slaCredit}. I’ve issued credit note {credNote} for that amount, leaving {slaLeft} to pay.'], ['c', 'That’s less than we hoped, but it’s what the agreement says. Paid.'], ['s', paid('{slaLeft}')]],
++					[['b', 'Your order form gives a credit of 15% of one month’s fee for that outage: {slaCredit}. With credit note {credNote}, {slaLeft} is still to pay.'], ['c', 'We don’t accept that. Our operations team lost a whole afternoon of shipments. I’ve asked our legal team to look at it.'], ['l', 'Their order form is clear: the standard credit only.'], ['c', 'Our legal team is still reviewing it.']]
++				]
++			},
++			{
++				detail: ['We assumed every customer gets service credits.'],
++				look: ['Their order form has no service-level credits; they are on the standard terms without the uptime schedule.'],
++				lookWho: 'r',
++				lookPaste: 'sla',
++				ends: [
++					[['b', 'I’m sorry about the outage. Your order form doesn’t include service-level credits, so we can’t credit the invoice. Could you pay the remaining {claimed}?'], ['c', 'Fair enough, we checked. Paid.'], ['s', paid('{claimed}')]],
++					[['b', 'Your order form doesn’t include service-level credits, so the {claimed} is still due.'], ['e', 'They were hit hard that day. Could we offer something?'], ['f', 'Goodwill credit of {goodwill}, no more.'], ['b', 'As a gesture, we’ve credited {goodwill} with credit note {credNote}, leaving {gwLeft}.'], ['s', paid('{gwLeft}')]]
++				]
++			}
++		]
++	},
++	// The customer asks to pay in instalments.
++	{
++		id: 'plan',
++		kinds: ['annual', 'trueup'],
++		fit: (c) => !c.card,
++		subjects: ['Overdue invoice {inv}', 'Payment arrangement for {inv}', 'RE: Payment reminder: {inv}'],
++		open: ['I’m sorry this is late. We’ve had a difficult few months and cash is tight. Would you consider letting us pay in instalments?', 'Could we talk about this invoice? Paying it in one go this month would be hard for us.', 'We will pay, but we need a little more time. Could we spread it over the next three months?'],
++		more: ['We’re not going anywhere; it’s just timing.', 'I’d rather be honest with you about it.'],
++		ask: ['Thanks for being upfront, {name}. I’ll ask our controller and come back to you. What would you propose?'],
++		paths: [
++			{
++				detail: ['Three equal payments: {inst} on {inst1}, {inst2} and {inst3}.'],
++				look: ['Agreed: three instalments of {inst}. Late fee waived if they keep to it.'],
++				lookWho: 'f',
++				ends: [
++					[['b', 'Our controller has agreed to three payments of {inst} on {inst1}, {inst2} and {inst3}. If one is going to slip, please tell me before the date.'], ['s', `>>inst1 ${paid('{inst}', '{inv}', '{instLeft}')}`], ['c', 'First instalment sent.']],
++					[['b', 'Agreed: {inst} on each of {inst1}, {inst2} and {inst3}.'], ['s', `>>inst1 ${paid('{inst}', '{inv}', '{instLeft}')}`], ['c', '>>inst2 I’m afraid the second instalment will be a couple of weeks late.'], ['b', 'Thanks for telling me in advance. Please keep me posted.']],
++					[['b', 'That’s fine: three payments of {inst}, on {inst1}, {inst2} and {inst3}.'], ['s', `>>inst1 ${paid('{inst}', '{inv}', '{instLeft}')}`], ['s', `>>inst2 ${paid('{inst}', '{inv}', '{inst}')}`], ['s', `>>inst3 ${paid('{inst}')}`]]
++				]
++			},
++			{
++				detail: ['Half now and half next month, if possible.'],
++				look: ['No: they have paid late on every invoice since last year. Full payment within 30 days, or it goes to the account owner.'],
++				lookWho: 'f',
++				ends: [
++					[['b', 'I’m sorry, we can’t offer instalments on this invoice. Could you pay it in full by {date1}?'], ['c', 'Understood. We’ll find a way.'], ['s', paid('{total}')]],
++					[['b', 'I’m afraid we can’t split this one. Could you pay in full by {date1}?'], ['e', 'Spoke to {ops}. They can pay half now; I’ve asked Ruth to accept the rest next month.'], ['f', 'Fine, as an exception.'], ['s', paid('{half}', '{inv}', '{half}')]]
++				]
++			}
++		]
++	},
++	// A wire that was returned or held.
++	{
++		id: 'returned',
++		kinds: ['annual', 'quarterly', 'trueup'],
++		fit: (c) => !c.card,
++		subjects: ['RE: Payment reminder: {inv}', 'Payment sent: {inv}', 'Overdue invoice {inv}'],
++		open: ['We sent the payment on {payDate}. I’ve asked our bank for the confirmation.', 'This was paid by wire on {payDate}.', 'The transfer went out on {payDate}. Has it not arrived?'],
++		more: ['It definitely left our account.', 'Let me know if you need anything from our side.'],
++		ask: ['Thanks. Nothing has reached our account yet. I’ll ask our bank to look for it; could you ask yours for a trace too?'],
++		paths: [
++			{
++				detail: ['Our bank says the payment was returned yesterday. The reason given is “beneficiary name does not match account”. We sent it to “Corvid Systems LLC”.'],
++				look: ['We’re Corvid Systems, Inc. Meridian rejects name mismatches; their vendor record has the wrong name.'],
++				lookPaste: 'none',
++				ends: [
++					[['b', 'Our legal name is Corvid Systems, Inc., not LLC, and our bank rejects payments where the name doesn’t match. Could you correct your record and send it again?'], ['c', 'Corrected and resent.'], ['s', paid('{total}')]],
++					[['b', 'We’re Corvid Systems, Inc., not LLC, and our bank turns away payments with a different name. Could you correct it and resend?'], ['c', 'The returned money hasn’t reached us yet, so we can’t resend. Our bank says it can take up to ten business days.'], ['c', 'Still nothing back from the bank. I’ll keep chasing.']]
++				]
++			},
++			{
++				detail: ['Our bank says it went through an intermediary bank and still shows as in transit.'],
++				look: ['Meridian found it held at the correspondent bank for a missing beneficiary address. Released once our bank supplied it.'],
++				lookPaste: 'none',
++				ends: [[['s', paid('{total}')], ['b', 'It arrived this morning. Our bank says an intermediary held it for a missing address; adding our full address to the payment next time will avoid that.'], ['c', 'Thanks, noted for next time.']]]
++			}
++		]
++	},
++	// A check posted to the office Corvid left in January.
++	{
++		id: 'check',
++		kinds: ['annual', 'quarterly', 'trueup'],
++		fit: (c) => !emea(c) && !c.card,
++		flags: ['check'],
++		subjects: ['RE: Payment reminder: {inv}', 'Check mailed for {inv}', 'Overdue invoice {inv}'],
++		open: ['A check was mailed on {payDate}, check number {checkNo}.', 'We sent you a check for this on {payDate}. Has it not arrived?', 'Our records show a check went out for this on {payDate}.'],
++		more: ['It hasn’t been cashed yet, according to our bank.', 'We still pay most suppliers by check.'],
++		ask: ['Thanks. It hasn’t reached our lockbox yet. Could you tell me the address it was sent to?'],
++		paths: [
++			{
++				detail: ['It went to 220 Canal Street, Boston.'],
++				paste: 'check',
++				look: ['220 Canal Street is our old office; we left in January, and mail forwarding ended on 31 March.'],
++				lookPaste: 'none',
++				ends: [
++					[['n', 'The building manager at Canal Street had a bundle of our mail; check {checkNo} was in it. Deposited.'], ['s', paid('{total}', '{inv}', '$0.00', 'check')], ['b', 'Your check turned up at our old office and has been paid in. Please change our address to PO Box 84417, Boston, MA 02284 for the future.']],
++					[['b', 'That’s our old office, and mail forwarding has ended. Could you stop the check and send a new one to our lockbox, PO Box 84417, Boston, MA 02284?'], ['c', 'Our bank charges for stopping a check. We’ll stop it, but we’d like you to cover the fee.'], ['f', 'No: we wrote to them about the new address in January.'], ['b', 'I’m sorry, we can’t cover the fee; our letter about the new address went out in January.'], ['c', 'Stopped. The new check goes out with our next run.']],
++					[['b', 'That’s our old office, I’m afraid. Could you stop the check and send a new one to PO Box 84417, Boston, MA 02284?'], ['c', 'We’d rather pay electronically from now on. Can you send your bank details?'], ['b', 'Our bank letter is attached.'], ['s', paid('{total}', '{inv}', '$0.00', 'ACH')]]
++				]
++			},
++			{
++				detail: ['It went to your PO box.'],
++				paste: 'check',
++				look: ['Lockbox report shows check {checkNo} received, but posted to another customer’s account: the remittance stub was missing.'],
++				ends: [[['b', 'Your check did arrive, but without its stub, and it was posted to the wrong account. I’ve corrected it, so the invoice is paid.'], ['c', 'Thanks. I’ll make sure the stub goes in next time.']]]
++			}
++		]
++	},
++	// The customer was bought by another company.
++	{
++		id: 'acquired',
++		kinds: ['annual', 'quarterly', 'trueup'],
++		fit: (c) => !c.card,
++		subjects: ['Overdue invoice {inv}', 'RE: Payment reminder: {inv}', 'Change of ownership'],
++		open: ['We were acquired by {parent} in {month}, and all supplier invoices now go through their accounts payable team. I’ve forwarded yours.', 'Thanks. Our finance function has moved to our new parent company, {parent}. I’ll pass this on.'],
++		more: ['Everything is still settling down.', 'Bear with us while the changes go through.'],
++		ask: ['Thanks, {name}. Is there someone at {parent} I should be in touch with directly?'],
++		paths: [
++			{
++				detail: ['Yes, their payables team at {parentAp}. You may need to register as a supplier with them.'],
++				look: ['New AP contact {parentAp}. They need their supplier form and our bank letter.'],
++				lookPaste: 'none',
++				ends: [
++					[['n', 'Supplier form and bank letter sent to {parent}.'], ['c', '{parent} have set you up. Payment will go next week.'], ['s', paid('{total}')]],
++					[['c', '{parent} say they can only pay invoices addressed to them, not to {legal}.'], ['l', 'The agreement is with {legal}; to bill {parent} we need a letter assigning it. Ask for one.'], ['b', 'Our agreement is with {legal}. To bill {parent} instead, we need a short letter confirming that {parent} takes over the agreement. Could you ask for one?'], ['c', 'Waiting for {parent}’s legal team.']]
++				]
++			},
++			{
++				detail: ['{parent} pays everything on 75-day terms, so it will be a while.'],
++				look: ['Their parent pays on 75 days. Our agreement with {legal} is {termsDays} days.'],
++				lookPaste: 'none',
++				ends: [[['b', 'Our agreement with {legal} has {termsDays}-day terms. Could {parent} pay this one on those?'], ['c', 'They’ve agreed to pay this one now and look at the terms for future invoices.'], ['s', paid('{total}')]]]
++			}
++		]
++	},
++	// Onboarding days billed before they took place.
++	{
++		id: 'services',
++		kinds: ['services'],
++		fit: (c) => !c.card,
++		subjects: ['Overdue invoice {inv}', 'Query on onboarding invoice {inv}', 'RE: {inv}'],
++		open: ['We’ve only had {delivered} of the {days} onboarding days on this invoice. Why are we being billed for all of them?', 'Our project lead says some of these onboarding sessions haven’t happened yet.', 'Before we pay, can you send a breakdown of the onboarding days?'],
++		more: ['We’re happy with the sessions so far.', 'Our project lead, {opsFirst}, is copied.'],
++		ask: ['Let me check with our onboarding team which sessions have taken place.'],
++		paths: [
++			{
++				detail: ['Thanks. For the record, two sessions were cancelled by your side.'],
++				look: ['Delivered {delivered} of {days} days; we postponed the rest when the consultant left. The order form bills services as they are delivered.'],
++				lookWho: 'm',
++				lookPaste: 'services',
++				ends: [
++					[['b', 'You’re right: {delivered} of the {days} days have taken place, and the order form bills days as they are delivered. Credit note {credNote} for {credit} takes off the rest; we’ll invoice them when they happen.'], ['s', paid('{rest}')]],
++					[['b', 'Only {delivered} days have been delivered, so credit note {credNote} takes the other days off; we’ll bill them once they’ve taken place.'], ['s', paid('{rest}')], ['c', 'Paid. When will the remaining sessions be scheduled? We haven’t heard.'], ['m', 'No consultant free until {date1}.'], ['b', 'We’re short of a consultant until {date1}; I’ll make sure the sessions are booked then.']]
++				]
++			},
++			{
++				flags: ['allDelivered'],
++				detail: ['Our project lead counted the sessions she attended.'],
++				look: ['All {days} days delivered; attendance below.'],
++				lookWho: 'm',
++				lookPaste: 'services',
++				ends: [[['b', 'All {days} days took place; the attendance is attached. Some were run with your team leads rather than your project lead.'], ['c', 'Thanks, our project lead hadn’t counted those. Paid.'], ['s', paid('{total}')]]]
++			}
++		]
++	},
++	// One invoice that two departments want split.
++	{
++		id: 'split',
++		kinds: ['annual', 'quarterly'],
++		fit: (c) => !c.card,
++		subjects: ['Overdue invoice {inv}', 'Invoice {inv} needs splitting', 'RE: Payment reminder: {inv}'],
++		open: ['This invoice needs to be split between two of our departments. Our AP team can’t pay it as one.', 'AP has sent this back. It needs to go to two cost centres.', 'Since this year, {dept} and {dept2} share the Perch subscription, and each pays its own share.'],
++		more: ['Sorry, I should have told you when the change happened.', 'It’s a new rule from our finance team.'],
++		ask: ['We can do that. How should it be split, and does each part need its own PO or cost centre?'],
++		paths: [
++			{
++				detail: ['{split1} to {dept} (cost centre {cc}) and {split2} to {dept2} (cost centre {cc2}).'],
++				look: ['Credit {inv}; reissue as two invoices.'],
++				lookPaste: 'invoice',
++				ends: [
++					[['b', 'Credit note {credNote} cancels {inv}. The two new invoices are {newInv} for {split1} ({cc}) and {newInv2} for {split2} ({cc2}).'], ['s', paid('{split1}', '{newInv}')], ['s', paid('{split2}', '{newInv2}')]],
++					[['b', 'Done: credit note {credNote} cancels {inv}, and {newInv} ({split1}, {cc}) and {newInv2} ({split2}, {cc2}) replace it.'], ['s', paid('{split1}', '{newInv}')], ['c', '{dept2} hasn’t coded its share yet; the person who holds that cost centre is on leave.']]
++				]
++			},
++			{
++				detail: ['I don’t know the split yet. Our finance director is working it out.'],
++				look: ['Waiting for their split.'],
++				lookPaste: 'none',
++				ends: [
++					[['b', 'No problem; let me know when you have it.'], ['c', 'Still waiting for the split, I’m afraid.']],
++					[['b', 'No problem. Send it over when you have it.'], ['c', 'Our finance director decided to pay it as one after all.'], ['s', paid('{total}')]]
++				]
++			}
++		]
++	},
++	// Vendor documents the customer's AP needs.
++	{
++		id: 'w9',
++		kinds: ['annual', 'quarterly', 'addon'],
++		fit: (c) => !emea(c) && !c.card,
++		subjects: ['Overdue invoice {inv}', 'Vendor documents', 'RE: Payment reminder: {inv}'],
++		open: ['AP has your invoice on hold. Apparently your vendor record is incomplete.', 'Our vendor list was audited last month, and your record was flagged. AP won’t release payments until it’s updated.', 'Before we can pay, our AP team needs something from you for your vendor record.'],
++		more: ['They didn’t tell me exactly what, sorry.', 'I’ll find out more.'],
++		ask: ['Happy to help. What exactly do they need from us?'],
++		paths: [
++			{
++				detail: ['A W-9 dated this year.'],
++				look: ['Sending our current W-9.'],
++				lookPaste: 'none',
++				ends: [
++					[['b', 'Our current W-9 is attached.'], ['c', 'Thanks, released.'], ['s', paid('{total}')]],
++					[['b', 'Our W-9 is attached.'], ['c', 'AP says that W-9 still shows your old address on Canal Street.'], ['n', 'Old W-9 attached by mistake; Ruth to send the current one.'], ['c', 'Still waiting for the corrected W-9.']]
++				]
++			},
++			{
++				detail: ['A W-9 and a certificate of insurance showing at least $2,000,000 of general liability cover.'],
++				look: ['Asked our broker for a certificate naming them.'],
++				lookPaste: 'none',
++				ends: [
++					[['n', 'Certificate received from the broker.'], ['b', 'Our W-9 and the certificate of insurance are attached.'], ['s', paid('{total}')]],
++					[['b', 'W-9 and certificate of insurance attached.'], ['c', 'AP says the certificate must name {legal} as the certificate holder.'], ['n', 'Asked the broker for a new one.'], ['c', 'Any news on the certificate?']]
++				]
++			}
++		]
++	}
++];
++
++// Things a customer raises on the way, answered in billing's next email.
++const sides: { q: string; a: string; us?: boolean }[] = [
++	{ q: 'While I have you, could you send a statement of our account? Our auditors want one for the half-year.', a: 'I’ve attached a statement of your account as of today.' },
++	{ q: 'Could you also add {ap} to the distribution for future invoices?', a: 'I’ve added {ap} to your account, so future invoices go there as well.' },
++	{ q: 'Could you send your current W-9 as well? The one we have on file is from 2023.', a: 'Our current W-9 is attached.', us: true },
++	{ q: 'Can you also confirm the remit-to address for checks? We seem to have two on file.', a: 'Checks go to our lockbox: Corvid Systems, Inc., PO Box 84417, Boston, MA 02284. Please remove 220 Canal Street; we left that office in January.', us: true },
++	{ q: 'Could future invoices show our cost centre, {cc}? It saves AP a step.', a: 'Done: {cc} will appear on future invoices.' },
++	{ q: 'Our auditors will write to you to confirm the balance we owe at the half-year. Please answer them when they do.', a: 'Of course. We’ll answer your auditors’ letter as soon as it arrives.' },
++	{ q: 'Is there a way to get invoices as PDF attachments rather than a link? Our AP system can’t open links.', a: 'Yes: I’ve switched your account to PDF attachments.' },
++	{ q: 'Can you send us a certificate of insurance? Our vendor team asks every supplier for one once a year.', a: 'Our certificate of insurance is attached; it runs to 31 December.' },
++	{ q: 'Could you tell me who looks after our account on your side now?', a: '{ownerFirst} {ownerLast} is your account owner; I’ve copied {ownerFirst} on this email.' },
++	{ q: 'Could you send your bank’s confirmation of your account details on its letterhead? Our treasury team asks for it once a year.', a: 'Attached is Meridian’s letter confirming our account details.' },
++	{ q: 'Do you offer a discount for paying early?', a: 'I’m afraid we don’t, but thank you for asking.' },
++	{ q: 'One more thing: our company address changes on 1 September. Should I send the new one now?', a: 'Yes please: send it whenever you have it, and I’ll update your account from 1 September.' },
++	{ q: 'Also, could you resend last year’s invoices? We’re missing two of them in our records.', a: 'Copies of last year’s invoices are attached.' },
++	{ q: 'Can the invoices be addressed to the finance team rather than to me personally? I may not be in this role much longer.', a: 'I’ve changed the addressee to your finance team.' }
++];
++const contexts = ['Sorry for the slow reply; it’s month-end here.', 'Apologies, I’ve been out for a few days.', 'I’m covering for a colleague this week, so bear with me.', 'We’ve had a lot of changes in our finance team this year.', 'Sorry, your email went to the wrong folder.', 'Thanks for your patience with us.'];
++const reminders = [
++	'Hello {to},\n\nOur records show that invoice {inv} for {total}, issued on {issued}, is past its due date of {due}. If it has been paid, could you send the remittance details so we can match it? Otherwise, could you let me know when we can expect payment? A copy of the invoice is attached.',
++	'Hi {to},\n\nA quick note that {inv} ({total}, due {due}) is still open on our side. Could you check where it stands? A copy is attached.',
++	'Dear {to},\n\nI’m writing about invoice {inv} for {total}, which was due on {due}. We haven’t received payment yet. If anything is holding it up on your side, let me know and I’ll help sort it out.',
++	'Hello {to},\n\nInvoice {inv} ({total}) fell due on {due} and is still unpaid. I’ve attached a copy in case the original went astray. When do you expect to pay it?'
++];
++const secondReminders = [
++	'Hello {to},\n\nFollowing up on my note of {firstDate} about {inv}, which is now {lateNow} days past due. Could you let me know where it stands?',
++	'Hi {to},\n\nI haven’t heard back about {inv} ({total}). Is there someone else I should be speaking to about it?',
++	'Dear {to},\n\nThis is a second reminder about invoice {inv} for {total}, due on {due}. Please let me know if there is a problem with it.'
++];
++const holdings = ['Thanks, {name}. I’m checking this with our controller and will come back to you by {day2}.', 'Thanks for the detail. I need to check one thing on our side and will be back in touch shortly.', 'Thank you. I’ve passed this to the right person here and will update you as soon as I hear back.'];
++const nudges = ['Just checking in on this one. Is there any news?', 'Any update on {inv}?', 'I wanted to follow up on this before our month-end close.'];
++const closings = ['Thanks for your help with this.', 'Let me know if you need anything else from us.', 'I appreciate you looking into it.', 'Thanks again.'];
++const custSigns = ['Thanks,\n{name}', '{name}', 'Kind regards,\n{full}', 'Best,\n{name}', 'Kind regards,\n{full}\n{title}\n{company}', 'Regards,\n{full}\n{title} | {legal}\n{address}'];
++const agentSigns = ['Best regards,\n{agentFull}\nCorvid Systems billing', 'Thanks,\n{agentFirst}', 'Kind regards,\n{agentFull}\nBilling | Corvid Systems, Inc.\nbilling@corvid.example · (617) 555-0118', '{agentFirst}\nCorvid billing'];
++const parents = { us: ['Cascade Operating Partners', 'Northfield Capital Group', 'Allegiant Services Holdings', 'Harlow Industries', 'Bluestem Partners'], eu: ['Norvik Group', 'Hanseatic Holding', 'Albion Services Group', 'Kestner Gruppe', 'Groupe Veland'] };
++const deptPairs: [string, string][] = [['Operations', 'Customer Service'], ['Warehouse', 'Finance'], ['Facilities', 'IT'], ['Dispatch', 'Fleet'], ['Operations', 'Shared Services'], ['Field Operations', 'Head Office']];
++const sessionNames = ['Kickoff workshop', 'Process mapping', 'Workflow build, part 1', 'Workflow build, part 2', 'Connector set-up', 'Admin training', 'Team lead training', 'Reporting workshop', 'Go-live support', 'Hypercare review', 'Data import', 'Escalation rules workshop'];
++const consultants = ['Priyanka Rao', 'Ben Hollister', 'Ines Kovac'];
++
++const fill = (text: string, values: Record<string, string>): string =>
++	text.replace(/\{(\w+)\}/g, (_, key: string) => {
++		const value = values[key];
++		if (value === undefined) throw new Error(`no value for {${key}} in: ${text.slice(0, 60)}`);
++		return value;
++	});
++const monthStart = (y: number, mo: number) => (Date.UTC(y, mo, 1) - EPOCH) / 60000;
++const nextMonthStart = (m: number) => monthStart(at(m).getUTCFullYear(), at(m).getUTCMonth() + 1);
++const addMonths = (m: number, n: number) => monthStart(at(m).getUTCFullYear(), at(m).getUTCMonth() + n);
++const monthsBetween = (from: number, to: number) => (at(to).getUTCFullYear() - at(from).getUTCFullYear()) * 12 + at(to).getUTCMonth() - at(from).getUTCMonth();
++/** Invoice and credit note numbers run with the date. */
++const docNumber = (prefix: string, m: number, salt: number) => {
++	const d = at(m);
++	const ofYear = Math.floor((Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()) - Date.UTC(d.getUTCFullYear(), 0, 1)) / 86400000);
++	return prefix === 'CN' ? `CN-${d.getUTCFullYear()}-${pad(Math.floor(ofYear / 2) + 11 + (salt % 2), 3)}` : `INV-${d.getUTCFullYear()}-${pad(Math.floor(ofYear * 3.6) + 15 + (salt % 3), 4)}`;
++};
++const firstWorkdayBefore = (m: number) => {
++	let x = m;
++	while (!isWorkday(x)) x -= DAY;
++	return x;
++};
++
++interface Plan {
++	topic: Topic;
++	path: Path;
++	open: number;
++	customer: Customer;
++	kind: Kind;
++}
++const profiles = new Map(customers.map((c) => [c, profile(c)]));
++const prof = (c: Customer) => profiles.get(c)!;
++/** When the invoice of a case was issued and fell due, from the day the case opened and the customer's terms. */
++const timing = (plan: Plan, termsDays: number) => {
++	const issued = firstWorkdayBefore(plan.open - (termsDays + 7) * DAY);
++	const due = issued + termsDays * DAY;
++	const opened = nextWorkday(Math.max(plan.open, due + 7 * DAY));
++	return { issued, due, opened };
++};
++const billingTerms = (plan: Plan) => (plan.path.flags?.includes('terms') || plan.topic.id === 'terms' && !plan.path.flags?.includes('theirTerms') ? 30 : prof(plan.customer).termsDays);
++
++const caseFile = (index: number, plan: Plan, number: number, anniversary: number): string => {
++	const r = mulberry32(0x7c3a1000 + index * 7919);
++	const { topic, path, customer: cu, kind } = plan;
++	const p = prof(cu);
++	const eu = emea(cu);
++	const flags = new Set([...(topic.flags ?? []), ...(path.flags ?? [])]);
++	if (flags.has('oldPo')) flags.delete('noPo');
++	const pathIndex = topic.paths.indexOf(path);
++	const endIndex = int(r, 0, path.ends.length - 1);
++	const end = path.ends[endIndex]!;
++	const [agentFirst, agentLast] = pick(r, billers);
++	const agentFull = `${agentFirst} ${agentLast}`;
++	const csm = pick(r, csms);
++
++	// The invoice.
++	const termsDays = billingTerms(plan);
++	const { issued, due, opened } = timing(plan, termsDays);
++	const openT = opened + 6 * 60 + int(r, 0, 25);
++	const late0 = Math.round((startOfDay(opened) - due) / DAY);
++	const nextAnniversary = (m: number) => {
++		let y = at(m).getUTCFullYear();
++		if (at(m).getUTCMonth() >= anniversary) y++;
++		return monthStart(y, anniversary);
++	};
++	let termEnd = nextAnniversary(issued) - DAY;
++	let termStart = addMonths(termEnd + DAY, -12);
++	const lines: [string, number][] = [];
++	const perSeat = p.perSeat;
++	let licensed = p.seats;
++	let lastYear = p.seats * perSeat;
++	const uplift = pick(r, [7, 8, 9, 10]);
++	const cap = pick(r, [3, 4, 5]);
++	const [addon, addonPrice] = addons[(hash(cu.name + 'addon') + index) % addons.length]!;
++	let peak = 0, extra = 0, months = 0, trueMonth = 0, prorRight = 0, prorWrong = 0, days = 0, delivered = 0;
++	const periodStart = nextMonthStart(issued);
++	if (kind === 'annual') {
++		const periodEnd = addMonths(periodStart, 12) - DAY;
++		const base = flags.has('uplift') ? Math.round(lastYear * (1 + uplift / 100)) : lastYear;
++		lines.push([`Perch Platform subscription, ${p.seats} seats, ${dateShort(periodStart)} to ${dateShort(periodEnd)}`, base]);
++		if (!flags.has('uplift') && hash(cu.name + 'connectors') % 3 === 0) lines.push([`Connectors Pack, ${dateShort(periodStart)} to ${dateShort(periodEnd)}`, 6000]);
++	} else if (kind === 'quarterly') {
++		const quarterEnd = addMonths(periodStart, 3) - DAY;
++		lines.push([`Perch Platform subscription, ${p.seats} seats, ${dateShort(periodStart)} to ${dateShort(quarterEnd)}`, (p.seats * perSeat) / 4]);
++	} else if (kind === 'trueup') {
++		months = monthsBetween(periodStart, termEnd + DAY);
++		if (months < 3 || months > 11) {
++			months = int(r, 4, 9);
++			termEnd = addMonths(periodStart, months) - DAY;
++			termStart = addMonths(termEnd + DAY, -12);
++		}
++		extra = int(r, 4, 18) + (p.seats > 150 ? int(r, 0, 20) : 0);
++		peak = licensed + extra;
++		trueMonth = addMonths(periodStart, -int(r, 1, 3));
++		lines.push([`Seats above licence: ${extra} seats at ${usd(perSeat)} a year, ${dateShort(periodStart)} to ${dateShort(termEnd)}`, Math.round((extra * perSeat * months) / 12)]);
++	} else if (kind === 'addon') {
++		prorRight = flags.has('prorWrong') || pathIndex === 1 && topic.id === 'prorate' ? addMonths(periodStart, -1) : periodStart;
++		if (monthsBetween(termStart, prorRight) < 2 || monthsBetween(prorRight, termEnd + DAY) < 3) {
++			termStart = addMonths(prorRight, -int(r, 2, 6));
++			termEnd = addMonths(termStart, 12) - DAY;
++		}
++		prorWrong = termStart;
++		const from = flags.has('prorWrong') || topic.id === 'prorate' && pathIndex === 1 ? prorWrong : prorRight;
++		months = monthsBetween(from, termEnd + DAY);
++		lines.push([`${addon}, ${dateShort(from)} to ${dateShort(termEnd)}`, Math.round((addonPrice * months) / 12)]);
++	} else {
++		days = int(r, 5, 12);
++		delivered = flags.has('allDelivered') ? days : int(r, 2, days - 2);
++		lines.push([`Onboarding services: ${days} days at $1,800`, days * 1800]);
++	}
++	const sub = lines.reduce((sum, [, amount]) => sum + amount, 0);
++	const taxRate = taxRates[p.state] ?? 6;
++	const tax = flags.has('tax') ? Math.round(sub * taxRate) / 100 : 0;
++	const total = sub + tax;
++	if (kind !== 'annual') lastYear = total;
++
++	// What the topic needs on top.
++	let received = total, credit = 0, fee = 0;
++	let wrongSeats = 0, peak2 = 0, extra2 = 0;
++	const claimed = Math.round(total * 10) / 100;
++	const slaCredit = Math.round((kind === 'annual' ? total / 12 : total / 3) * 15) / 100;
++	const goodwill = round(claimed * 0.4, 10);
++	switch (topic.id) {
++		case 'po':
++			received = round(total * pick(r, [0.5, 0.6, 0.75]), 100);
++			break;
++		case 'fees':
++			fee = int(18, 65) + pick(r, [0, 0, 0.5]);
++			received = total - fee;
++			break;
++		case 'sla':
++			received = total - claimed;
++			break;
++		case 'card':
++			received = Math.min(round(total * pick(r, [0.4, 0.5, 0.6]), 500), 5000);
++			break;
++		case 'trueup':
++			if (pathIndex === 0) credit = Math.round(total * 50) / 100;
++			if (pathIndex === 1) {
++				wrongSeats = endIndex === 0 ? extra + int(r, 2, 9) : int(r, 2, extra - 2);
++				peak2 = peak - wrongSeats;
++				extra2 = Math.max(0, peak2 - licensed);
++				credit = endIndex === 0 ? total : Math.round(((extra - extra2) * perSeat * months) / 12);
++			}
++			break;
++		case 'uplift':
++			credit = Math.round((lastYear * (uplift - cap)) / 100);
++			break;
++		case 'prorate':
++			credit = pathIndex === 0 ? total - Math.round((addonPrice * monthsBetween(prorRight, termEnd + DAY)) / 12) : Math.round(addonPrice / 12);
++			break;
++		case 'services':
++			credit = (days - delivered) * 1800;
++			break;
++		case 'tax':
++			received = sub;
++			break;
++	}
++	const rest = total - credit;
++	const inst = Math.round((total / 3) * 100) / 100;
++	const split1 = round(total * pick(r, [0.5, 0.6, 0.7]), 100);
++	const others = customers.filter((c) => c !== cu && c.country === cu.country || c !== cu && !eu && !emea(c));
++	const otherCust = pick(r, others).name;
++	const otherAmount = round(total * pick(r, [0.06, 0.1, 0.15]), 10);
++	const otherIssued = firstWorkdayBefore(issued - int(r, 20, 45) * DAY);
++	const otherInv = docNumber('INV', otherIssued, index + 1);
++	const otherPaid = otherIssued + int(r, 5, 15) * DAY;
++
++	// Dates the messages refer to.
++	const scale = Math.max(0.3, Math.min(1, (LAST_MESSAGE - openT) / (16 * DAY)));
++	const ahead = (lo: number, hi: number) => nextWorkday(startOfDay(openT) + Math.round(int(r, lo, hi) * Math.max(scale, 0.5)) * DAY);
++	const payDateT = firstWorkdayBefore(startOfDay(openT) - int(r, 2, Math.max(2, late0 + 4)) * DAY);
++	let runT = startOfDay(openT) + 3 * DAY;
++	while (at(runT).getUTCDate() !== p.runDay) runT += DAY;
++	const runNextT = addMonths(runT, 1) + (p.runDay - 1) * DAY;
++	const contractTerms = topic.id === 'terms' ? (flags.has('theirTerms') ? termsDays + 30 : pick(r, [45, 60])) : termsDays;
++	const dueRealT = issued + contractTerms * DAY;
++	const inst1T = ahead(7, 12);
++	const goLiveT = ahead(12, 30);
++	const parent = pick(r, eu ? parents.eu : parents.us);
++	const [dept, dept2] = pick(r, deptPairs);
++	const ccOf = () => (eu ? `${int(r, 1000, 9899)}` : `CC-${int(r, 100, 899)}-${int(r, 10, 99)}`);
++	const poOf = () => [`PO-${int(r, 10000, 99999)}`, `4500${int(r, 100000, 999999)}`, `P${int(r, 100000, 999999)}`, `${p.slug.slice(0, 3).toUpperCase()}-PO-${int(r, 1000, 9999)}`][p.poStyle]!;
++	const po = poOf();
++	const po2 = poOf();
++	const methodOf = flags.has('check') ? 'check' : p.method;
++	const refOf = (method: string) =>
++		method === 'card' ? `card ····${p.card}` : method === 'check' ? `check ${int(r, 10000, 99999)}` : method === 'wire' ? `${eu ? 'FT' : 'WT'}26${int(r, 100000, 999999)}` : `ACH ${int(r, 1000000, 9999999)}`;
++	const ownerFirst = p.owner.split(' ')[0]!;
++	const sentTo = flags.has('oldContact') ? p.former.email : p.contact.email;
++	const entityOld = `${cu.name} Holdings${cu.legal.replace(/^.*?((,? (Inc\.|LLC|Ltd|GmbH|B\.V\.|AB|AS|A\/S|ApS|S\.A\.|S\.L\.|SAS|S\.r\.l\.|Co\.|Corp\.|sp\. z o\.o\.))?)$/, '$1')}`;
++	const values: Record<string, string> = {
++		name: p.contact.first,
++		full: p.contact.full,
++		email: p.contact.email,
++		title: p.title,
++		company: cu.name,
++		short: cu.name,
++		legal: cu.legal,
++		address: p.address,
++		ap: p.ap,
++		ops: p.ops.full,
++		opsFirst: p.ops.first,
++		opsTitle: p.opsTitle,
++		oldFirst: p.former.first,
++		oldFull: p.former.full,
++		oldEmail: p.former.email,
++		sentTo,
++		to: flags.has('oldContact') ? p.former.first : p.contact.first,
++		agentFirst,
++		agentFull,
++		owner: p.owner,
++		ownerFirst,
++		ownerLast: p.owner.split(' ')[1]!,
++		inv: docNumber('INV', issued, index),
++		newInv: docNumber('INV', openT + int(r, 6, 14) * DAY, index + 7),
++		newInv2: docNumber('INV', openT + int(r, 15, 16) * DAY, index + 8),
++		credNote: docNumber('CN', openT + int(r, 5, 12) * DAY, index),
++		total: usd(total),
++		sub: usd(sub),
++		tax: usd(tax),
++		issued: dateLong(issued),
++		due: dateLong(due),
++		termsDays: String(termsDays),
++		contractTerms: String(contractTerms),
++		dueReal: dateLong(dueRealT),
++		orderDate: dateLong(firstWorkdayBefore(termStart - int(r, 300, 700) * DAY)),
++		noticeDate: dateLong(firstWorkdayBefore(periodStart - int(r, 68, 95) * DAY)),
++		po,
++		po2,
++		received: usd(received),
++		balance: usd(total - received),
++		fee: usd(fee),
++		credit: usd(credit),
++		rest: usd(rest),
++		licensed: String(licensed),
++		peak: String(peak),
++		extra: String(extra),
++		peak2: String(peak2),
++		extra2: String(extra2),
++		wrongSeats: String(wrongSeats),
++		trueMonth: monthOf(trueMonth),
++		lastYear: usd(lastYear),
++		uplift: String(uplift),
++		cap: String(cap),
++		diff: usd(total - lastYear),
++		capLeft: usd(rest - lastYear),
++		addon,
++		addonMonth: monthOf(prorRight),
++		prorRight: dateLong(prorRight),
++		prorWrong: dateLong(prorWrong),
++		monthCredit: usd(credit),
++		monthLeft: usd(rest),
++		slaCredit: usd(slaCredit),
++		claimed: usd(claimed),
++		slaLeft: usd(claimed - slaCredit),
++		goodwill: usd(goodwill),
++		gwLeft: usd(claimed - goodwill),
++		exemptKind: cu.exempt,
++		vat: p.vat,
++		card: p.card,
++		card2: String(int(r, 1000, 9999)),
++		decline: pick(r, ['expired card', 'insufficient funds', 'card reported lost', 'do not honor']),
++		limit: usd(received),
++		otherCust,
++		otherInv,
++		otherPaid: dayMonth(otherPaid),
++		dup: usd(otherAmount),
++		days: String(days),
++		delivered: String(delivered),
++		split1: usd(split1),
++		split2: usd(total - split1),
++		dept,
++		dept2,
++		cc: ccOf(),
++		cc2: ccOf(),
++		inst: usd(inst),
++		instLeft: usd(total - inst),
++		inst1: dayMonth(inst1T),
++		inst2: dayMonth(addMonths(inst1T, 1) + (at(inst1T).getUTCDate() - 1) * DAY),
++		inst3: dayMonth(addMonths(inst1T, 2) + (at(inst1T).getUTCDate() - 1) * DAY),
++		half: usd(total / 2),
++		goLive: dayMonth(goLiveT),
++		goLive2: dayMonth(goLiveT + int(r, 21, 40) * DAY),
++		runDay: ordinal(p.runDay),
++		runNext: dayMonth(runNextT),
++		runWeekday: pick(r, ['Tuesday', 'Thursday']),
++		late: String(late0 + 2),
++		lateFee: usd(Math.round(total * 1.5) / 100),
++		payDate: dayMonth(payDateT),
++		checkNo: String(int(r, 10000, 99999)),
++		trace: `FH${int(r, 1000000, 9999999)}`,
++		parent,
++		parentAp: `ap@${plain(parent.split(' ')[0]!)}.example`,
++		portal: `the ${cu.name} supplier portal`,
++		portalRef: `SUB-${int(r, 100000, 999999)}`,
++		taxForm: eu ? 'your certificate of incorporation' : 'a W-9',
++		entityOld,
++		month: monthOf(openT - int(r, 30, 100) * DAY),
++		nextMonth: monthNames[(at(openT).getUTCMonth() + int(r, 1, 3)) % 12]!,
++		day: weekday(ahead(2, 4)),
++		day2: weekday(ahead(5, 8)),
++		date1: dayMonth(ahead(12, 25)),
++		method: methodOf,
++		ref: refOf(methodOf),
++		today: dayMonth(openT),
++		firstDate: dayMonth(openT),
++		lateNow: String(late0),
++		oooBack: ''
++	};
++	const f = (text: string) => fill(text, values);
++	const jumps: Record<string, number> = { dueReal: dueRealT, run: runT, inst1: inst1T, inst2: addMonths(inst1T, 1) + (at(inst1T).getUTCDate() - 1) * DAY, inst3: addMonths(inst1T, 2) + (at(inst1T).getUTCDate() - 1) * DAY, goLive: goLiveT };
++
++	// Pasted output.
++	const lineOf = (label: string, amount: string) => `${label.padEnd(76)}${amount.padStart(14)}`;
++	const invoicePaste = () => {
++		const rows = [
++			`Invoice        ${values.inv}`,
++			`Customer       ${flags.has('wrongEntity') ? entityOld : cu.legal}`,
++			`Bill to        Accounts Payable, ${p.address}`,
++			...(eu && !flags.has('vatMissing') ? [`Customer VAT   ${p.vat}`] : []),
++			`PO number      ${flags.has('oldPo') ? po2 : flags.has('noPo') || hash(cu.name + 'po') % 2 ? '—' : po}`,
++			`Issued         ${dateShort(issued)}`,
++			`Terms          Net ${termsDays}`,
++			`Due            ${dateShort(due)}`,
++			`Sent to        ${sentTo}`,
++			'',
++			...lines.map(([label, amount]) => lineOf(label, usd(amount))),
++			lineOf('Subtotal', usd(sub)),
++			...(tax ? [lineOf(`Sales tax, ${p.state} (${taxRate}%)`, usd(tax))] : []),
++			...(eu && !flags.has('vatMissing') ? [lineOf('VAT: reverse charge applies', '$0.00')] : []),
++			lineOf('Total due', usd(total))
++		];
++		return `${pick(r, ['The invoice as issued:', 'From the billing tool:', 'Invoice details:'])}\n\n\`\`\`text\n${rows.join('\n')}\n\`\`\``;
++	};
++	const ledgerPaste = (now: number) => {
++		const rows: [number, string, string, number, number][] = [];
++		if (kind === 'annual' || kind === 'addon' || kind === 'services') {
++			const before = firstWorkdayBefore(issued - int(r, 362, 368) * DAY);
++			rows.push([before, docNumber('INV', before, index + 3), 'Perch Platform subscription', p.seats * perSeat, 0]);
++			rows.push([nextWorkday(before + (termsDays - int(r, 0, 6)) * DAY), `PMT-${int(r, 40000, 69999)}`, methodOf, 0, p.seats * perSeat]);
++		}
++		for (let q = kind === 'quarterly' ? 2 : kind === 'trueup' ? 1 : 0; q > 0; q--) {
++			const before = firstWorkdayBefore(issued - q * int(r, 89, 92) * DAY);
++			const amount = kind === 'quarterly' ? total : (p.seats * perSeat) / 4;
++			rows.push([before, docNumber('INV', before, index + q), 'Perch Platform subscription, quarter', amount, 0]);
++			rows.push([nextWorkday(before + (termsDays + int(r, -4, 9)) * DAY), `PMT-${int(r, 40000, 69999)}`, methodOf, 0, amount]);
++		}
++		if (flags.has('twoInvoices')) {
++			rows.push([otherIssued, otherInv, 'Connectors Pack, prorated', otherAmount, 0]);
++			rows.push([otherPaid, `PMT-${int(r, 70000, 79999)}`, `card ····${p.card}`, 0, otherAmount]);
++		}
++		rows.push([issued, values.inv!, kind === 'trueup' ? 'Seats above licence' : kind === 'addon' ? addon : kind === 'services' ? 'Onboarding services' : 'Perch Platform subscription', total, 0]);
++		if (flags.has('short')) rows.push([payDateT, `PMT-${int(r, 80000, 89999)}`, `wire, ${values.ref}`, 0, received]);
++		if (flags.has('twoInvoices')) rows.push([payDateT, `PMT-${int(r, 80000, 89999)}`, `${methodOf}, applied to ${otherInv}`, 0, total + otherAmount]);
++		rows.sort((a, b) => a[0] - b[0]);
++		let balance = 0;
++		const body = rows.map(([when, doc, detail, charge, payment]) => {
++			balance += charge - payment;
++			return `| ${dateShort(when)} | ${doc} | ${detail} | ${charge ? usd(charge) : ''} | ${payment ? usd(payment) : ''} | ${usd(balance)} |`;
++		});
++		return `Account ledger, ${cu.legal}, as of ${dateShort(now)}:\n\n| Date | Document | Detail | Charges | Payments | Balance |\n| --- | --- | --- | ---: | ---: | ---: |\n${body.join('\n')}`;
++	};
++	const remitPaste = () => {
++		const paidSum = flags.has('short') ? total : flags.has('slaDeduct') ? received : flags.has('twoInvoices') ? total + otherAmount : total;
++		const rows = [
++			'REMITTANCE ADVICE',
++			`Payer            ${cu.legal}`,
++			`Payee            ${flags.has('wrongPayee') ? 'Corvid Freight Services LLC' : 'Corvid Systems, Inc.'}`,
++			`Payment date     ${iso(payDateT)}`,
++			`Method           ${methodOf === 'wire' ? 'International wire (SWIFT), charges shared' : methodOf.toUpperCase()}`,
++			...(flags.has('oldBank') ? ['Paid to          First Harbor Bank, account ····2208'] : []),
++			`Reference        ${values.ref}`,
++			'',
++			`${'Document'.padEnd(18)}${'Date'.padEnd(14)}${'Amount'.padStart(14)}`,
++			`${values.inv!.padEnd(18)}${dateShort(issued).padEnd(14)}${usd(total).padStart(14)}`,
++			...(flags.has('twoInvoices') ? [`${otherInv.padEnd(18)}${dateShort(otherIssued).padEnd(14)}${usd(otherAmount).padStart(14)}`] : []),
++			...(flags.has('slaDeduct') ? [`${'Less: service credit, outage of 12 May'.padEnd(32)}${`-${usd(claimed)}`.padStart(14)}`] : []),
++			`${'Total paid'.padEnd(32)}${usd(paidSum).padStart(14)}`
++		];
++		return `\`\`\`text\n${rows.join('\n')}\n\`\`\``;
++	};
++	const bankPaste = (now: number) => {
++		const ours = topic.id === 'double' ? [startOfDay(now), 'ACH CR', cu.legal, total, `${values.inv} ${int(r, 100000, 999999)}`] : [payDateT, 'WIRE IN', cu.legal, received, `/INV/${values.inv}`];
++		const rows = shuffle(r, customers.filter((c) => c !== cu))
++			.slice(0, int(r, 3, 6))
++			.map((c) => [firstWorkdayBefore((ours[0] as number) - int(r, 0, 2) * DAY), emea(c) ? 'WIRE IN' : pick(r, ['ACH CR', 'ACH CR', 'WIRE IN', 'LOCKBOX']), c.legal, round(prof(c).seats * prof(c).perSeat * pick(r, [0.25, 1, 0.25, 0.08]), 10), `INV-2026-${pad(int(r, 200, 900), 4)}`] as [number, string, string, number, string]);
++		rows.push(ours as [number, string, string, number, string]);
++		rows.sort((a, b) => a[0] - b[0]);
++		const body = rows.map(([when, type, payer, amount, ref]) => `${iso(when)}  ${type.padEnd(8)}  ${payer.toUpperCase().slice(0, 26).padEnd(26)}  ${usd(amount).padStart(13)}  ${ref}`);
++		return `Meridian Commerce Bank, incoming credits to the operating account ····4471:\n\n\`\`\`text\n${body.join('\n')}\n\`\`\``;
++	};
++	const usagePaste = () => {
++		const rows = [0, 1, 2].map((k) => {
++			const m = addMonths(trueMonth, k - (monthsBetween(addMonths(periodStart, -3), trueMonth) % 3));
++			const value = m === trueMonth ? peak : licensed - int(r, -extra + 1, 12);
++			return `| ${monthOf(m)} ${at(m).getUTCFullYear()} | ${licensed} | ${Math.min(value, peak)} |`;
++		});
++		return `| Month | Licensed seats | Peak active seats |\n| --- | ---: | ---: |\n${rows.join('\n')}`;
++	};
++	const clausePaste = () => {
++		if (topic.id === 'uplift' && flags.has('cap')) return `> **Order form dated ${values.orderDate}, Fees.** The subscription fee for each contract year after the first may increase by no more than ${cap}% over the fee for the year before.`;
++		if (topic.id === 'uplift') return `> **Master subscription agreement, clause 6.3.** Corvid may change its fees for any later contract year by giving the customer at least 60 days’ written notice before that year begins.\n\nNotice log: letter to ${p.former.email}, ${values.noticeDate}, “Your Perch pricing from ${dateLong(periodStart)}”.`;
++		const agreed = flags.has('theirTerms') ? termsDays : contractTerms;
++		return `> **Order form dated ${values.orderDate}, Payment.** Invoices are payable within ${agreed} days of the invoice date, by bank transfer to the account shown on the invoice.\n\nBilling tool, account settings: payment terms Net ${termsDays}; invoice delivery by email; reminders on.`;
++	};
++	const portalPaste = () => {
++		const ok = pathIndex === 1;
++		const rows = [
++			`${cu.name} supplier portal · supplier profile · Corvid Systems, Inc.`,
++			`Company details ............... complete`,
++			`${(eu ? 'Certificate of incorporation ' : 'Tax form (W-9) ').padEnd(30, '.')} complete`,
++			`Bank account letter ........... ${ok ? 'complete' : 'missing'}`,
++			`Insurance certificate ......... ${hash(cu.name) % 2 ? 'not required' : 'complete'}`,
++			`Status ........................ ${ok ? 'accepted' : 'draft, not submitted'}`,
++			`Invoices ...................... ${ok ? `${values.inv} rejected: no matching PO line` : 'none submitted'}`
++		];
++		return `\`\`\`text\n${rows.join('\n')}\n\`\`\``;
++	};
++	const headersPaste = () =>
++		[
++			'```text',
++			'From:      "Corvid Systems Accounts" <accounts@corvid-billing.example>',
++			'Reply-To:  corvid.receivables@mailbox.example',
++			`To:        ${p.ap}`,
++			`Date:      ${weekday(openT - 5 * DAY).slice(0, 3)}, ${dateShort(openT - 5 * DAY)} 16:02:11 -0400`,
++			'Subject:   Updated remittance details for Corvid Systems, Inc.',
++			`Received:  from mail.corvid-billing.example (unknown [203.0.113.${int(r, 10, 250)}])`,
++			'Authentication-Results: spf=softfail; dkim=none; dmarc=fail',
++			'```'
++		].join('\n');
++	const cardPaste = (now: number) => {
++		const rows = [`| ${dateShort(due)} 07:00 | ····${p.card} | ${usd(total)} | declined: ${values.decline} |`, `| ${dateShort(nextWorkday(due + 3 * DAY))} 07:00 | ····${p.card} | ${usd(total)} | declined: ${values.decline} |`];
++		if (pathIndex === 0) rows.push(`| ${dateShort(now)} ${clock(now)} | ····${values.card2} | ${usd(total)} | approved |`);
++		if (pathIndex === 1) rows.push(`| ${dateShort(now)} ${clock(now)} | ····${values.card2} | ${usd(total)} | declined: over limit |`, `| ${dateShort(now)} ${clock(now + 3)} | ····${values.card2} | ${usd(received)} | approved |`);
++		return `Card charges for ${values.inv}:\n\n| Date | Card | Amount | Result |\n| --- | --- | ---: | --- |\n${rows.join('\n')}`;
++	};
++	const agingPaste = (now: number) => {
++		const late = Math.round((startOfDay(now) - due) / DAY);
++		const cells = [late <= 0, late > 0 && late <= 30, late > 30 && late <= 60, late > 60 && late <= 90, late > 90].map((here) => (here ? usd(total) : '$0.00'));
++		return `Aged receivables, ${cu.legal}, ${dateShort(now)}:\n\n| Current | 1–30 days | 31–60 days | 61–90 days | Over 90 days | Total |\n| ---: | ---: | ---: | ---: | ---: | ---: |\n| ${cells.join(' | ')} | ${usd(total)} |`;
++	};
++	const checkPaste = () =>
++		[
++			'```text',
++			`Check register, ${cu.legal}`,
++			`Check no.    ${values.checkNo}`,
++			`Date         ${dateShort(payDateT)}`,
++			'Payee        Corvid Systems, Inc.',
++			`Amount       ${usd(total)}`,
++			`Mailed to    ${pathIndex === 0 ? '220 Canal Street, Boston, MA 02110' : 'PO Box 84417, Boston, MA 02284'}`,
++			'Status       outstanding, not presented',
++			'```'
++		].join('\n');
++	const slaPaste = () =>
++		[
++			'```text',
++			'Perch status page, incident history, May 2026',
++			'12 May 2026, 13:52 to 17:31 ET   Workflow runs delayed or failed for tenants in the US-East and EU regions (3 h 39 min)',
++			'Monthly availability, May 2026:  99.51%',
++			'',
++			`Order form dated ${values.orderDate}, service levels: ${pathIndex === 0 ? 'standard schedule (credit of 5% of the monthly fee for each full hour below 99.9% monthly availability, at most 25%)' : 'none'}`,
++			'```'
++		].join('\n');
++	const servicesPaste = () => {
++		const names = shuffle(r, sessionNames).slice(0, days);
++		let when = firstWorkdayBefore(issued - int(r, 30, 50) * DAY);
++		const rows = names.map((session, k) => {
++			when = nextWorkday(when + int(r, 2, 6) * DAY);
++			return k < delivered ? `| ${dateShort(when)} | ${session} | ${pick(r, consultants)} | ${int(r, 2, 9)} | 1 |` : `| — | ${session} | postponed | — | 0 |`;
++		});
++		return `Onboarding log for ${cu.name}:\n\n| Date | Session | Consultant | Attendees | Days |\n| --- | --- | --- | ---: | ---: |\n${rows.join('\n')}`;
++	};
++	const pasteOf = (kindOfPaste: Paste | undefined, now: number): string => {
++		switch (kindOfPaste) {
++			case undefined:
++			case 'none':
++				return '';
++			case 'invoice':
++				return invoicePaste();
++			case 'ledger':
++				return ledgerPaste(now);
++			case 'remit':
++				return remitPaste();
++			case 'bank':
++				return bankPaste(now);
++			case 'usage':
++				return usagePaste();
++			case 'clause':
++				return clausePaste();
++			case 'portal':
++				return portalPaste();
++			case 'headers':
++				return headersPaste();
++			case 'cardlog':
++				return cardPaste(now);
++			case 'aging':
++				return agingPaste(now);
++			case 'check':
++				return checkPaste();
++			case 'sla':
++				return slaPaste();
++			case 'services':
++				return servicesPaste();
++		}
++	};
++
++	// The thread.
++	let t = openT;
++	const messages: string[] = [];
++	const labels: Record<Who, string> = {
++		c: `**${p.contact.full}, ${cu.name}**`,
++		o: `**${p.ops.full}, ${cu.name}**`,
++		b: `**${agentFull}, Corvid billing**`,
++		n: `**${agentFull}** · internal note`,
++		f: '**Ruth Calloway, controller** · internal note',
++		r: '**Diego Santos, revenue operations** · internal note',
++		l: '**Simone Adler, legal** · internal note',
++		e: `**${p.owner}, account owner** · internal note`,
++		m: `**${csm}, customer success** · internal note`,
++		s: '**Billing system**',
++		x: `**Automatic reply from ${sentTo}**`
++	};
++	const say = (who: Who, body: string) => messages.push(`${labels[who]} · ${stamp(t)}\n\n${body.trim()}`);
++	let stopped = false;
++	const advance = (who: Who) => {
++		const before = t;
++		const gap = (lo: number, hi: number) => Math.round(int(r, lo, hi) * scale);
++		if (who === 'c' || who === 'o') t = working(r, t + gap(40, 2200), eu);
++		else if (who === 'b') t = office(r, t + gap(30, 1000));
++		else if (who === 's') {
++			t = startOfDay(t + Math.max(1, gap(1, 4)) * DAY) + 7 * 60 + int(r, 0, 50);
++			while (!isWorkday(t)) t += DAY;
++		} else if (who === 'x') t += int(r, 1, 3);
++		else t = office(r, t + gap(10, 600));
++		if (t > LAST_MESSAGE) t = Math.min(LAST_MESSAGE, before + int(r, 20, 240));
++		values.today = dayMonth(t);
++	};
++	const localHour = () => Math.floor(minuteOfDay(t + (eu ? 360 : 0)) / 60);
++	const custBody = (who: 'c' | 'o', paragraphs: string[], first: boolean) => {
++		const greetings = first && !values.agentKnown ? ['Hello,', 'Hi,', 'Dear Corvid billing team,', 'Hello Corvid team,'] : ['Hi {agentFirst},', 'Hello {agentFirst},', 'Hi,', 'Dear {agentFirst},', ...(localHour() < 12 ? ['Good morning {agentFirst},'] : [])];
++		const signs = who === 'o' ? ['Thanks,\n{opsFirst}', '{ops}\n{opsTitle}, {company}', '{opsFirst}'] : first ? [...custSigns, ...(cu.country === 'DE' ? ['Mit freundlichen Grüßen\n{full}\n{title}\n{legal}'] : [])] : custSigns.slice(0, 4);
++		return [...(r() < 0.8 ? [f(pick(r, greetings))] : []), ...paragraphs, f(pick(r, signs))].join('\n\n');
++	};
++	const pendingSide: string[] = [];
++	const agentBody = (paragraphs: string[], more = false) => {
++		const extra = pendingSide.splice(0);
++		const closing = more && r() < 0.4 ? [pick(r, closings)] : [];
++		const greeted = /^(Hi|Hello|Dear|Thanks, \S|Thank you, \S)/.test(paragraphs[0]!);
++		return [...(greeted ? [] : [pick(r, [`Hi ${values.name},`, `Hello ${values.name},`, `Dear ${values.name},`])]), ...paragraphs, ...extra, ...closing, f(pick(r, agentSigns))].join('\n\n');
++	};
++
++	// 1. The reminders.
++	values.agentKnown = '';
++	if (topic.lead) {
++		const keep = t;
++		t = due + 7 * 60;
++		for (const [who, text] of topic.lead) say(who, f(text));
++		t = keep;
++	}
++	const automatic = !topic.reminder && r() < 0.45;
++	if (automatic) say('s', f('Automatic reminder sent to {sentTo}: “Invoice {inv} is past due”.'));
++	const directReply = automatic && !flags.has('oldContact') && r() < 0.45;
++	if (!directReply) {
++		if (automatic) t = office(r, t + int(r, 3, 6) * DAY);
++		else advance('b');
++		values.firstDate = dayMonth(t);
++		say('b', [f(pick(r, topic.reminder ?? reminders)), ...(r() < 0.3 ? [pick(r, closings)] : []), f(pick(r, agentSigns))].join('\n\n'));
++		values.agentKnown = 'yes';
++		if (r() < 0.14) {
++			advance('x');
++			values.oooBack = dateLong(nextWorkday(t + int(r, 3, 9) * DAY));
++			const german = `${pad(at(nextWorkday(t + int(r, 3, 9) * DAY)).getUTCDate())}.${pad(at(t).getUTCMonth() + 1)}.${at(t).getUTCFullYear()}`;
++			say('x', f(cu.country === 'DE' ? `Vielen Dank für Ihre Nachricht. Ich bin bis einschließlich ${german} nicht im Büro. In dringenden Fällen wenden Sie sich bitte an {ap}.\n\nThank you for your message. I am out of the office until {oooBack}. For urgent matters, please contact {ap}.` : pick(r, ['Thank you for your email. I am out of the office until {oooBack} with limited access to email. For invoice queries, please write to {ap}.', 'I’m on annual leave and back on {oooBack}. Your email will not be forwarded.'])));
++		}
++		if (flags.has('oldContact') || r() < 0.3) {
++			t = office(r, t + Math.round(int(r, 4, 7) * scale) * DAY);
++			values.lateNow = String(Math.round((startOfDay(t) - due) / DAY));
++			const text = flags.has('oldContact') ? 'Hello {to},\n\nI haven’t heard back about {inv} ({total}). I’ve copied {opsFirst}, who we have as your Perch administrator, in case they can point me to the right person.' : pick(r, secondReminders);
++			say('b', [f(text), f(pick(r, agentSigns))].join('\n\n'));
++		}
++	}
++
++	// 2. The customer answers.
++	advance('c');
++	const opening: string[] = [];
++	if (flags.has('oldContact')) opening.push(f('{opsFirst} forwarded your email to me.'));
++	if (r() < 0.35) opening.push(pick(r, contexts));
++	opening.push(f(pick(r, topic.open)));
++	if (r() < 0.7) opening.push(f(pick(r, topic.more)));
++	if (topic.shows && r() < 0.8) opening.push(`${pick(r, ['Remittance below:', 'Here is the remittance advice from our system:', 'For reference:'])}\n\n${pasteOf(topic.shows, t)}`);
++	say('c', custBody('c', opening, true));
++	values.agentKnown = 'yes';
++
++	// 3. Billing asks.
++	advance('b');
++	const ask = f(pick(r, topic.ask));
++	say('b', agentBody([ask, ...(topic.askPaste ? [pasteOf(topic.askPaste, t)] : [])], true));
++
++	// 4. The customer explains, and may raise something else.
++	const detailWho = path.detailWho ?? 'c';
++	advance(detailWho);
++	const side = r() < 0.55 ? pick(r, sides.filter((s) => !s.us || !eu)) : undefined;
++	const detail = [f(pick(r, path.detail)), ...(path.paste ? [pasteOf(path.paste, t)] : [])];
++	if (side && detailWho === 'c') {
++		detail.push(f(side.q));
++		pendingSide.push(f(side.a));
++	}
++	say(detailWho, custBody(detailWho, detail, false));
++
++	// 5. Someone looks.
++	advance(path.lookWho ?? 'n');
++	say(path.lookWho ?? 'n', [f(pick(r, path.look)), pasteOf(path.lookPaste ?? 'ledger', t)].filter(Boolean).join('\n\n'));
++
++	// 6. A holding reply, always when the customer's question would otherwise go unanswered, and sometimes a nudge.
++	const answered = end.some(([who]) => who === 'b');
++	if ((pendingSide.length && !answered) || r() < 0.25) {
++		advance('b');
++		say('b', agentBody([f(pick(r, holdings))]));
++	}
++	if (end[0]![0] === 'c' && !end[0]![1].startsWith('>>') && r() < 0.3) {
++		t = office(r, t + Math.round(int(r, 3, 6) * scale) * DAY);
++		say('b', agentBody([f(pick(r, nudges))]));
++	}
++
++	// 7. The end.
++	for (const [who, raw] of end) {
++		let text = raw;
++		const jump = /^>>(\w+) /.exec(text);
++		if (jump) {
++			text = text.slice(jump[0].length);
++			const target = jumps[jump[1]!]!;
++			if (target > LAST_MESSAGE) {
++				stopped = true;
++				break;
++			}
++			if (target > t) t = startOfDay(target) + (who === 's' ? 7 * 60 : 9 * 60) + int(r, 0, 90);
++			if (who === 'c' || who === 'o') t = working(r, t, eu);
++		} else advance(who);
++		values.today = dayMonth(t);
++		if (who === 's') values.ref = refOf(/ by (card|check|ACH|wire) /.exec(text)?.[1] ?? methodOf);
++		const body = f(text);
++		if (who === 'c' || who === 'o') say(who, custBody(who, [body], false));
++		else if (who === 'b') say('b', agentBody([body]));
++		else say(who, body);
++	}
++	if (stopped && pendingSide.length) {
++		advance('b');
++		say('b', agentBody([f(pick(r, holdings))]));
++	}
++
++	const contact = flags.has('oldContact') ? p.former.full : p.contact.full;
++	return [
++		`# Case ${number}: ${f(pick(r, topic.subjects))}`,
++		`${cu.name} · invoice ${values.inv}, ${usd(total)}, due ${dateLong(due)} · account owner ${p.owner}\nOpened ${stampLong(openT)}, when the invoice was ${late0} days past due · billing contact ${contact} <${sentTo}>`,
++		...messages.map((message) => `---\n\n${message}`)
++	].join('\n\n') + '\n';
++};
++
++// Which topic, path and customer each case follows: topics are dealt in rounds, each round in a new order, and the
++// paths of a topic in turn, so that two cases on one topic end differently until its paths run out. Each customer
++// gets the fewest cases it can, and at most one invoice for a whole contract year.
++const order = mulberry32(20260302);
++const workdays: number[] = [];
++for (let d = 1; d <= 152; d++) if (isWorkday(d * DAY)) workdays.push(d * DAY);
++const plans: Plan[] = [];
++const usedTopic = new Map<Topic, number>();
++const usedCustomer = new Map<Customer, number>();
++const annual = new Map<Customer, Plan>();
++const deck: Topic[] = [];
++for (let index = 0; index < ITEMS; index++) {
++	const open = workdays[Math.floor((index * workdays.length) / ITEMS)]!;
++	const allowed = (topic: Topic) => !topic.since || dayIndex(open) >= topic.since;
++	if (!deck.some(allowed)) deck.push(...shuffle(order, topics));
++	const topic = deck.splice(deck.findIndex(allowed), 1)[0]!;
++	const seen = usedTopic.get(topic) ?? 0;
++	usedTopic.set(topic, seen + 1);
++	const path = topic.paths[(seen + topics.indexOf(topic)) % topic.paths.length]!;
++	const wanted = pick(order, topic.kinds);
++	const kindFor = (c: Customer): Kind | undefined => {
++		if (wanted !== 'annual' && wanted !== 'quarterly') return wanted;
++		const kind = prof(c).quarterly ? 'quarterly' : 'annual';
++		if (!topic.kinds.includes(kind) || (kind === 'annual' && annual.has(c))) return undefined;
++		return kind;
++	};
++	const fits = shuffle(order, customers).filter((c) => (topic.fit ?? ((x: Customer) => !x.card))(c) && kindFor(c));
++	const fewest = Math.min(...fits.map((c) => usedCustomer.get(c) ?? 0));
++	const customer = fits.find((c) => (usedCustomer.get(c) ?? 0) === fewest)!;
++	usedCustomer.set(customer, fewest + 1);
++	const plan = { topic, path, open, customer, kind: kindFor(customer)! };
++	if (plan.kind === 'annual') annual.set(customer, plan);
++	plans.push(plan);
++}
++/** A customer's contract year starts in the month its annual invoice covers from, or in a month of its own. */
++const anniversaryOf = (c: Customer) => {
++	const plan = annual.get(c);
++	if (!plan) return hash(c.name + 'year') % 12;
++	return at(nextMonthStart(timing(plan, billingTerms(plan)).issued)).getUTCMonth();
++};
++
++const folder = join(root, 'billing', 'cases');
++mkdirSync(folder, { recursive: true });
++let number = 2103;
++plans.forEach((plan, index) => {
++	number += int(order, 1, 3);
++	writeFileSync(join(folder, `case-${number}.md`), caseFile(index, plan, number, anniversaryOf(plan.customer)));
++});
++writeFileSync(
++	join(folder, 'README.md'),
++	`# Collections cases, March to July 2026\n\nThe cases the billing inbox opened between 2 March and 31 July 2026, one file each, exported from the old billing\ntool before the switch. A case opens on its own when an invoice is a week past due, and holds the emails with the\ncustomer, the internal notes and anything the billing system logged. The export kept the messages but not the reason\ncodes, statuses or owners. Numbers missing from the sequence were test cases or were merged into another case.\nTimes are US Eastern.\n`
++);

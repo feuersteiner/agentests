@@ -1,0 +1,630 @@
+<meta name="dash-one-writer" />
+<style>
+	.sb {
+		display: flex;
+		flex-direction: column;
+		gap: var(--cds-gap-lg);
+	}
+	.sb-head {
+		display: flex;
+		flex-direction: column;
+		gap: var(--cds-gap-sm);
+		max-width: 72ch;
+	}
+	.sb-title {
+		font-family: var(--font-anthropic-serif);
+		font-weight: 400;
+		font-size: var(--cds-font-size-title);
+		margin: 0;
+		text-wrap: balance;
+	}
+	.sb-lede {
+		font-size: var(--cds-font-size-body);
+		margin: 0;
+	}
+	.sb-note {
+		color: var(--color-fg-muted);
+		font-size: var(--cds-font-size-caption);
+		margin: 0;
+	}
+	.sb-warn {
+		color: var(--color-warn);
+		font-size: var(--cds-font-size-caption);
+		margin: 0;
+	}
+	.sb-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+		gap: var(--cds-gap-md);
+	}
+	.sb-filter {
+		display: flex;
+		align-items: center;
+		gap: var(--cds-gap-sm);
+		font-size: var(--cds-font-size-caption);
+		color: var(--color-fg-muted);
+	}
+	.sb-card {
+		background: var(--color-panel);
+		border: 1px solid var(--color-border-line);
+		border-radius: var(--cds-radius);
+		padding: var(--cds-pad-lg);
+		display: flex;
+		flex-direction: column;
+		gap: var(--cds-gap-sm);
+		min-width: 0;
+	}
+	.sb-card h2 {
+		font-size: var(--cds-font-size-heading);
+		font-weight: var(--cds-font-weight-medium);
+		margin: 0;
+	}
+	.sb-card p {
+		margin: 0;
+		color: var(--color-fg-muted);
+		font-size: var(--cds-font-size-caption);
+	}
+	.sb-chart {
+		position: relative;
+		min-height: 168px;
+	}
+	.sb-chart svg {
+		display: block;
+		overflow: visible;
+	}
+	.sb-chart svg text {
+		font-size: var(--cds-font-size-caption);
+		fill: var(--cds-text-secondary);
+		font-variant-numeric: tabular-nums;
+	}
+	.sb-chart svg text.sb-value {
+		fill: var(--color-fg);
+	}
+	.sb-chart .sb-empty {
+		color: var(--color-fg-muted);
+		font-size: var(--cds-font-size-caption);
+	}
+	.sb-tip {
+		position: absolute;
+		pointer-events: none;
+		background: var(--cds-surface-popover);
+		border: 1px solid var(--cds-border);
+		box-shadow: var(--cds-shadow-popover);
+		border-radius: var(--cds-radius);
+		padding: var(--cds-pad-xs) var(--cds-pad-sm);
+		font-size: var(--cds-font-size-caption);
+		color: var(--color-fg);
+		white-space: nowrap;
+		z-index: 2;
+	}
+	.sb-chart-wide {
+		min-height: 240px;
+	}
+	.sb-legend {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--cds-gap-sm) var(--cds-gap-md);
+		font-size: var(--cds-font-size-caption);
+		color: var(--color-fg);
+	}
+	.sb-legend span {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+	}
+	.sb-legend i {
+		width: 10px;
+		height: 10px;
+		border-radius: 50%;
+		display: inline-block;
+	}
+	.sb-tip span {
+		color: var(--cds-text-secondary);
+	}
+</style>
+<div class="sb">
+	<header class="sb-head" id="header">
+		<h1 class="sb-title">Arm Scoreboard</h1>
+		<p class="sb-lede" data-draw="lede">—</p>
+		<p class="sb-warn" data-draw="caveat">—</p>
+		<p class="sb-note">
+			<b data-draw="nruns" data-source="totals" data-field="runs" data-row="0">—</b>
+			runs across
+			<b data-draw="ntests" data-source="totals" data-field="tests" data-row="0">—</b>
+			test(s). All four arms use the same agent. The baseline never sees the rule; the skill arm has
+			it among ten skills it may choose to load; the two gate arms enforce it, among ten Tests, with
+			gpt-6-luna or jev-latest deciding.
+		</p>
+	</header>
+	<label class="sb-filter" id="tier-filter">
+		Context of the tests
+		<select class="dash-select" data-draw="tier" aria-label="Context of the tests"></select>
+	</label>
+	<div class="sb-grid">
+		<section class="sb-card" id="speed">
+			<h2>Speed</h2>
+			<p>
+				Mean seconds from the agent's start to its exit, time in the gate included. Shorter is
+				faster.
+			</p>
+			<div class="sb-chart" data-draw="chart-seconds" data-source="byArm"></div>
+		</section>
+		<section class="sb-card" id="quality">
+			<h2>Quality</h2>
+			<p>
+				Mean judge score from 0 to 10: the task done and the rule kept. Runs with no commit score 0.
+			</p>
+			<div class="sb-chart" data-draw="chart-score" data-source="byArm"></div>
+		</section>
+		<section class="sb-card" id="cost">
+			<h2>Cost</h2>
+			<p>Mean USD per run: the agent plus the decision model. The judge's cost is not counted.</p>
+			<div class="sb-chart" data-draw="chart-cost" data-source="byArm"></div>
+		</section>
+		<section class="sb-card" id="context">
+			<h2>Context used</h2>
+			<p>
+				Mean peak context: the largest prompt of the agent's run, as a share of its 1M-token context
+				window.
+			</p>
+			<div class="sb-chart" data-draw="chart-context" data-source="byArm"></div>
+		</section>
+	</div>
+	<section class="sb-card" id="by-context">
+		<h2>Quality as context grows</h2>
+		<p>
+			Mean judge score per arm in each context tier, over every run of that tier. The hypothesis
+			under test: the gate arms gain on the others as the agent's context fills up. Tiers name the
+			size the material was built for; the second line under each gives the peak context the agents
+			actually reached, on average.
+		</p>
+		<div class="sb-legend" data-draw="tier-legend"></div>
+		<div class="sb-chart sb-chart-wide" data-draw="chart-tier" data-source="byTier"></div>
+	</section>
+</div>
+<script>
+	window.SB_ARMS = [
+		{ arm: 'baseline', label: 'Baseline' },
+		{ arm: 'skill', label: 'Skill' },
+		{ arm: 'luna', label: 'Gate · Luna' },
+		{ arm: 'jev', label: 'Gate · Jev' }
+	];
+	dash.calc('byArm', {
+		inputs: ['runs'],
+		title: 'Averages per arm',
+		description:
+			'For each arm: its runs, the mean judge score over the runs that have one (a machinery error has none), the mean seconds and the mean cost in USD of the agent plus the decision model.',
+		fn: (runs) => {
+			const tier = dash.params().tier || '';
+			if (tier) runs = runs.filter((run) => run.tier === tier);
+			const num = (value) =>
+				value === null || value === undefined || value === '' ? null : Number(value);
+			const mean = (values, places) => {
+				const kept = values.filter((value) => value !== null && Number.isFinite(value));
+				if (!kept.length) return null;
+				const factor = 10 ** places;
+				return Math.round((kept.reduce((a, b) => a + b, 0) / kept.length) * factor) / factor;
+			};
+			return ['baseline', 'skill', 'luna', 'jev'].map((arm) => {
+				const mine = runs.filter((run) => run.arm === arm);
+				return {
+					arm,
+					runs: mine.length,
+					meanScore: mean(
+						mine.map((run) => num(run.score)),
+						2
+					),
+					meanSeconds: mean(
+						mine.map((run) => num(run.seconds)),
+						1
+					),
+					meanCostUsd: mean(
+						mine.map((run) => num(run.costUsd)),
+						4
+					),
+					meanContextPercent: mean(
+						mine.map((run) => num(run.contextPercent)),
+						1
+					)
+				};
+			});
+		}
+	});
+	dash.calc('byTier', {
+		inputs: ['runs'],
+		title: 'Mean score per arm and context tier',
+		description:
+			'For each context tier (short tasks, then long tasks built for about 200k and about 500k tokens) and each arm: its runs, the mean judge score over the runs that have one, and the mean measured peak context in tokens. Ignores the tier filter.',
+		fn: (runs) => {
+			const num = (value) =>
+				value === null || value === undefined || value === '' ? null : Number(value);
+			const mean = (values, places) => {
+				const kept = values.filter((value) => value !== null && Number.isFinite(value));
+				if (!kept.length) return null;
+				const factor = 10 ** places;
+				return Math.round((kept.reduce((a, b) => a + b, 0) / kept.length) * factor) / factor;
+			};
+			const order = (tier) => (tier === 'short' ? 0 : Number.parseInt(tier, 10));
+			const tiers = [...new Set(runs.map((run) => run.tier).filter(Boolean))].sort(
+				(a, b) => order(a) - order(b)
+			);
+			return tiers.flatMap((tier) =>
+				['baseline', 'skill', 'luna', 'jev'].map((arm) => {
+					const mine = runs.filter((run) => run.tier === tier && run.arm === arm);
+					return {
+						tier,
+						arm,
+						runs: mine.length,
+						meanScore: mean(
+							mine.map((run) => num(run.score)),
+							2
+						),
+						meanPeakTokens: mean(
+							mine.map((run) => num(run.peakContextTokens)),
+							0
+						)
+					};
+				})
+			);
+		}
+	});
+	dash.calc('totals', {
+		inputs: ['runs'],
+		title: 'Runs and tests',
+		description:
+			'How many runs the page covers, and how many distinct tests (a rule and one of its tasks) they come from.',
+		fn: (runs) => {
+			const tier = dash.params().tier || '';
+			if (tier) runs = runs.filter((run) => run.tier === tier);
+			return [{ runs: runs.length, tests: new Set(runs.map((run) => run.test)).size }];
+		}
+	});
+
+	window.SB_FORMAT = {
+		meanSeconds: (value) => `${value.toFixed(1)} s`,
+		meanScore: (value) => value.toFixed(2),
+		meanCostUsd: (value) => `$${value.toFixed(4)}`,
+		meanContextPercent: (value) => `${value.toFixed(1)}%`
+	};
+
+	window.SB_CHART = (field, domainMax, unitWord) => ({
+		mount: (el) => {
+			const tip = document.createElement('div');
+			tip.className = 'sb-tip';
+			tip.hidden = true;
+			return { tip };
+		},
+		update: (el, made) => {
+			const result = dash.data('byArm');
+			el.replaceChildren();
+			if (result.status !== 'ok') {
+				const note = document.createElement('div');
+				note.className = 'sb-empty';
+				note.textContent = result.status === 'error' ? 'This chart could not load its runs.' : '—';
+				el.append(note);
+				return;
+			}
+			const byArm = new Map(result.data.map((row) => [row.arm, row]));
+			const arms = window.SB_ARMS;
+			const width = Math.max(220, el.clientWidth || 300);
+			const barHeight = 24;
+			const rowGap = 14;
+			const height = arms.length * (barHeight + rowGap) - rowGap + 4;
+			const svg = d3
+				.select(el)
+				.append('svg')
+				.attr('width', '100%')
+				.attr('viewBox', `0 0 ${width} ${height}`)
+				.attr('role', 'img')
+				.attr('aria-label', `Mean ${unitWord} per arm`);
+			const probe = svg.append('text').attr('x', -9999).text('Gate · Luna');
+			const labelWidth = (probe.node().getComputedTextLength() || 72) + 10;
+			probe.remove();
+			const valueRoom = 64;
+			const values = arms
+				.map((a) => byArm.get(a.arm)?.[field])
+				.filter((v) => v !== null && v !== undefined);
+			const max = domainMax ?? (Math.max(...values, 0) * 1.05 || 1);
+			const x = d3
+				.scaleLinear()
+				.domain([0, max])
+				.range([0, Math.max(40, width - labelWidth - valueRoom)]);
+			svg
+				.append('line')
+				.attr('x1', labelWidth)
+				.attr('x2', labelWidth)
+				.attr('y1', 0)
+				.attr('y2', height)
+				.style('stroke', 'var(--cds-chart-axis)');
+			const fmt = window.SB_FORMAT[field];
+			arms.forEach((a, index) => {
+				const row = byArm.get(a.arm);
+				const value = row ? row[field] : null;
+				const y = index * (barHeight + rowGap);
+				const g = svg.append('g').attr('transform', `translate(0,${y})`);
+				g.append('text')
+					.attr('x', 0)
+					.attr('y', barHeight / 2)
+					.attr('dy', '0.35em')
+					.text(a.label);
+				if (value === null || value === undefined) {
+					g.append('text')
+						.attr('x', labelWidth + 6)
+						.attr('y', barHeight / 2)
+						.attr('dy', '0.35em')
+						.text('no runs yet');
+					return;
+				}
+				const w = Math.max(2, x(value));
+				g.append('path')
+					.attr(
+						'd',
+						`M${labelWidth},${2} h${Math.max(0, w - 4)} a4,4 0 0 1 4,4 v${barHeight - 12} a4,4 0 0 1 -4,4 h${-Math.max(0, w - 4)} z`
+					)
+					.style('fill', dash.colors[index % dash.colors.length]);
+				g.append('text')
+					.attr('class', 'sb-value')
+					.attr('x', labelWidth + w + 6)
+					.attr('y', barHeight / 2)
+					.attr('dy', '0.35em')
+					.attr('data-source', 'byArm')
+					.attr('data-field', field)
+					.attr('data-where', `arm=${a.arm}`)
+					.text(fmt(value));
+				g.append('rect')
+					.attr('x', 0)
+					.attr('y', -rowGap / 2)
+					.attr('width', width)
+					.attr('height', barHeight + rowGap)
+					.style('fill', 'transparent')
+					.on('pointerenter pointermove', (event) => {
+						const box = el.getBoundingClientRect();
+						made.tip.replaceChildren();
+						const name = document.createElement('div');
+						name.textContent = `${a.label}: ${fmt(value)}`;
+						const count = document.createElement('span');
+						count.textContent = `${row.runs} run${row.runs === 1 ? '' : 's'}`;
+						made.tip.append(name, count);
+						made.tip.hidden = false;
+						const left = Math.min(event.clientX - box.left + 12, box.width - made.tip.offsetWidth);
+						made.tip.style.left = `${Math.max(0, left)}px`;
+						made.tip.style.top = `${event.clientY - box.top + 12}px`;
+					})
+					.on('pointerleave', () => {
+						made.tip.hidden = true;
+					});
+			});
+			el.append(made.tip);
+		}
+	});
+
+	dash.draw('chart-seconds', window.SB_CHART('meanSeconds', null, 'seconds'));
+	dash.draw('chart-score', window.SB_CHART('meanScore', 10, 'judge score'));
+	dash.draw('chart-cost', window.SB_CHART('meanCostUsd', null, 'cost in USD'));
+	dash.draw(
+		'chart-context',
+		window.SB_CHART('meanContextPercent', null, 'peak context, percent of the window')
+	);
+	dash.draw('tier', (sel) => {
+		const result = dash.data('runs');
+		const tiers =
+			result.status === 'ok'
+				? [...new Set(result.data.map((run) => run.tier).filter(Boolean))]
+				: [];
+		const order = (tier) => (tier === 'short' ? 0 : Number.parseInt(tier, 10));
+		tiers.sort((a, b) => order(a) - order(b));
+		const label = (tier) => (tier === 'short' ? 'Short tasks' : `Long tasks, about ${tier} tokens`);
+		sel.replaceChildren(
+			new Option('All tests', ''),
+			...tiers.map((tier) => new Option(label(tier), tier))
+		);
+		sel.value = dash.params().tier ?? '';
+		sel.onchange = () => dash.setParams({ tier: sel.value || null });
+	});
+
+	const sbTierLabel = (tier) => (tier === 'short' ? 'Short tasks' : `Long, ~${tier}`);
+	dash.draw('tier-legend', (el) => {
+		el.replaceChildren(
+			...window.SB_ARMS.map((a, index) => {
+				const item = document.createElement('span');
+				const dot = document.createElement('i');
+				dot.style.background = dash.colors[index % dash.colors.length];
+				item.append(dot, a.label);
+				return item;
+			})
+		);
+	});
+	dash.draw('chart-tier', {
+		mount: () => {
+			const tip = document.createElement('div');
+			tip.className = 'sb-tip';
+			tip.hidden = true;
+			return { tip };
+		},
+		update: (el, made) => {
+			const result = dash.data('byTier');
+			el.replaceChildren();
+			if (result.status !== 'ok' || !result.data.length) {
+				const note = document.createElement('div');
+				note.className = 'sb-empty';
+				note.textContent = result.status === 'error' ? 'This chart could not load its runs.' : '—';
+				el.append(note);
+				return;
+			}
+			const rows = result.data;
+			const tiers = [...new Set(rows.map((row) => row.tier))];
+			const width = Math.max(300, el.clientWidth || 600);
+			const height = 240;
+			const margin = { top: 10, right: 96, bottom: 44, left: 34 };
+			const scores = rows.map((row) => row.meanScore).filter((v) => v !== null);
+			const low = Math.max(0, Math.floor(Math.min(...scores, 10) - 0.5));
+			const x = d3
+				.scalePoint()
+				.domain(tiers)
+				.range([margin.left, width - margin.right])
+				.padding(0.4);
+			const y = d3
+				.scaleLinear()
+				.domain([low, 10])
+				.range([height - margin.bottom, margin.top]);
+			const svg = d3
+				.select(el)
+				.append('svg')
+				.attr('width', '100%')
+				.attr('viewBox', `0 0 ${width} ${height}`)
+				.attr('role', 'img')
+				.attr('aria-label', 'Mean judge score per arm in each context tier');
+			for (const tick of y.ticks(5)) {
+				svg
+					.append('line')
+					.attr('x1', margin.left)
+					.attr('x2', width - margin.right)
+					.attr('y1', y(tick))
+					.attr('y2', y(tick))
+					.style('stroke', 'var(--cds-chart-grid, var(--color-border-line))')
+					.style('stroke-width', 1);
+				svg
+					.append('text')
+					.attr('x', margin.left - 6)
+					.attr('y', y(tick))
+					.attr('dy', '0.35em')
+					.attr('text-anchor', 'end')
+					.text(tick);
+			}
+			for (const tier of tiers) {
+				const inTier = rows.filter((row) => row.tier === tier);
+				const peaks = inTier.filter((row) => row.meanPeakTokens !== null && row.runs > 0);
+				const total = inTier.reduce((a, row) => a + row.runs, 0);
+				const peak = total
+					? peaks.reduce((a, row) => a + row.meanPeakTokens * row.runs, 0) / total
+					: null;
+				svg
+					.append('text')
+					.attr('x', x(tier))
+					.attr('y', height - margin.bottom + 18)
+					.attr('text-anchor', 'middle')
+					.text(sbTierLabel(tier));
+				svg
+					.append('text')
+					.attr('x', x(tier))
+					.attr('y', height - margin.bottom + 34)
+					.attr('text-anchor', 'middle')
+					.text(peak === null ? '' : `peak ≈ ${Math.round(peak / 1000)}k`);
+			}
+			const fmt = window.SB_FORMAT.meanScore;
+			const labels = [];
+			window.SB_ARMS.forEach((a, index) => {
+				const color = dash.colors[index % dash.colors.length];
+				const points = tiers
+					.map((tier) => rows.find((row) => row.tier === tier && row.arm === a.arm))
+					.filter((row) => row && row.meanScore !== null);
+				if (!points.length) return;
+				svg
+					.append('path')
+					.attr(
+						'd',
+						d3
+							.line()
+							.x((row) => x(row.tier))
+							.y((row) => y(row.meanScore))(points)
+					)
+					.style('fill', 'none')
+					.style('stroke', color)
+					.style('stroke-width', 2);
+				for (const row of points) {
+					svg
+						.append('circle')
+						.attr('cx', x(row.tier))
+						.attr('cy', y(row.meanScore))
+						.attr('r', 4.5)
+						.style('fill', color)
+						.style('stroke', 'var(--color-panel)')
+						.style('stroke-width', 2);
+					svg
+						.append('circle')
+						.attr('cx', x(row.tier))
+						.attr('cy', y(row.meanScore))
+						.attr('r', 12)
+						.style('fill', 'transparent')
+						.on('pointerenter pointermove', (event) => {
+							const box = el.getBoundingClientRect();
+							made.tip.replaceChildren();
+							const name = document.createElement('div');
+							name.textContent = `${a.label}, ${sbTierLabel(row.tier)}: ${fmt(row.meanScore)}`;
+							const detail = document.createElement('span');
+							detail.textContent = `${row.runs} run${row.runs === 1 ? '' : 's'}${row.meanPeakTokens === null ? '' : `, mean peak ${Math.round(row.meanPeakTokens / 1000)}k tokens`}`;
+							made.tip.append(name, detail);
+							made.tip.hidden = false;
+							const left = Math.min(
+								event.clientX - box.left + 12,
+								box.width - made.tip.offsetWidth
+							);
+							made.tip.style.left = `${Math.max(0, left)}px`;
+							made.tip.style.top = `${event.clientY - box.top + 12}px`;
+						})
+						.on('pointerleave', () => {
+							made.tip.hidden = true;
+						});
+				}
+				const last = points[points.length - 1];
+				labels.push({ x: x(last.tier) + 10, y: y(last.meanScore), row: last, arm: a });
+			});
+			// End labels never overlap: each sits at least one line below the one above it.
+			labels.sort((p, q) => p.y - q.y);
+			labels.forEach((label, index) => {
+				if (index > 0) label.y = Math.max(label.y, labels[index - 1].y + 14);
+				svg
+					.append('text')
+					.attr('class', 'sb-value')
+					.attr('x', label.x)
+					.attr('y', label.y)
+					.attr('dy', '0.35em')
+					.attr('data-source', 'byTier')
+					.attr('data-field', 'meanScore')
+					.attr('data-where', `tier=${label.row.tier},arm=${label.arm.arm}`)
+					.text(`${label.arm.label} ${fmt(label.row.meanScore)}`);
+			});
+			el.append(made.tip);
+		}
+	});
+
+	const sbTotals = () => {
+		const t = dash.data('totals');
+		return t.status === 'ok' && t.data.length ? t.data[0] : null;
+	};
+	dash.draw('nruns', (el) => {
+		const t = sbTotals();
+		el.textContent = t ? String(t.runs) : '—';
+	});
+	dash.draw('ntests', (el) => {
+		const t = sbTotals();
+		el.textContent = t ? String(t.tests) : '—';
+	});
+	dash.draw('caveat', (el) => {
+		const t = sbTotals();
+		el.hidden = !t || t.tests >= 30;
+		el.textContent = t
+			? `Early numbers: ${t.tests} test${t.tests === 1 ? '' : 's'} so far, too few to compare the arms. The full benchmark covers 581 tests: 481 short and 100 long.`
+			: '—';
+	});
+	dash.draw('lede', (el) => {
+		const result = dash.data('byArm');
+		if (result.status !== 'ok') {
+			el.textContent = '—';
+			return;
+		}
+		const rows = result.data.filter((row) => row.runs > 0);
+		if (!rows.length) {
+			el.textContent = 'No runs yet.';
+			return;
+		}
+		const label = (arm) => window.SB_ARMS.find((a) => a.arm === arm)?.label ?? arm;
+		const pick = (field, better) =>
+			rows.filter((r) => r[field] !== null).sort((a, b) => better(a[field], b[field]))[0];
+		const best = pick('meanScore', (a, b) => b - a);
+		const fast = pick('meanSeconds', (a, b) => a - b);
+		const cheap = pick('meanCostUsd', (a, b) => a - b);
+		const f = window.SB_FORMAT;
+		el.textContent = `So far ${label(best.arm)} scores highest (${f.meanScore(best.meanScore)} of 10), ${label(fast.arm)} is fastest (${f.meanSeconds(fast.meanSeconds)}) and ${label(cheap.arm)} is cheapest (${f.meanCostUsd(cheap.meanCostUsd)} a run).`;
+	});
+</script>

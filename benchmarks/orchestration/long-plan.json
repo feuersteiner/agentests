@@ -1,0 +1,602 @@
+[
+	{
+		"rule": "api-responses-use-explicit-field-projection",
+		"domain": "dev",
+		"task": 4,
+		"context": 200000
+	},
+	{
+		"rule": "backup-job-fails-loudly-and-keeps-old-backups",
+		"domain": "dev",
+		"task": 2,
+		"context": 500000
+	},
+	{
+		"rule": "balance-check-and-debit-atomic",
+		"domain": "dev",
+		"task": 1,
+		"context": 200000
+	},
+	{
+		"rule": "bulk-deletion-soft-deletes-and-verifies-ids",
+		"domain": "dev",
+		"task": 3,
+		"context": 500000
+	},
+	{
+		"rule": "bun-await-condition-not-sleep",
+		"domain": "dev",
+		"task": 2,
+		"context": 200000
+	},
+	{
+		"rule": "cache-key-includes-tenant-and-all-inputs",
+		"domain": "dev",
+		"task": 3,
+		"context": 500000
+	},
+	{
+		"rule": "calendar-arithmetic-handles-leap-days",
+		"domain": "dev",
+		"task": 1,
+		"context": 200000
+	},
+	{
+		"rule": "cancelled-request-discards-pooled-connection",
+		"domain": "dev",
+		"task": 3,
+		"context": 500000
+	},
+	{
+		"rule": "capacity-removal-enforces-floor",
+		"domain": "dev",
+		"task": 4,
+		"context": 200000
+	},
+	{
+		"rule": "couchbase-redact-user-data-in-logs",
+		"domain": "dev",
+		"task": 1,
+		"context": 500000
+	},
+	{
+		"rule": "credential-rotation-verifies-before-revoking",
+		"domain": "dev",
+		"task": 3,
+		"context": 200000
+	},
+	{
+		"rule": "deleting-user-revokes-sessions",
+		"domain": "dev",
+		"task": 2,
+		"context": 500000
+	},
+	{
+		"rule": "deno-error-message-form",
+		"domain": "dev",
+		"task": 2,
+		"context": 200000
+	},
+	{
+		"rule": "downloaded-tools-verified-before-execution",
+		"domain": "dev",
+		"task": 4,
+		"context": 500000
+	},
+	{
+		"rule": "effect-deps-stable-identities",
+		"domain": "dev",
+		"task": 4,
+		"context": 200000
+	},
+	{
+		"rule": "elapsed-time-uses-monotonic-clock",
+		"domain": "dev",
+		"task": 3,
+		"context": 500000
+	},
+	{
+		"rule": "email-links-use-configured-base-url",
+		"domain": "dev",
+		"task": 3,
+		"context": 200000
+	},
+	{
+		"rule": "every-referenced-id-ownership-checked",
+		"domain": "dev",
+		"task": 4,
+		"context": 500000
+	},
+	{
+		"rule": "generated-config-validated-before-use",
+		"domain": "dev",
+		"task": 1,
+		"context": 200000
+	},
+	{
+		"rule": "go-interface-in-consumer-package",
+		"domain": "dev",
+		"task": 4,
+		"context": 500000
+	},
+	{
+		"rule": "google-no-speculative-generality",
+		"domain": "dev",
+		"task": 4,
+		"context": 200000
+	},
+	{
+		"rule": "growing-table-ids-are-64-bit",
+		"domain": "dev",
+		"task": 1,
+		"context": 500000
+	},
+	{
+		"rule": "ha-device-protocol-in-library",
+		"domain": "dev",
+		"task": 1,
+		"context": 200000
+	},
+	{
+		"rule": "ha-direct-key-access-after-validation",
+		"domain": "dev",
+		"task": 1,
+		"context": 500000
+	},
+	{
+		"rule": "k8s-enum-not-bool",
+		"domain": "dev",
+		"task": 4,
+		"context": 200000
+	},
+	{
+		"rule": "library-migrations-defer-destructive-changes",
+		"domain": "dev",
+		"task": 3,
+		"context": 500000
+	},
+	{
+		"rule": "never-repurpose-an-existing-flag",
+		"domain": "dev",
+		"task": 4,
+		"context": 200000
+	},
+	{
+		"rule": "new-code-path-behind-default-off-flag",
+		"domain": "dev",
+		"task": 2,
+		"context": 500000
+	},
+	{
+		"rule": "no-credentials-in-logs",
+		"domain": "dev",
+		"task": 4,
+		"context": 200000
+	},
+	{
+		"rule": "outbound-timeout-within-caller-deadline",
+		"domain": "dev",
+		"task": 1,
+		"context": 500000
+	},
+	{
+		"rule": "password-reset-email-goes-to-stored-address",
+		"domain": "dev",
+		"task": 4,
+		"context": 200000
+	},
+	{
+		"rule": "payment-retry-reuses-idempotency-key",
+		"domain": "dev",
+		"task": 2,
+		"context": 500000
+	},
+	{
+		"rule": "personalised-responses-not-publicly-cacheable",
+		"domain": "dev",
+		"task": 3,
+		"context": 200000
+	},
+	{
+		"rule": "posthog-branching-decision-is-pure",
+		"domain": "dev",
+		"task": 3,
+		"context": 500000
+	},
+	{
+		"rule": "posthog-guard-double-submit",
+		"domain": "dev",
+		"task": 1,
+		"context": 200000
+	},
+	{
+		"rule": "posthog-side-effects-after-commit",
+		"domain": "dev",
+		"task": 1,
+		"context": 500000
+	},
+	{
+		"rule": "posthog-tests-catch-new-regressions",
+		"domain": "dev",
+		"task": 4,
+		"context": 200000
+	},
+	{
+		"rule": "posthog-thin-entrypoints",
+		"domain": "dev",
+		"task": 1,
+		"context": 500000
+	},
+	{
+		"rule": "pull-request-target-never-runs-pr-code",
+		"domain": "dev",
+		"task": 1,
+		"context": 200000
+	},
+	{
+		"rule": "rails-deprecate-before-removing",
+		"domain": "dev",
+		"task": 4,
+		"context": 500000
+	},
+	{
+		"rule": "retries-use-randomized-exponential-backoff",
+		"domain": "dev",
+		"task": 2,
+		"context": 200000
+	},
+	{
+		"rule": "schema-change-compatible-with-running-code",
+		"domain": "dev",
+		"task": 1,
+		"context": 500000
+	},
+	{
+		"rule": "sentry-no-queries-in-serialize",
+		"domain": "dev",
+		"task": 2,
+		"context": 200000
+	},
+	{
+		"rule": "sentry-scope-tenant-queries",
+		"domain": "dev",
+		"task": 4,
+		"context": 500000
+	},
+	{
+		"rule": "ssrf-guard-revalidates-redirects",
+		"domain": "dev",
+		"task": 3,
+		"context": 200000
+	},
+	{
+		"rule": "tigerbeetle-bound-every-loop",
+		"domain": "dev",
+		"task": 1,
+		"context": 500000
+	},
+	{
+		"rule": "tigerbeetle-units-last-in-names",
+		"domain": "dev",
+		"task": 4,
+		"context": 200000
+	},
+	{
+		"rule": "update-endpoints-allowlist-writable-fields",
+		"domain": "dev",
+		"task": 3,
+		"context": 500000
+	},
+	{
+		"rule": "uv-no-history-in-comments",
+		"domain": "dev",
+		"task": 4,
+		"context": 200000
+	},
+	{
+		"rule": "zed-comments-explain-why",
+		"domain": "dev",
+		"task": 3,
+		"context": 500000
+	},
+	{
+		"rule": "apologise-only-when-at-fault",
+		"domain": "business",
+		"task": 2,
+		"context": 200000
+	},
+	{
+		"rule": "bad-news-active-voice",
+		"domain": "business",
+		"task": 3,
+		"context": 500000
+	},
+	{
+		"rule": "balanced-investment-promotions",
+		"domain": "business",
+		"task": 1,
+		"context": 200000
+	},
+	{
+		"rule": "consumer-prices-include-vat",
+		"domain": "business",
+		"task": 1,
+		"context": 500000
+	},
+	{
+		"rule": "disciplinary-invite-contents",
+		"domain": "business",
+		"task": 3,
+		"context": 200000
+	},
+	{
+		"rule": "discount-within-volume-tier",
+		"domain": "business",
+		"task": 1,
+		"context": 500000
+	},
+	{
+		"rule": "dont-invent-error-cause",
+		"domain": "business",
+		"task": 1,
+		"context": 200000
+	},
+	{
+		"rule": "errors-dont-blame-user",
+		"domain": "business",
+		"task": 3,
+		"context": 500000
+	},
+	{
+		"rule": "forecast-commit-needs-evidence",
+		"domain": "business",
+		"task": 1,
+		"context": 200000
+	},
+	{
+		"rule": "form-errors-say-how-to-fix",
+		"domain": "business",
+		"task": 4,
+		"context": 500000
+	},
+	{
+		"rule": "free-offer-terms-at-outset",
+		"domain": "business",
+		"task": 3,
+		"context": 200000
+	},
+	{
+		"rule": "free-to-paid-needs-approval",
+		"domain": "business",
+		"task": 4,
+		"context": 500000
+	},
+	{
+		"rule": "free-trial-means-free",
+		"domain": "business",
+		"task": 1,
+		"context": 200000
+	},
+	{
+		"rule": "handover-objectives-complete",
+		"domain": "business",
+		"task": 4,
+		"context": 500000
+	},
+	{
+		"rule": "impact-before-reasons",
+		"domain": "business",
+		"task": 4,
+		"context": 200000
+	},
+	{
+		"rule": "legal-rights-not-a-perk",
+		"domain": "business",
+		"task": 2,
+		"context": 500000
+	},
+	{
+		"rule": "never-voice-the-mascot",
+		"domain": "business",
+		"task": 3,
+		"context": 200000
+	},
+	{
+		"rule": "no-celebrating-routine-tasks",
+		"domain": "business",
+		"task": 3,
+		"context": 500000
+	},
+	{
+		"rule": "no-directional-language",
+		"domain": "business",
+		"task": 2,
+		"context": 200000
+	},
+	{
+		"rule": "no-discount-for-case-study",
+		"domain": "business",
+		"task": 2,
+		"context": 500000
+	},
+	{
+		"rule": "no-easy-or-simple",
+		"domain": "business",
+		"task": 2,
+		"context": 200000
+	},
+	{
+		"rule": "no-false-urgency",
+		"domain": "business",
+		"task": 2,
+		"context": 500000
+	},
+	{
+		"rule": "no-fictitious-former-price",
+		"domain": "business",
+		"task": 2,
+		"context": 200000
+	},
+	{
+		"rule": "no-first-or-only-claims",
+		"domain": "business",
+		"task": 1,
+		"context": 500000
+	},
+	{
+		"rule": "no-free-credits-to-close",
+		"domain": "business",
+		"task": 3,
+		"context": 200000
+	},
+	{
+		"rule": "no-green-virtue-from-legal-minimum",
+		"domain": "business",
+		"task": 1,
+		"context": 500000
+	},
+	{
+		"rule": "no-idioms-for-translation",
+		"domain": "business",
+		"task": 3,
+		"context": 200000
+	},
+	{
+		"rule": "no-medical-claims-for-wellness",
+		"domain": "business",
+		"task": 2,
+		"context": 500000
+	},
+	{
+		"rule": "no-offset-based-neutral-claims",
+		"domain": "business",
+		"task": 4,
+		"context": 200000
+	},
+	{
+		"rule": "no-pay-history-question",
+		"domain": "business",
+		"task": 4,
+		"context": 500000
+	},
+	{
+		"rule": "no-preannouncing-features",
+		"domain": "business",
+		"task": 1,
+		"context": 200000
+	},
+	{
+		"rule": "no-promised-results",
+		"domain": "business",
+		"task": 3,
+		"context": 500000
+	},
+	{
+		"rule": "no-public-financial-metrics",
+		"domain": "business",
+		"task": 1,
+		"context": 200000
+	},
+	{
+		"rule": "no-unapproved-customer-logos",
+		"domain": "business",
+		"task": 4,
+		"context": 500000
+	},
+	{
+		"rule": "no-unapproved-customer-quotes",
+		"domain": "business",
+		"task": 4,
+		"context": 200000
+	},
+	{
+		"rule": "no-unqualified-green-claims",
+		"domain": "business",
+		"task": 1,
+		"context": 500000
+	},
+	{
+		"rule": "non-gaap-not-more-prominent",
+		"domain": "business",
+		"task": 4,
+		"context": 200000
+	},
+	{
+		"rule": "nyc-good-faith-salary-range",
+		"domain": "business",
+		"task": 3,
+		"context": 500000
+	},
+	{
+		"rule": "offer-letter-no-strike-price",
+		"domain": "business",
+		"task": 3,
+		"context": 200000
+	},
+	{
+		"rule": "payment-errors-state-charge",
+		"domain": "business",
+		"task": 4,
+		"context": 500000
+	},
+	{
+		"rule": "po-is-not-booked-arr",
+		"domain": "business",
+		"task": 2,
+		"context": 200000
+	},
+	{
+		"rule": "privacy-right-to-object-separate",
+		"domain": "business",
+		"task": 3,
+		"context": 500000
+	},
+	{
+		"rule": "privacy-specific-retention",
+		"domain": "business",
+		"task": 2,
+		"context": 200000
+	},
+	{
+		"rule": "referral-fee-after-payment",
+		"domain": "business",
+		"task": 3,
+		"context": 500000
+	},
+	{
+		"rule": "release-notes-lead-with-user-impact",
+		"domain": "business",
+		"task": 2,
+		"context": 200000
+	},
+	{
+		"rule": "same-pay-same-level",
+		"domain": "business",
+		"task": 2,
+		"context": 500000
+	},
+	{
+		"rule": "subject-lines-tell-dont-sell",
+		"domain": "business",
+		"task": 4,
+		"context": 200000
+	},
+	{
+		"rule": "superiority-claims-need-basis",
+		"domain": "business",
+		"task": 3,
+		"context": 500000
+	},
+	{
+		"rule": "testimonials-show-typical-results",
+		"domain": "business",
+		"task": 1,
+		"context": 200000
+	},
+	{
+		"rule": "uptime-sla-only-when-eligible",
+		"domain": "business",
+		"task": 4,
+		"context": 500000
+	}
+]
