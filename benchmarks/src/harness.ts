@@ -4,6 +4,7 @@ import { basename, dirname, join } from 'node:path';
 import { toAgentArgs } from './agent.ts';
 import { killAll } from './claude.ts';
 import { runCommand } from './command.ts';
+import { findSkillPlaceholders } from './dataset.ts';
 import type { DatasetEntry } from './dataset.ts';
 import { readKeys } from './environment.ts';
 import { toJudgeArgs } from './judge.ts';
@@ -88,6 +89,20 @@ export const checkGates = (gateArms: GateArm[], pricesFile: string): GateCheck =
 	}
 	return { keys, prices: known, problems };
 };
+
+/**
+ * A problem for each argument placeholder in a skill the skill arm would load: Claude Code replaces it with a
+ * word of the prompt, so the agent would get other text than the dataset's.
+ */
+const checkSkills = (tests: PlannedTest[], arms: Arm[]): string[] =>
+	arms.includes('skill')
+		? [...new Set(tests.map(({ entry }) => entry))].flatMap((entry) =>
+				findSkillPlaceholders(entry).map(
+					(found) =>
+						`${entry.id}: skill/SKILL.md ${found} is an argument placeholder to Claude Code, which would replace it with a word of the prompt; escape it as \\$ so the skill arm gets the text as written`
+				)
+			)
+		: [];
 
 /** The repository's commit, and whether its working tree differs from it. */
 export const readRepository = async () => ({
@@ -174,7 +189,7 @@ export const runBenchmark = async (settings: HarnessSettings): Promise<void> => 
 		(arm): arm is GateArm => isGateArm(arm) && settings.arms.includes(arm)
 	);
 	const { keys, prices, problems } = checkGates(gateArms, settings.pricesFile);
-	stopOn(problems);
+	stopOn([...problems, ...checkSkills(settings.tests, settings.arms)]);
 	const claudeVersion = (await runCommand('claude', ['--version'], repositoryDirectory)).trim();
 	const plans: RunPlan[] = settings.tests.flatMap(({ entry, task }) =>
 		allArms.filter((arm) => settings.arms.includes(arm)).map((arm) => ({ entry, task, arm }))

@@ -278,7 +278,9 @@ not counted. A run in which the agent still got a commit through after a refusal
 usual, with its refusals counted. A refusal that leaves no commit outranks the time limit, and a
 machinery error outranks both. Before any run starts, the harness checks that every requested gate
 arm has its key and a price for its model, and stops with a message naming what is missing; a
-`null` price means the price is unknown, and that arm does not start.
+`null` price means the price is unknown, and that arm does not start. When arm 2 runs, it also
+stops on any argument placeholder in a `SKILL.md` body, which would change the skill's text: write
+`\$4` for a literal `$4`.
 
 ## Running the benchmark
 

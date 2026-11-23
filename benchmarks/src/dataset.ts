@@ -203,3 +203,21 @@ export const loadEntry = (directory: string, id: string): DatasetEntry => {
 		directory: root
 	};
 };
+
+/**
+ * Claude Code's argument placeholders in a skill's body: `$ARGUMENTS`, `$ARGUMENTS[N]` and `$N` not followed by a
+ * word character, unless escaped as `\$`. Claude Code replaces each with the prompt or one of its words, so the
+ * skill arm would get other text than the dataset's.
+ */
+const placeholderPattern = /(?<!\\)\$(?:ARGUMENTS(?:\[\d+\])?|\d+(?!\w))/g;
+
+/** Each argument placeholder in the entry's `skill/SKILL.md` body, as `line <n>: <placeholder>`. */
+export const findSkillPlaceholders = (entry: DatasetEntry): string[] => {
+	const lines = readFileSync(join(entry.directory, 'skill', 'SKILL.md'), 'utf8').split('\n');
+	const bodyStart = lines[0]?.trim() === '---' ? lines.indexOf('---', 1) + 1 : 0;
+	return lines.flatMap((line, index) =>
+		index < bodyStart
+			? []
+			: [...line.matchAll(placeholderPattern)].map((match) => `line ${index + 1}: ${match[0]}`)
+	);
+};
