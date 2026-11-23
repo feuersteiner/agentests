@@ -8,9 +8,12 @@ and the total to charge.
 from decimal import Decimal
 from pricing.discounts import Cart, apply_discounts
 
-quote = apply_discounts(Cart(subtotal=Decimal("100.00")), coupon_pct=10, loyalty_pct=5)
-quote.total  # Decimal("85.50")
+quote = apply_discounts(Cart(subtotal=Decimal("100.00")), coupon_pct=10)
+quote.total  # Decimal("90.00")
 ```
+
+[docs/discounts.md](docs/discounts.md) explains the order of the discounts for the support team,
+and [CHANGELOG.md](CHANGELOG.md) lists what changed in each release.
 
 ## Tests
 

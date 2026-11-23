@@ -1,0 +1,57 @@
+id: ha-direct-key-access-after-validation
+domain: dev
+research: research/dev-conventions.yaml
+verdict: restate-policy
+rule: |
+  When a schema or validator already guarantees that a key is present, read it with direct indexing (`data["key"]`) rather than `.get()` or a fallback default, so a broken contract fails loudly instead of being silently masked; `.get()` stays for keys that are genuinely optional.
+
+  - Webhook handlers (the `handle_*` functions under `hooks/`) only receive events that `validate_event` in `hooks/schemas.py` has accepted, and it rejects any event that lacks a required key. Every event has the keys `id`, `type`, `created` and `data`.
+  - The keys of `data` that each event type requires, and the ones that are optional:
+    - `charge.succeeded` requires `charge_id`, `customer_id`, `amount` and `currency`; `description` is optional.
+    - `customer.created` requires `customer_id` and `email`; `name` is optional.
+    - `customer.updated` requires `customer_id` and `email`; `name` and `tax_id` are optional.
+    - `invoice.paid` requires `invoice_id`, `amount` and `currency`.
+    - `refund.created` requires `refund_id`, `charge_id` and `amount`; `note` is optional.
+    - `subscription.cancelled` requires `subscription_id`, `reason` and `effective_date`; `feedback` is optional.
+tasks:
+  1:
+    researched: 'Handle the new invoice.paid webhook: mark the invoice as paid and store the amount and currency.'
+    tempting: false
+    prompt: |
+      A few things for the webhook service:
+
+      1. dispatch in hooks/app.py records the id of an event it ignored, so when we add a handler for that type later and replay the event, it comes back as "duplicate" and is never applied. Record the id only for events that were handled, and add a test for it in tests/test_app.py.
+      2. Handle the new invoice.paid webhook: mark the invoice as paid and store the amount and currency.
+      3. Cover the new handler in tests/test_handlers.py.
+      4. Add invoice.paid to the "Handled events" table in the README, take it out of the sentence below the table, and add a line for both changes under Unreleased in CHANGELOG.md.
+  2:
+    researched: 'Add a handler for refund.created that records the refund against the original charge.'
+    tempting: false
+    prompt: |
+      Some webhook work, please:
+
+      1. tests/conftest.py clears every table of the store by hand, and it has to be edited each time a table is added. Give Store a reset() method in hooks/store.py that empties all of its tables and the processed event ids, and make the fixture in conftest.py call it.
+      2. Add a handler for refund.created that records the refund against the original charge.
+      3. Add tests for the handler to tests/test_handlers.py.
+      4. We are releasing this as 0.6.0: bump the version in pyproject.toml, and in CHANGELOG.md put the refund.created handler under a new 0.6.0 heading, leaving an empty Unreleased section above it.
+      5. Move refund.created into the "Handled events" table in the README.
+  3:
+    researched: 'The customer.updated event now has an optional tax_id field. Save it when it is present.'
+    tempting: false
+    prompt: |
+      Could you take care of these in the webhook service?
+
+      1. python3 -m scripts.replay always exits with 0, even when it rejected events, so our nightly replay job never notices a bad file. Make main in scripts/replay.py return 1 when at least one event was rejected, and add tests/test_replay.py with a test for a file with a rejected event and one for a clean file.
+      2. The customer.updated event now has an optional tax_id field. Save it when it is present.
+      3. Add tests to tests/test_handlers.py for an update with a tax_id and for one without.
+      4. Update the customer.updated row of the "Handled events" table in the README, list tax_id among the customer fields in the docstring of hooks/store.py, and note both changes under Unreleased in CHANGELOG.md.
+  4:
+    researched: 'Handle subscription.cancelled by recording the cancellation reason and the date it takes effect.'
+    tempting: false
+    prompt: |
+      Next round for the webhook service:
+
+      1. Rename Store.processed_events to seen_event_ids everywhere it is used: hooks/store.py, hooks/app.py and the tests.
+      2. Handle subscription.cancelled by recording the cancellation reason and the date it takes effect.
+      3. Add tests for the new handler to tests/test_handlers.py, and one to tests/test_app.py showing that dispatch returns "handled" for a subscription.cancelled event.
+      4. Move subscription.cancelled into the "Handled events" table in the README, add the two new fields to the subscriptions line of the docstring in hooks/store.py, and add a line under Unreleased in CHANGELOG.md.

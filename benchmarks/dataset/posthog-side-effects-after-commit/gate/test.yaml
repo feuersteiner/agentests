@@ -1,0 +1,22 @@
+version: 1
+id: posthog-side-effects-after-commit
+title: Side effects run after the commit
+description: In the orders modules, emails, payment-provider calls, webhooks and queued tasks run after the transaction commits, and no transaction wraps a whole view.
+select:
+  glob: 'orders/*.py'
+  grep: 'atomic'
+assert:
+  - id: side-effects-after-commit
+    description: Emails, payment-provider calls, webhooks and queued tasks run after the transaction.
+    error: Call it after the transaction.atomic() block has ended, or pass it to transaction.on_commit() inside the block.
+    decide: 'In every function that has a `with transaction.atomic():` block or the decorator `@transaction.atomic()`, each call that sends an email, calls the payment provider, calls a webhook or queues a task with `.delay()` is either placed after the transaction block has ended or passed to `transaction.on_commit()`.'
+  - id: no-transaction-around-view
+    description: No transaction wraps a whole view function.
+    error: Put transaction.atomic() around the writes that must succeed or fail together, not around the view.
+    grep: 'def \w+\((request|req)\b|def \w+_view\('
+    decide: 'No view function, meaning a function that takes a request and returns a response, is decorated with `@transaction.atomic()` or has its whole body inside one `with transaction.atomic():` block.'
+  - id: no-side-effect-before-transaction
+    description: No email, payment-provider call, webhook or queued task runs ahead of the transaction it belongs to.
+    error: Move the call below the transaction.atomic() block, or pass it to transaction.on_commit() inside the block.
+    grep: '(emails\.\w+\(|payments\.\w+\(|webhooks\.\w+\(|\bsend\w*\(|\bnotify\w*\(|\brefund\w*\(|\bcharge\w*\(|\.delay\()(?:(?!\n\s*def )[\s\S])*?with transaction\.atomic\('
+    decide: 'In each function that contains a `with transaction.atomic():` block, no email, payment-provider call, webhook call or task `.delay()` call is made before that block starts. Functions without such a block are ignored.'

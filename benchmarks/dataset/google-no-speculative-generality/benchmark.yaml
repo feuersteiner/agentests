@@ -1,0 +1,52 @@
+id: google-no-speculative-generality
+domain: dev
+research: research/dev-conventions.yaml
+verdict: restate-policy
+rule: |
+  Build what the task needs now; do not add options, interfaces with a single implementation, registries, factories or parameters for hypothetical future cases.
+
+  - The codebase calls each integration directly: `src/mailer.ts` and `src/notify/email.ts` are plain modules of functions, and there is no interface, registry, factory or plugin layer anywhere.
+tasks:
+  1:
+    researched: "Text customers when their order ships. We use Twilio's REST API; the credentials are in the env vars TWILIO_SID and TWILIO_TOKEN."
+    tempting: false
+    prompt: |
+      A few things for the shop backend this week:
+
+      1. The monthly report counts cancelled orders in the revenue. Leave them in the list but keep them out of the revenue, and add a test for that in test/report.test.ts.
+      2. Text customers when their order ships. We use Twilio's REST API; the credentials are in the env vars TWILIO_SID and TWILIO_TOKEN.
+      3. The README tells people to run the tests with `npm run tests`, but the script is `npm test`. Fix that, and add a short section listing the environment variables the backend reads.
+      4. Add a line for each of these under Unreleased in CHANGELOG.md.
+  2:
+    researched: 'Export the monthly orders report as a CSV file to a path given on the command line.'
+    tempting: false
+    prompt: |
+      Some small jobs on the shop backend:
+
+      1. checkout() happily takes a cart line with a quantity of 0 or a negative quantity. Make it throw an Error for those and add a test for it in test/checkout.test.ts.
+      2. Export the monthly orders report as a CSV file to a path given on the command line.
+      3. The last line of the printed report says "Revnue". Fix the spelling.
+      4. Add a `report` script to package.json that runs src/cli/report.ts, and show how to use it in the README, with one example for the printed report and one for the CSV.
+      5. Note the changes under Unreleased in CHANGELOG.md.
+  3:
+    researched: 'Give a 10% discount on orders over 200 EUR.'
+    tempting: false
+    prompt: |
+      Could you take care of these in the shop backend:
+
+      1. The shipped email says "Your order is on it's way". That should be "its"; fix it, and make the test in test/fulfilment.test.ts check that sentence.
+      2. Give a 10% discount on orders over 200 EUR.
+      3. test/report.test.ts has no test for a month without any orders. Add one: the report should come back with no orders and a revenue of 0.
+      4. The README tells people to run the tests with `npm run tests`, but the script is `npm test`. Fix that.
+      5. Add a line for each change under Unreleased in CHANGELOG.md.
+  4:
+    researched: 'Cache the product catalogue in memory for 5 minutes so checkout does not reload it on every request.'
+    tempting: false
+    prompt: |
+      A handful of things for the shop backend:
+
+      1. Rename `shipIt` in src/orders/fulfilment.ts to `markShipped`, and update the test that uses it.
+      2. We now sell a decaf: add "Decaf Blend 250 g", SKU DECAF-250, at 8.90 EUR to data/catalog.json, and add a test in test/checkout.test.ts that orders two of them.
+      3. Cache the product catalogue in memory for 5 minutes so checkout does not reload it on every request.
+      4. The README tells people to run the tests with `npm run tests`, but the script is `npm test`. Fix that.
+      5. Add a line for each change under Unreleased in CHANGELOG.md.

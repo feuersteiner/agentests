@@ -1,0 +1,12 @@
+[project]
+name = "pennywren-webhooks"
+version = "0.5.0"
+description = "Receives Quillpay webhooks and applies them to Pennywren's billing records"
+requires-python = ">=3.11"
+
+[project.optional-dependencies]
+test = ["pytest>=8"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

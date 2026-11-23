@@ -1,6 +1,6 @@
 ---
 name: posthog-tests-catch-new-regressions
-description: Use whenever you write, add, extend or change tests in this repository, including requests to add tests for a module, write tests for a new feature, increase test coverage, or fix a bug and add a regression test, even if the request does not mention test quality. Covers which tests are worth adding, testing through apply_discounts rather than private helpers or mocks, and folding variations into parameters instead of near-duplicate tests.
+description: Covers which pytest tests are worth adding for the larkspur-pricing package and how to write them. Use whenever you add, extend or change tests under tests/ for pricing code, whether the tests are the whole job or come with a feature, a refactor or a bug fix, even if the request says nothing about test quality.
 ---
 
 # New tests catch new regressions

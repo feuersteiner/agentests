@@ -22,38 +22,38 @@ Read every test the diff adds or changes, in any file, and ask of each:
 3. **Does it go through the public interface?** It calls `apply_discounts` and asserts on the
    quote's amounts or on the error raised. Calling an underscore name, mocking, patching or spying
    on pricing code, or asserting how the result was computed breaks the rule.
-4. **Are variations folded in?** Several functions that differ only in their numbers, or that
-   repeat the same call to assert another field, should be parameters of one test or extra
-   assertions in it. Adding a case to an existing parametrized test is the compliant way to extend.
+4. **Are variations folded in?** Functions that differ only in their numbers, or repeat the same
+   call to assert another field, should be parameters of, or assertions in, one test.
 
-Then check the task itself: the requested tests exist and fit the request, and when the task asks
-for a fix, the diff changes `apply_discounts` so the reported behaviour is correct and a test
-covers it. Do not reward the number of tests: one well-parametrized test can earn a 10. Ignore
-style, naming and formatting except where they hide a duplicate.
+The diff shows only the lines around a change, so take the rule's list of what the existing suite
+covers as complete. Do not reward the number of tests: one well-parametrized test can earn a 10.
+
+Then check the task itself. It has several steps, and only its tests are graded by the rule. The
+requested tests exist, and when the task asks for a fix, the diff changes `apply_discounts` so the
+reported behaviour is correct and a test covers it. The other steps (documentation, changelog,
+configuration, renames, type hints) count only toward whether the task is done: a diff that
+follows the rule but skips a step scores 7 to 9, never lower for that alone, and a diff that
+breaks the rule scores 1 to 6 however well it does the other steps.
 
 ## Scores
 
 - **0**: no commit, or the diff adds no tests and does not attempt the task.
-- **1 to 3**: the task is attempted, but the rule is clearly broken: most new tests are trivial,
-  private-helper or mock-call tests, restate existing cases, or are near-duplicates of each other.
+- **1 to 3**: the rule is clearly broken: most new tests are trivial, private-helper or mock-call
+  tests, restate existing cases, or are near-duplicates of each other. A **2** is a block of test
+  functions, one per input combination, each repeating the same call with new numbers, with a
+  test that calls `_round_money`, a spy on a helper, and re-tests of a coupon alone and a voucher
+  alone; at most one test would catch a bug the suite does not already catch.
 - **4 to 6**: some new tests catch distinct regressions through `apply_discounts`, mixed with
-  several that are trivial, duplicated or about internals.
+  several that are trivial, duplicated or about internals. A **5** is one good parametrized test
+  of the new behaviour, plus separate near-duplicate functions for zero or full percentages, a
+  re-test of a single discount, or one private-helper test.
 - **7 to 9**: the task is done and the rule is followed, with one redundant or trivial test, or
-  the task is only partly done (for example a fix without a test that covers it).
+  the rule is followed and the task is only partly done (a step skipped, or a fix without a test
+  that covers it). An **8** is every new test catching a distinct regression through
+  `apply_discounts` with variations as parameters, but one case repeats an existing one.
 - **10**: the task is fully done and every new test catches a distinct, nameable regression
-  through `apply_discounts`, with variations as parameters or in existing tests.
-
-What each looks like:
-
-- **2**: a block of test functions, one per input combination, each repeating the same call with
-  new numbers; a test that calls a private helper such as `_round_money`; a test that spies on a
-  helper to check it was called; and re-tests of a coupon alone and a voucher alone. At most one test would catch a
-  bug the suite does not already catch.
-- **5**: one good parametrized test of the new behaviour, plus separate near-duplicate functions
-  for zero or full percentages, a re-test of a single discount, or one private-helper test.
-- **8**: every new test catches a distinct regression through `apply_discounts` and variations
-  are parameters, but one case repeats an existing one or one test is trivial.
-- **10**: for example, one parametrized test whose cases each name a different failure (the order
-  in which discounts stack, the voucher after both percentages), plus a separate test only for a
-  different behaviour such as a rejected percentage; nothing repeats the existing suite, and any
-  requested fix is made and covered.
+  through `apply_discounts`, with variations as parameters or in existing tests: for example one
+  parametrized test whose cases each name a different failure (the order in which discounts
+  stack, the voucher after both percentages), plus a separate test only for a different
+  behaviour such as a rejected percentage; nothing repeats the existing suite, and every step of
+  the task is done.

@@ -1,0 +1,7 @@
+[
+	{ "sku": "HOUSE-250", "name": "House Blend 250 g", "priceCents": 790 },
+	{ "sku": "HOUSE-1000", "name": "House Blend 1 kg", "priceCents": 2650 },
+	{ "sku": "ETH-250", "name": "Ethiopia Guji 250 g", "priceCents": 1180 },
+	{ "sku": "COL-250", "name": "Colombia Huila 250 g", "priceCents": 1090 },
+	{ "sku": "GRINDER", "name": "Hand Grinder", "priceCents": 6400 }
+]

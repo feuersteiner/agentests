@@ -1,0 +1,8 @@
+[
+	{ "id": "F-1041", "placedOn": "2026-09-28", "status": "shipped", "email": "ines@example.com", "totalCents": 2650 },
+	{ "id": "F-1042", "placedOn": "2026-10-02", "status": "shipped", "email": "tomas@example.com", "totalCents": 7190 },
+	{ "id": "F-1043", "placedOn": "2026-10-09", "status": "cancelled", "email": "mira@example.com", "totalCents": 1180 },
+	{ "id": "F-1044", "placedOn": "2026-10-17", "status": "shipped", "email": "ines@example.com", "totalCents": 3440 },
+	{ "id": "F-1045", "placedOn": "2026-10-30", "status": "paid", "email": "joris@example.com", "totalCents": 1580 },
+	{ "id": "F-1046", "placedOn": "2026-11-03", "status": "paid", "email": "tomas@example.com", "totalCents": 2360 }
+]
