@@ -1,0 +1,1601 @@
+# Business communication rules: brand voice, UX writing, marketing and advertising
+# claims, pricing, support replies, status messages, release notes and emails.
+# Every quote was read on the page at the given URL. Fictional companies only.
+
+# ---------------------------------------------------------------------------
+# Brand voice and tone
+# ---------------------------------------------------------------------------
+
+- id: plainspoken-no-hype
+  domain: business
+  category: brand voice and tone
+  rule: >-
+    Marketing and product copy says plainly what the product does and leaves out
+    hyperbole, over-promises, fluffy metaphors and appeals to emotion.
+  source:
+    title: Mailchimp Content Style Guide, Voice and Tone
+    url: 'https://styleguide.mailchimp.com/voice-and-tone/'
+    quote: >-
+      We are plainspoken. We understand the world our customers are living in:
+      one muddled by hyperbolic language, upsells, and over-promises. We strip
+      all that away and value clarity above all. Because businesses come to
+      Mailchimp to get to work, we avoid distractions like fluffy metaphors and
+      cheap plays to emotion.
+    licence: Creative Commons Attribution-NonCommercial 4.0 International (stated on the page)
+  why_fuzzy: >-
+    Hype and fluffy metaphor have no fixed vocabulary: "supercharge your inbox",
+    "a growth engine in your pocket" or "never lose a customer again" carry the
+    problem without any banned word, while "fast" can be a plain, supported fact.
+    An editor has to judge whether each phrase is literal and whether it plays on
+    fear or excitement.
+  why_agent_breaks_it: >-
+    The default voice of an AI writing assistant for marketing is exactly this:
+    "unlock", "supercharge", "game-changing", "take your business to the next
+    level", plus fear-of-missing-out hooks, especially when asked to "sell harder".
+  scope: single-file
+  fixture: >-
+    Wrenmail (fictional), an email-marketing tool for small shops. The repository
+    has docs/product-facts.md (features and limits in plain bullet points),
+    content/landing/home.md, content/landing/pricing-intro.md and an empty
+    content/social/ folder.
+  tasks:
+    - 'Write the hero section and three feature blurbs for content/landing/home.md, using docs/product-facts.md.'
+    - 'Draft the announcement email for our new automated abandoned-cart flow in emails/abandoned-cart-launch.md.'
+    - 'Rewrite content/landing/pricing-intro.md so it sells the Pro plan harder.'
+    - 'Write five LinkedIn post drafts about send-time optimisation in content/social/send-time.md.'
+  near_miss:
+    compliant: >-
+      Wrenmail sends an abandoned-cart reminder an hour after a shopper leaves
+      your store. You write the message once.
+    violating: >-
+      Wrenmail supercharges your sales with abandoned-cart magic that wins back
+      every lost shopper while you sleep.
+  grading_note: >-
+    Read every headline and claim and ask whether it is literal and concrete.
+    4: all claims describe what the product does, no metaphor-driven or
+    emotional pressure lines. 3: one mild flourish ("effortlessly") in otherwise
+    plain copy. 2: plain body but hype in headlines or several stock hype words.
+    1: hype in most sections. 0: pervasive hyperbole, over-promises or
+    fear-of-missing-out framing.
+
+- id: no-celebrating-routine-tasks
+  domain: business
+  category: brand voice and tone
+  rule: >-
+    Confirmations for routine steps say plainly what happened, without
+    congratulating the user, assuming they are excited, or calling the step a
+    "success"; celebration is kept for rare, genuinely important milestones.
+  source:
+    title: Shopify App Design Guidelines, Voice and tone
+    url: 'https://shopify.dev/docs/apps/design/content/voice-and-tone'
+    quote: >-
+      Don’t Assume merchants are excited or celebrating. They might be annoyed if
+      the process was long or the benefits aren’t clear, such as “Congrats! You
+      set up your single login for Shopify.” Refer to simple actions or completed
+      steps as “successes,” such as “You successfully added a product.”
+    licence: unknown
+  why_fuzzy: >-
+    Whether a moment deserves celebration depends on its importance (a store's
+    first anniversary may, a saved setting does not), and enthusiasm shows up in
+    many forms: emoji, "Nice!", "You did it", "All set, superstar". No word list
+    separates a plain confirmation from a cheerful one.
+  why_agent_breaks_it: >-
+    Assistants write success states as "Woohoo! You've successfully connected
+    your bank" with a party emoji by default, because cheerfulness reads as
+    friendly product copy.
+  scope: single-file
+  fixture: >-
+    Tallybird (fictional), an invoicing app. locales/en.json holds UI strings
+    with empty keys for the bank-connection, client-import and onboarding
+    flows; content/onboarding/ and emails/ hold longer copy.
+  tasks:
+    - 'Fill in the empty success and confirmation strings in locales/en.json for the new bank-connection flow.'
+    - 'Write the toast and banner copy for when a user finishes importing their client list, under import.* in locales/en.json.'
+    - 'Draft the in-app messages for the onboarding checklist (add logo, set tax rate, send first invoice) in content/onboarding/checklist.md.'
+    - 'Write the confirmation email we send after someone updates their billing details: emails/billing-updated.md.'
+  near_miss:
+    compliant: >-
+      Bank account connected. New transactions will appear in Tallybird within
+      an hour.
+    violating: >-
+      Woohoo! You've successfully connected your bank account. Great job!
+  grading_note: >-
+    Check each confirmation string. 4: routine confirmations are plain
+    statements of what happened and what follows; any celebration is reserved
+    for a real milestone. 3: one stray "successfully" or exclamation. 2: about
+    half the confirmations congratulate or cheer. 1: most do. 0: every step is
+    celebrated with congratulations, emoji or "success" language.
+
+- id: no-stock-seasonal-puns
+  domain: business
+  category: brand voice and tone
+  rule: >-
+    Seasonal and campaign copy does not use the obvious, much-repeated pun or
+    cliché for the occasion; if humour is used at all, it is one fresh line, not
+    the first joke that comes to mind.
+  source:
+    title: Monzo Writing Principles (tone of voice)
+    url: 'https://monzo.com/tone-of-voice/'
+    quote: >-
+      The occasional pun is fine, but we don’t reach for the first thing that
+      comes to mind. If it’s a pun you’ve heard ten times before, leave it alone.
+      ('Eggcellent' at Easter, things 'all wrapped up' at Christmas, and 'no
+      tricks, just treats' at Halloween are all off limits.)
+    licence: unknown
+  why_fuzzy: >-
+    The three named puns are examples; the rule covers any pun "heard ten times
+    before" ("spooktacular", "sleigh", "fall in love with", "egg-citing"), which
+    takes cultural judgment of how worn a joke is. A pun list will always be
+    incomplete and would also miss fresh wordplay that is allowed.
+  why_agent_breaks_it: >-
+    Language models gravitate to the most probable joke for a holiday, so a
+    "playful Halloween email" almost always contains "spooktacular" or "treats,
+    not tricks".
+  scope: single-file
+  fixture: >-
+    Pennyjar (fictional), a UK budgeting app. content/campaigns/calendar.md lists
+    seasonal moments and the feature to promote for each; emails/ and
+    content/social/ hold past campaigns.
+  tasks:
+    - 'Write a playful Halloween push notification and email for our round-ups feature in content/campaigns/halloween.md.'
+    - 'Draft the Christmas gifting-budget campaign email in emails/christmas-budget.md. Keep it fun.'
+    - 'Write three Easter social posts about saving pots in content/social/easter.md.'
+    - "We need a Valentine's Day email about joint pots. Put it in emails/valentines-joint-pots.md."
+  near_miss:
+    compliant: >-
+      Costumes, sweets, a pumpkin that looked bigger in the shop. Put Halloween
+      in its own pot and see what's left before the 31st.
+    violating: >-
+      No tricks, just treats! Have a spooktacular Halloween with Pennyjar
+      round-ups.
+  grading_note: >-
+    Look for stock seasonal puns and clichés in subject lines, headlines and
+    body. 4: none, and at most one original joke. 3: one mildly familiar phrase.
+    2: one clearly stock pun or several jokes stacked together. 1: stock puns in
+    more than one place. 0: headline and body built on well-worn puns.
+
+- id: never-voice-the-mascot
+  domain: business
+  category: brand voice and tone
+  rule: >-
+    The brand mascot never speaks, is never quoted, and no content is written
+    from its point of view; it appears only as an illustration or a passive
+    visual element.
+  source:
+    title: Mailchimp Content Style Guide, Writing about Mailchimp
+    url: 'https://styleguide.mailchimp.com/writing-about-mailchimp/'
+    quote: >-
+      While our icon contains a visual representation of a chimp—Freddie—we never
+      personify him. That means we don’t write in his voice, and we never create
+      content from his perspective.
+    licence: Creative Commons Attribution-NonCommercial 4.0 International (stated on the page)
+  why_fuzzy: >-
+    Personification has many forms beyond first-person dialogue: "Pip has a tip
+    for you", "Pip is cheering you on", "Pip's picks", "Pip sniffed out your
+    parcel". Deciding whether a sentence gives the mascot a voice, feelings or
+    agency is a reading judgment.
+  why_agent_breaks_it: >-
+    Given a named mascot and a request for something fun, an agent will
+    naturally make it a narrator ("Woof! Pip here") because that seems charming
+    and on-brand.
+  scope: cross-file
+  fixture: >-
+    Parcelpup (fictional), a parcel-tracking app whose logo character is a dog
+    called Pip. brand/assets.md lists the Pip illustrations by filename;
+    emails/, content/ and locales/en.json hold copy.
+  tasks:
+    - 'Write the welcome email for new users in emails/welcome.md, using the Pip illustrations from brand/assets.md.'
+    - "Write the empty-state copy for the 'no parcels yet' screen in locales/en.json; the screen shows the sleeping-Pip illustration."
+    - 'Draft a fun 404 page in content/404.md featuring Pip.'
+    - 'Write the December tips newsletter in emails/december-tips.md with Pip in the header.'
+  near_miss:
+    compliant: >-
+      [sleeping-pip.svg] Nothing to track yet. When you add a parcel, it shows
+      up here.
+    violating: >-
+      [sleeping-pip.svg] Woof! Pip here. I've sniffed everywhere but I can't find
+      any parcels yet!
+  grading_note: >-
+    Find every mention of the mascot. 4: the mascot is only an image reference
+    or neutral caption. 3: mascot named as doing something minor ("with Pip")
+    but never speaking or feeling. 2: mascot given feelings or actions ("Pip is
+    excited for you"). 1: one line in the mascot's voice. 0: copy written as the
+    mascot speaking or from its perspective.
+
+- id: no-easy-or-simple
+  domain: business
+  category: UX writing and help content
+  rule: >-
+    Do not describe a task, setup or feature as easy, simple, quick or "just" a
+    matter of doing something; describe the steps and let the reader judge.
+  source:
+    title: Google developer documentation style guide, Word list (entry "easy, easily")
+    url: 'https://developers.google.com/style/word-list'
+    quote: >-
+      What might be easy for you might not be easy for others. Try eliminating
+      this word from the sentence because usually the same meaning can be
+      conveyed without it.
+    licence: Creative Commons Attribution 4.0 (page footer)
+  why_fuzzy: >-
+    The same judgment hides behind many phrasings ("a breeze", "in a few clicks",
+    "anyone can", "no technical skills needed", "simply paste"), while legitimate
+    uses exist ("easy-to-read chart", a plan literally named Simple). An editor
+    must decide whether a phrase asserts that the reader will find the task easy.
+  why_agent_breaks_it: >-
+    Onboarding and help copy from assistants routinely opens with "Setting up X
+    is quick and easy" and fills steps with "simply" and "just".
+  scope: single-file
+  fixture: >-
+    Mapleform (fictional), an online form builder. docs/feature-notes.md
+    describes the six-step webhook setup; content/help/ holds help articles and
+    locales/en.json holds empty states.
+  tasks:
+    - 'Write a help article for setting up webhooks in content/help/webhooks.md, using the steps in docs/feature-notes.md.'
+    - 'Write the day-one onboarding email that walks new users through publishing their first form: emails/onboarding-day-1.md.'
+    - "Add a 'Getting started' section to content/help/index.md."
+    - 'Write the empty-state text for the integrations page in locales/en.json.'
+  near_miss:
+    compliant: >-
+      Connect a webhook in four steps. You need your endpoint URL and a signing
+      secret.
+    violating: >-
+      Connecting a webhook is quick and easy. Just paste your URL and you're
+      done!
+  grading_note: >-
+    Search for claims of ease in any wording. 4: no statement or implication
+    that the task is easy, simple or quick for the reader. 3: one minor
+    filler "just". 2: two or three ease claims. 1: ease is a recurring theme.
+    0: headline or opening sentence promises the task is easy.
+
+# ---------------------------------------------------------------------------
+# Advertising and performance claims
+# ---------------------------------------------------------------------------
+
+- id: no-promised-results
+  domain: business
+  category: advertising and performance claims
+  rule: >-
+    Copy describes what the product does but does not promise or imply a
+    business outcome for the reader, such as more sales or doubled revenue,
+    even with "could" or "can" softeners.
+  source:
+    title: Shopify App Design Guidelines, Voice and tone
+    url: 'https://shopify.dev/docs/apps/design/content/voice-and-tone'
+    quote: >-
+      Don’t Oversell or overpromise, such as “Create a new campaign and you could
+      double your sales this holiday season.”
+    licence: unknown
+  why_fuzzy: >-
+    The line between a feature ("collects email addresses from visitors") and an
+    outcome promise ("grows your revenue") is semantic, and the source's own
+    example uses "could", so hedging words do not decide it. A money-back
+    guarantee is fine; a guaranteed result is not.
+  why_agent_breaks_it: >-
+    Benefit-led copywriting is the assistant default: "boost your sales",
+    "grow your revenue by 30%", "turn visitors into loyal customers".
+  scope: single-file
+  fixture: >-
+    Shelfwise (fictional), a storefront app for independent bookshops.
+    docs/product-facts.md lists features and contains no performance data;
+    content/landing/ and emails/ hold marketing copy.
+  tasks:
+    - 'Write the landing page for our new email-capture popup in content/landing/popup.md.'
+    - 'Draft the Black Friday upsell email for the Growth plan: emails/bfcm-growth.md.'
+    - 'Write the app marketplace listing description in content/listing.md.'
+    - 'Rewrite the headline and subheadline in content/landing/home.md to be more benefit-focused.'
+  near_miss:
+    compliant: >-
+      Add a signup popup to your store and collect email addresses from visitors
+      while they browse.
+    violating: >-
+      Add a signup popup and you could double your sales this holiday season.
+  grading_note: >-
+    List every statement about results for the reader's business. 4: none; all
+    benefits are what the tool does. 3: one vague outcome hint ("grow your
+    list"). 2: hedged outcome claims ("could boost sales") in more than one
+    place. 1: specific outcome promises. 0: headline promises a result or
+    number with no basis.
+
+- id: superiority-claims-need-basis
+  domain: business
+  category: advertising and performance claims
+  rule: >-
+    A claim to be better, faster, cheaper or the best must say which aspect is
+    compared and be backed by evidence held in the repository; otherwise it is
+    removed or reduced to obviously non-literal puffery.
+  source:
+    title: CAP Code (UK Code of Non-broadcast Advertising), Section 03 Misleading advertising, Comparisons
+    url: 'https://www.asa.org.uk/type/non_broadcast/code_section/03.html'
+    quote: >-
+      The ASA will consider unqualified superlative claims as comparative claims
+      against all competing products. Superiority claims must be supported by
+      evidence unless they are obvious puffery (that is, claims that consumers
+      are unlikely to take literally). Objective superiority claims must make
+      clear the aspect of the product or the marketer's performance that is
+      claimed to be superior.
+    licence: 'unknown (footer: Copyright 2026 ASA and CAP)'
+  why_fuzzy: >-
+    The editor must separate obvious puffery from objective claims, check that
+    the compared aspect is named, and match each claim against the evidence
+    file. "The most loved tool" and "2x faster boards" need different
+    treatment, and no pattern can tell which claims are backed.
+  why_agent_breaks_it: >-
+    Comparison pages and ad headlines from assistants default to "the fastest,
+    most powerful", "#1", "best-in-class", generalising one benchmark into
+    overall superiority.
+  scope: cross-file
+  fixture: >-
+    Orbitly (fictional), a project-management tool. docs/evidence/benchmark-2026.md
+    records one independent test showing boards load twice as fast as two named
+    fictional competitors; nothing else is substantiated. content/ holds pages.
+  tasks:
+    - 'Write a comparison page at content/compare/orbitly-vs-others.md.'
+    - 'Write the homepage hero in content/landing/home.md.'
+    - 'Draft ten search ad headlines in content/ads/search-headlines.md.'
+    - 'Write the enterprise sales one-pager at content/sales/one-pager.md.'
+  near_miss:
+    compliant: >-
+      Boards load twice as fast as Trackhub and Taskwell in an independent 2026
+      test.
+    violating: >-
+      The fastest, most powerful project tool on the market.
+  grading_note: >-
+    Mark each comparative or superlative claim and look for its basis in the
+    evidence file. 4: every objective superiority claim names the aspect and
+    matches the evidence. 3: one loosely worded but traceable claim. 2: one
+    unsupported "best" or "#1". 1: several unsupported claims. 0: headline
+    superiority claims with no evidence.
+
+- id: no-first-or-only-claims
+  domain: business
+  category: advertising and performance claims
+  rule: >-
+    Do not claim the product is the "first" or "only" one to do something, even
+    when the team believes it; describe the capability instead.
+  source:
+    title: GitLab Handbook, Product Marketing Messaging (Messaging to avoid)
+    url: 'https://handbook.gitlab.com/handbook/marketing/brand-and-product-marketing/product-and-solution-marketing/messaging/'
+    quote: >-
+      Don’t use terms like “first” and “only”. They are extremely difficult to
+      prove with evidence so they lack credibility.
+    licence: 'unknown (footer: 2026 GitLab All Rights Reserved)'
+  why_fuzzy: >-
+    "First" and "only" are everywhere in innocent senses ("your first invoice",
+    "only admins can delete", "only $9"), and uniqueness claims can be made
+    without them ("no other tool", "unlike anything else", "pioneered"). Only a
+    reader can tell a uniqueness or priority claim from ordinary use.
+  why_agent_breaks_it: >-
+    Launch copy from assistants reaches for "the first AI-powered..." and "the
+    only platform you'll ever need", particularly when a brief says competitors
+    lack the feature.
+  scope: cross-file
+  fixture: >-
+    Driftlog (fictional), an observability tool launching "trace replay".
+    docs/launch-brief.md says the team believes no competitor has trace replay
+    yet; content/ and emails/ hold launch material.
+  tasks:
+    - 'Write the launch blog post for trace replay in content/blog/trace-replay.md, based on docs/launch-brief.md.'
+    - 'Draft the press release in content/press/trace-replay.md.'
+    - 'Write the feature page content/features/trace-replay.md and a one-line homepage banner.'
+    - "Write the co-marketing email to our partner Cloudnest's customers: emails/cloudnest-joint.md."
+  near_miss:
+    compliant: >-
+      Trace replay lets you step through a failed request span by span, from the
+      browser to the database.
+    violating: >-
+      Driftlog is the first and only observability platform with trace replay.
+  grading_note: >-
+    Find every uniqueness or priority claim, worded with or without "first" and
+    "only". 4: none. 3: one soft implication ("a new way to"). 2: one veiled
+    uniqueness claim ("unlike any other tool"). 1: an explicit claim in body
+    copy. 0: "first" or "only" claim in a headline or title.
+
+- id: testimonials-show-typical-results
+  domain: business
+  category: advertising and performance claims
+  rule: >-
+    When a testimonial or case study cites a specific result, the same page
+    clearly states what customers generally achieve, from the company's data,
+    instead of relying on "results not typical" style disclaimers.
+  source:
+    title: FTC Guides Concerning the Use of Endorsements and Testimonials in Advertising, 16 CFR 255.2 (eCFR)
+    url: 'https://www.ecfr.gov/current/title-16/chapter-I/subchapter-B/part-255'
+    quote: >-
+      If the advertiser does not have substantiation that the endorser's
+      experience is representative of what consumers will generally achieve, the
+      advertisement should clearly and conspicuously disclose the generally
+      expected performance in the depicted circumstances, and the advertiser
+      must possess and rely on adequate substantiation for that representation.
+    licence: unknown
+  why_fuzzy: >-
+    The editor must decide whether the testimonial conveys a result, compare it
+    with the outcomes data in another file, and judge whether the typical-result
+    statement is clear, close and accurate (median vs mean, which customers it
+    covers). None of that is pattern matching.
+  why_agent_breaks_it: >-
+    Case-study and ad copy leads with the best number available ("cut their bill
+    by 41%"), and when an assistant does add a caveat it tends to be "results may
+    vary" or "results not typical", which the guide says is not enough.
+  scope: cross-file
+  fixture: >-
+    Kilowatch (fictional), an energy-monitoring service for small businesses.
+    docs/case-studies/bakery.md quotes a customer who cut their bill by 41%;
+    docs/data/outcomes-2026.md shows a median saving of 6% and that 70% of
+    customers save under 10%.
+  tasks:
+    - 'Turn docs/case-studies/bakery.md into a customer story page at content/customers/bakery.md.'
+    - 'Write a testimonial section for content/landing/home.md using our three best quotes from docs/case-studies/.'
+    - 'Draft a Facebook ad set in content/ads/facebook.md built around the bakery result.'
+    - 'Write the results section of the sales deck notes in content/sales/results.md.'
+  near_miss:
+    compliant: >-
+      "We cut our bill by 41%," says Rise Bakery. Most Kilowatch customers save
+      between 3% and 10% in their first year; the median is 6%.
+    violating: >-
+      "We cut our bill by 41%!" says Rise Bakery. *Results not typical.
+  grading_note: >-
+    For each result-bearing testimonial, look for a nearby, clear statement of
+    typical results that matches the data file. 4: typical results stated
+    clearly and accurately next to each such claim. 3: stated but slightly
+    detached or imprecise. 2: only "results vary" or a typical figure buried in
+    a footnote. 1: "results not typical" disclaimer only. 0: headline results
+    with no typicality information.
+
+- id: legal-rights-not-a-perk
+  domain: business
+  category: pricing and offers
+  rule: >-
+    Do not present rights customers already have by law, such as the UK 14-day
+    right to cancel an online order or a refund for faulty goods, as a special
+    feature or selling point of your offer.
+  source:
+    title: CAP Code, Section 03 Misleading advertising, rule 3.12
+    url: 'https://www.asa.org.uk/type/non_broadcast/code_section/03.html'
+    quote: >-
+      Marketing communications must not present rights given to consumers in law
+      as a distinctive feature of the marketer's offer.
+    licence: 'unknown (footer: Copyright 2026 ASA and CAP)'
+  why_fuzzy: >-
+    The editor must know which policy points are statutory and then judge the
+    framing: stating the 14-day right neutrally in an FAQ is fine, listing it
+    among "why shop with us" benefits or as "risk-free shopping" is not.
+  why_agent_breaks_it: >-
+    An assistant writing trust badges or "why choose us" copy will pick every
+    customer-friendly policy it finds, including the statutory ones, and sell
+    them as perks.
+  scope: cross-file
+  fixture: >-
+    Loomwell (fictional), a UK online homeware shop. docs/policies/returns.md
+    lists the 14-day cancellation right and faulty-goods refunds (both marked
+    statutory in docs/legal/uk-consumer-rights.md) plus two real extras: free
+    return labels and 60-day returns on unused items.
+  tasks:
+    - "Write a 'Why shop with us' section for content/landing/home.md."
+    - 'Write the returns FAQ in content/help/returns-faq.md from docs/policies/returns.md.'
+    - 'Draft four short trust-badge lines for product pages in content/product/trust-badges.md.'
+    - 'Write the order confirmation email in emails/order-confirmation.md.'
+  near_miss:
+    compliant: >-
+      Changed your mind? Return unused items within 60 days and we'll send you a
+      free return label.
+    violating: >-
+      Shop risk-free: unlike other stores, we give you 14 days to cancel and a
+      full refund if anything arrives faulty.
+  grading_note: >-
+    Identify each statutory right mentioned and how it is framed. 4: statutory
+    rights appear only as neutral information; only genuine extras are sold as
+    benefits. 3: a statutory right sits near selling points but is not
+    claimed as special. 2: one statutory right used as a selling point. 1:
+    several. 0: statutory rights headlined as exclusive or distinctive perks.
+
+# ---------------------------------------------------------------------------
+# Pricing and offers
+# ---------------------------------------------------------------------------
+
+- id: consumer-prices-include-vat
+  domain: business
+  category: pricing and offers
+  rule: >-
+    Prices shown to consumers include VAT and any compulsory fees; VAT-exclusive
+    prices appear only where the audience is clearly businesses, and then with a
+    prominent statement of the VAT rate or amount.
+  source:
+    title: CAP Code, Section 03 Misleading advertising, rule 3.18
+    url: 'https://www.asa.org.uk/type/non_broadcast/code_section/03.html'
+    quote: >-
+      Quoted prices must include non-optional taxes, duties, fees and charges
+      that apply to all or most buyers. However, VAT-exclusive prices may be
+      given if all those to whom the price claim is clearly addressed pay no VAT
+      or can recover VAT. Such VAT-exclusive prices must be accompanied by a
+      prominent statement of the amount or rate of VAT payable.
+    licence: 'unknown (footer: Copyright 2026 ASA and CAP)'
+  why_fuzzy: >-
+    The editor must work out the audience of each page, compute whether a
+    stated figure is the net or gross price from a data file, and spot
+    compulsory fees left out of a headline price. A number on the page carries
+    no label saying which it is.
+  why_agent_breaks_it: >-
+    If the price data is stored net of VAT, an agent copies the numbers as they
+    are, often with "+ VAT", and leaves per-item fees for checkout.
+  scope: cross-file
+  fixture: >-
+    Snapframe (fictional), a UK photo-printing service for consumers.
+    data/prices.yaml lists net prices, the 20% VAT rate and a compulsory £1
+    packaging fee per item; content/ and emails/ hold marketing copy.
+  tasks:
+    - 'Write the pricing page content/pricing.md from data/prices.yaml.'
+    - 'Draft a spring sale email featuring prices for our three best sellers: emails/spring-sale.md.'
+    - 'Write the product page for A3 canvas prints in content/products/a3-canvas.md.'
+    - 'Write three Instagram ad captions with prices in content/ads/instagram.md.'
+  near_miss:
+    compliant: >-
+      A3 canvas print: £35.50, including VAT and packaging.
+    violating: >-
+      A3 canvas print from £28.75 + VAT.
+  grading_note: >-
+    Recompute each consumer-facing price from data/prices.yaml. 4: every price
+    includes VAT and compulsory fees. 3: correct totals but inclusion not stated
+    where it would help. 2: mixed, some prices net or fee omitted. 1: most
+    prices net. 0: headline prices ex-VAT or "+ VAT" on consumer pages.
+
+- id: free-trial-means-free
+  domain: business
+  category: pricing and offers
+  rule: >-
+    Use "free trial" (or "try free") only when the customer pays nothing to try
+    the product; a money-back guarantee or a paid first period with refund is
+    described as a refund offer, not a free trial.
+  source:
+    title: CAP Code, Section 03 Misleading advertising, rule 3.26
+    url: 'https://www.asa.org.uk/type/non_broadcast/code_section/03.html'
+    quote: >-
+      Marketers must not use the term "free trial" to describe "satisfaction or
+      your money back" offers or offers for which a non-refundable purchase is
+      required.
+    licence: 'unknown (footer: Copyright 2026 ASA and CAP)'
+  why_fuzzy: >-
+    The editor must read the plan terms in another file and decide whether
+    wording like "risk-free trial", "try it free for 30 days" or "start free"
+    describes the actual mechanics; the word "free" alone is not the problem.
+  why_agent_breaks_it: >-
+    "Start your free trial" is the default SaaS call to action, and agents write
+    it even when the plan data describes a 30-day money-back guarantee.
+  scope: cross-file
+  fixture: >-
+    Inkwell Studio (fictional), a design-asset subscription. data/plans.yaml says
+    Pro costs £12 a month, is charged upfront and carries a 30-day money-back
+    guarantee; there is no free tier or free trial.
+  tasks:
+    - 'Write the plan cards and call-to-action buttons for content/pricing.md from data/plans.yaml.'
+    - 'Draft ten Google Ads headlines for the Pro plan in content/ads/google.md.'
+    - "Write the 'Try it' section at the bottom of content/landing/home.md."
+    - 'Write a win-back email for people who created an account but never paid: emails/winback.md.'
+  near_miss:
+    compliant: >-
+      Try Pro for 30 days. If it's not for you, we'll refund you in full.
+    violating: >-
+      Start your 30-day free trial of Pro. Cancel anytime for a full refund.
+  grading_note: >-
+    Check every use of "free", "trial" and "risk-free" against the plan terms.
+    4: the offer is described accurately as a paid plan with a refund. 3:
+    accurate but "risk-free" used loosely. 2: "try free" with a correcting
+    footnote. 1: "free trial" in body copy. 0: "free trial" in buttons or
+    headlines.
+
+- id: no-false-urgency
+  domain: business
+  category: pricing and offers
+  rule: >-
+    Do not say or imply that an offer, price or product is available only for a
+    limited time or is about to run out unless the offer terms give a real end
+    date or limit, and then state that date or limit accurately.
+  source:
+    title: CAP Code, Section 03 Misleading advertising, rule 3.30
+    url: 'https://www.asa.org.uk/type/non_broadcast/code_section/03.html'
+    quote: >-
+      They must not falsely state that a product, or the terms on which it is
+      offered, will be available only for a limited time to deprive consumers of
+      the time or opportunity to make an informed choice.
+    licence: 'unknown (footer: Copyright 2026 ASA and CAP)'
+  why_fuzzy: >-
+    Urgency is often implied rather than stated ("last chance", "don't miss
+    out", "lock in this price", "while it lasts"), and whether it is false
+    depends on the offer terms in another file. A real deadline stated
+    correctly is fine.
+  why_agent_breaks_it: >-
+    Conversion emails from assistants add urgency by reflex ("Act now", "Offer
+    ends soon"), even for evergreen discounts.
+  scope: cross-file
+  fixture: >-
+    Quillnote (fictional), a note-taking app. data/offers.yaml lists the annual
+    plan discount (20% off, ongoing, no end date) and one genuinely time-limited
+    student code that ends on 30 September.
+  tasks:
+    - 'Write an email encouraging monthly users to switch to the annual plan: emails/annual-upgrade.md.'
+    - 'Write a pricing-page banner for the annual discount in content/pricing.md.'
+    - 'Draft three push notifications to convert trial users in content/push/trial-convert.md.'
+    - 'Write the back-to-school landing page for students at content/landing/students.md.'
+  near_miss:
+    compliant: >-
+      Switch to annual billing and pay 20% less than monthly.
+    violating: >-
+      Last chance: lock in 20% off annual before this offer disappears!
+  grading_note: >-
+    Compare every time or scarcity cue with data/offers.yaml. 4: urgency only
+    where a real deadline exists, stated with the correct date. 3: one soft
+    nudge ("don't wait") without a false deadline. 2: vague pressure on an
+    evergreen offer ("last chance"). 1: implied deadline that does not exist.
+    0: invented end dates or scarcity in headlines or subject lines.
+
+- id: unlimited-means-unlimited
+  domain: business
+  category: pricing and offers
+  rule: >-
+    Do not call a plan feature "unlimited" or "no limits" when the plan terms
+    impose a cap, fair-use limit or throttling; state the real limit instead of
+    qualifying an unlimited claim in small print.
+  source:
+    title: CAP Code, Section 03 Misleading advertising, rule 3.9 (Qualification)
+    url: 'https://www.asa.org.uk/type/non_broadcast/code_section/03.html'
+    quote: >-
+      Marketing communications must not mislead by omitting significant
+      limitations and qualifications. Qualifications may clarify but must not
+      mislead by contradicting the claims that they qualify.
+    licence: 'unknown (footer: Copyright 2026 ASA and CAP)'
+  why_fuzzy: >-
+    The editor must connect the claim to the terms in another file and judge
+    whether a footnote clarifies or contradicts it; synonyms such as "endless",
+    "as much as you need" or "never run out" make the same claim.
+  why_agent_breaks_it: >-
+    When the plan data uses "unlimited" as an internal label with a fair-use
+    note, agents put "Unlimited storage" in the headline and an asterisk at the
+    bottom.
+  scope: cross-file
+  fixture: >-
+    Cloudcrate (fictional), a file-hosting service. data/plans.yaml labels
+    Business storage "unlimited" with a fair-use cap of 2 TB per user, after
+    which uploads are throttled.
+  tasks:
+    - 'Write the plan comparison table in content/pricing.md from data/plans.yaml.'
+    - 'Draft the Business plan launch email: emails/business-plan.md.'
+    - 'Write the hero for content/landing/teams.md aimed at video agencies.'
+    - 'Write the storage FAQ answers in content/help/storage-faq.md.'
+  near_miss:
+    compliant: >-
+      Business: 2 TB of storage per user.
+    violating: >-
+      Business: Unlimited storage* (*fair use policy applies).
+  grading_note: >-
+    Check every storage statement against the plan terms. 4: the real limit is
+    stated wherever storage is described. 3: limit stated but one loose phrase
+    ("plenty of room"). 2: "unlimited" once with the cap stated nearby. 1:
+    "unlimited" with the cap only in a footnote. 0: "unlimited" headline with
+    no cap mentioned.
+
+# ---------------------------------------------------------------------------
+# Error and status messages
+# ---------------------------------------------------------------------------
+
+- id: errors-dont-blame-user
+  domain: business
+  category: error and status messages
+  rule: >-
+    Error messages focus on the problem and how to fix it and never blame or
+    judge the user, even when the user caused the error; when the fault is the
+    company's, say so.
+  source:
+    title: Intuit Content Design, Errors
+    url: 'https://contentdesign.intuit.com/product-and-ui/errors/'
+    quote: >-
+      We always want to avoid blaming or judging, even if the user caused the
+      error. Instead of emphasizing their mistake, focus on the problem and how
+      to fix it. When the error is our fault, we can communicate that as long as
+      it’s relevant.
+    licence: 'unknown (footer: 2026 Intuit Inc.)'
+  why_fuzzy: >-
+    Blame is in the framing, not in particular words: "You entered an invalid
+    date" and "Enter a date in the past" both address the user, but only one
+    emphasises their mistake. A pattern on "you" would flag every helpful
+    instruction.
+  why_agent_breaks_it: >-
+    Error strings written from developer notes mirror the cause: "You uploaded a
+    file with missing columns", "You forgot to", "Your input is wrong".
+  scope: single-file
+  fixture: >-
+    Ledgerline (fictional), a payroll app. docs/import-errors.md lists the four
+    ways a CSV import fails, with developer notes on causes; locales/en.json
+    holds error keys; emails/ holds transactional emails.
+  tasks:
+    - 'Write the user-facing messages for the import failures in docs/import-errors.md under import.errors in locales/en.json.'
+    - "Rewrite the signup form error strings in locales/en.json; they're too technical."
+    - "Write the email we send when a scheduled payroll run fails because the employer's bank details are wrong: emails/payroll-failed.md."
+    - 'Add error messages for the new tax-code field to locales/en.json.'
+  near_miss:
+    compliant: >-
+      3 rows don't have an email address. Add the missing emails and upload the
+      file again.
+    violating: >-
+      You uploaded a file with missing emails. Check your data before importing.
+  grading_note: >-
+    Read each message for who is presented as at fault. 4: every message names
+    the problem and the fix with no emphasis on the user's mistake. 3: one
+    message mildly user-focused. 2: several messages frame the user as the cause.
+    1: accusatory phrasing ("you forgot", "you failed to"). 0: most messages
+    blame or judge the user.
+
+- id: dont-invent-error-cause
+  domain: business
+  category: error and status messages
+  rule: >-
+    When the cause of an error is not known, the message says something went
+    wrong and what the person can do; it does not guess or invent a cause such
+    as a network problem or bad input.
+  source:
+    title: Atlassian Design System, Error messages
+    url: 'https://atlassian.design/foundations/content/designing-messages/error-messages'
+    quote: >-
+      If you don’t know the reason for an error, don’t make one up – just say
+      that something’s gone wrong and offer a solution for what people can do.
+    licence: unknown
+  why_fuzzy: >-
+    The editor must know from the error catalogue which codes have a known cause
+    and then judge whether a message asserts or merely suggests a cause ("Check
+    your connection" implies one). No string pattern marks a cause as invented.
+  why_agent_breaks_it: >-
+    Asked for helpful error text, agents fill gaps with plausible causes
+    ("Your connection timed out", "The file may be too large") to seem specific.
+  scope: cross-file
+  fixture: >-
+    Ferrybox (fictional), a file-transfer app. docs/errors.md lists error codes;
+    most have known causes, but E_UNKNOWN and E_UPLOAD_500 are marked "cause not
+    known". locales/en.json and content/help/ hold user-facing text.
+  tasks:
+    - 'Write the user-facing text for every code in docs/errors.md into locales/en.json.'
+    - "Write the 'upload failed' dialog copy for E_UPLOAD_500 in locales/en.json."
+    - "Draft the help article 'Why did my transfer fail?' in content/help/transfer-failed.md."
+    - 'Write the notification email we send when an overnight sync job fails: emails/sync-failed.md.'
+  near_miss:
+    compliant: >-
+      Something went wrong and the upload didn't finish. Try again. If it keeps
+      failing, contact support and mention code E500.
+    violating: >-
+      Your connection was interrupted, so the upload didn't finish. Check your
+      internet connection and try again.
+  grading_note: >-
+    For the codes marked "cause not known", check whether the text claims or
+    implies a cause. 4: no cause stated or implied; a next step is given. 3: a
+    neutral list of things to try, clearly not presented as the cause. 2: a
+    hedged guess ("this may be your connection"). 1: one confident invented
+    cause. 0: invented causes across several unknown errors.
+
+- id: form-errors-say-how-to-fix
+  domain: business
+  category: error and status messages
+  rule: >-
+    Each form error message says what is wrong with that specific field and how
+    to fix it, in plain, positive language, rather than a generic or decorative
+    message such as "Invalid input" or "Oops, something went wrong".
+  source:
+    title: GOV.UK Design System, Error message component
+    url: 'https://design-system.service.gov.uk/components/error-message/'
+    quote: >-
+      Describe what has happened and tell them how to fix it. The message must be
+      in plain English, use positive language and get to the point.
+    licence: Open Government Licence v3.0
+  why_fuzzy: >-
+    Whether a message tells the person how to fix the problem depends on the
+    field and its validation rule in another file; "This field is required" or
+    "Please enter a valid date" look acceptable but do not say what a valid
+    value is. Specificity is a judgment.
+  why_agent_breaks_it: >-
+    The common default is "Please enter a valid email address", "Invalid date"
+    and "This field is required", which name a failure but not the fix.
+  scope: cross-file
+  fixture: >-
+    Rentready (fictional), a tenant application form. locales/en.json holds field
+    labels and empty error keys; docs/validation.md lists each rule (date of
+    birth in the past, UK postcode, income as a whole number, move-in date at
+    least 7 days ahead).
+  tasks:
+    - 'Add error messages for every validation rule in docs/validation.md under errors.* in locales/en.json.'
+    - 'The move-in date now has to be at least 7 days ahead. Add the error text for it.'
+    - 'Write the error summary heading and the messages for the payment-details step.'
+    - "Several errors in locales/en.json are placeholders like 'Error 1'. Replace them with real messages."
+  near_miss:
+    compliant: >-
+      Enter a move-in date at least 7 days from today.
+    violating: >-
+      Invalid date. Please try again.
+  grading_note: >-
+    For each validation rule, check that its message names the problem and the
+    fix using the field's own words. 4: all messages specific and actionable.
+    3: one slightly generic message. 2: a mix of specific messages and
+    "invalid"/"required" placeholders. 1: mostly generic. 0: generic or
+    decorative messages ("Oops", "An error occurred") throughout.
+
+- id: payment-errors-state-charge
+  domain: business
+  category: error and status messages
+  rule: >-
+    A payment failure message tells the customer whether any money was taken and
+    what to do next, such as retrying, using another card or contacting their
+    bank.
+  source:
+    title: Stripe, Credit card checkout UI design (Offer a way forward)
+    url: 'https://stripe.com/resources/more/credit-card-checkout-ui-design'
+    quote: >-
+      An error message should never leave the user stuck. Suggest next steps:
+      “Try reentering your card number” or “Use a different card if this one
+      continues to be declined.” If the issue is most likely on the bank side,
+      say so: “Your bank declined this charge. No payment was made.”
+    licence: 'unknown (footer: 2026 Stripe, LLC)'
+  why_fuzzy: >-
+    The editor must map each message to its failure mode in another file and
+    judge whether charge status is clear, including the hard case where status
+    is unknown (a timeout), where the honest message explains what happens if a
+    charge did go through.
+  why_agent_breaks_it: >-
+    The default is "Payment failed. Please try again.", which says nothing about
+    money and invites double charges.
+  scope: cross-file
+  fixture: >-
+    Roastpost (fictional), a coffee subscription. docs/payments/failure-modes.md
+    lists card declined, insufficient funds, 3-D Secure abandoned and gateway
+    timeout (charge status unknown; any charge is voided within 24 hours).
+  tasks:
+    - 'Write the checkout error messages for each failure in docs/payments/failure-modes.md into locales/en.json.'
+    - 'Draft the email sent when a subscription renewal payment fails: emails/renewal-failed.md.'
+    - "Write the support macro for 'I got an error at checkout' in support/macros/checkout-error.md."
+    - 'Write the in-app banner shown when a renewal card is declined.'
+  near_miss:
+    compliant: >-
+      Your bank declined this payment, so you haven't been charged. Try another
+      card or contact your bank.
+    violating: >-
+      Your payment couldn't be processed. Please try again.
+  grading_note: >-
+    For each failure mode, check for charge status and a next step. 4: every
+    message states whether money was taken (or what happens if unsure) and
+    what to do. 3: one message missing charge status. 2: next steps everywhere
+    but charge status mostly missing. 1: generic failure text with a retry
+    prompt. 0: neither charge status nor a next step.
+
+- id: incident-updates-concrete-impact
+  domain: business
+  category: error and status messages
+  rule: >-
+    Incident and outage notices say concretely what is and is not affected for
+    the customer (data, orders, payments) and what is being done, instead of
+    vague reassurance such as "don't worry, it's temporary".
+  source:
+    title: Shopify App Design Guidelines, Voice and tone (Serious problems or errors)
+    url: 'https://shopify.dev/docs/apps/design/content/voice-and-tone'
+    quote: >-
+      Explain the impact on their business clearly, without using confusing or
+      scary language, such as “Some of today’s sales data hasn’t been updated
+      yet. This will be fixed shortly. Your data is safe, and your sales are not
+      affected.”
+    licence: unknown
+  why_fuzzy: >-
+    Whether a notice states impact clearly needs comparison with the internal
+    incident notes and a judgment about what a customer needs to know; "We're
+    experiencing technical difficulties" and "Our team is on it" are fluent but
+    empty.
+  why_agent_breaks_it: >-
+    Status updates written by assistants default to generic reassurance and
+    soft language ("some users may experience issues", "we appreciate your
+    patience") and leave out what is unaffected.
+  scope: cross-file
+  fixture: >-
+    Shelfwise (fictional storefront app). docs/incidents/inc-412.md is the
+    internal timeline: product images failing on 18% of stores since 09:10 UTC,
+    checkout unaffected, no data lost, fix being deployed, next update 11:00 UTC.
+  tasks:
+    - 'Write the status page update for inc-412 in content/status/inc-412.md.'
+    - 'Draft the follow-up email to affected merchants: emails/inc-412-followup.md.'
+    - 'Write the in-app incident banner in locales/en.json.'
+    - 'Write a support macro agents can send when merchants ask about the outage: support/macros/inc-412.md.'
+  near_miss:
+    compliant: >-
+      Product images aren't loading on some stores. Checkout and orders are
+      working normally and no data has been lost. We're deploying a fix and will
+      update you by 11:00 UTC.
+    violating: >-
+      We're experiencing some technical difficulties, but don't worry, our team
+      is on it and everything will be back to normal soon!
+  grading_note: >-
+    Compare the notice with the incident notes. 4: states what is affected,
+    what is not, and what is being done, with no empty reassurance. 3: all
+    present, one vague phrase. 2: some specifics but key facts (e.g. checkout
+    unaffected) missing or "don't worry" style lines. 1: mostly vague. 0:
+    generic "technical difficulties" with no concrete impact.
+
+# ---------------------------------------------------------------------------
+# Support replies and apologies
+# ---------------------------------------------------------------------------
+
+- id: apologise-only-when-at-fault
+  domain: business
+  category: support replies and apologies
+  rule: >-
+    Say sorry only when the company actually did something wrong, and then say
+    "we're sorry" once, sincerely, before moving to the fix; unwelcome news that
+    is not the company's fault carries no apology.
+  source:
+    title: Monzo Writing Principles (When we have to say sorry, say it sincerely)
+    url: 'https://monzo.com/tone-of-voice/'
+    quote: >-
+      When we’ve done something wrong, we own up to it and take responsibility.
+      It’s never ‘We’d like to apologise’, it’s ‘We’re sorry’. But be careful not
+      to over-apologise – we say sorry once like we mean it, and then we focus on
+      what we’re doing to make things better. Sometimes we have to give people
+      news they won’t like, but we haven’t done anything wrong. In those cases,
+      we shouldn’t say sorry.
+    licence: unknown
+  why_fuzzy: >-
+    Deciding whether the company was at fault requires reading the ticket and
+    its internal notes, and apology takes many forms ("we regret",
+    "unfortunately", "apologies for any inconvenience"). Counting apologies and
+    judging sincerity is editorial.
+  why_agent_breaks_it: >-
+    Support replies and change notices from assistants open with "We're sorry
+    to inform you" and close with "We apologise for any inconvenience" whether
+    or not anything went wrong.
+  scope: cross-file
+  fixture: >-
+    Pennyjar (fictional UK budgeting app). support/tickets/ holds three tickets
+    with internal notes: a bug charged a fee twice (company at fault), an
+    overdraft was declined under lending policy, and a customer objects to a
+    plan price rise.
+  tasks:
+    - 'Draft replies to the three tickets in support/tickets/ and save them in support/replies/.'
+    - 'Write the email telling Plus subscribers the price goes from £3 to £4 a month in January: emails/plus-price-change.md.'
+    - 'Write the support macro for declined overdraft applications: support/macros/overdraft-declined.md.'
+    - 'Write the follow-up email to customers who were charged the duplicate fee: emails/duplicate-fee-refund.md.'
+  near_miss:
+    compliant: >-
+      We're sorry. A bug charged your £3 fee twice, and we've refunded the extra
+      £3 today. [price-change email:] From 1 January, Plus will cost £4 a month.
+    violating: >-
+      We're sorry to let you know that from 1 January Plus will cost £4 a month.
+      We apologise for any inconvenience this may cause.
+  grading_note: >-
+    Sort each message into at-fault or not-at-fault using the notes, then check
+    apologies. 4: apology only in at-fault messages, once, in plain "we're
+    sorry" form. 3: correct placement but formal or doubled once. 2: stray
+    apology in one not-at-fault message. 1: apologies in most messages. 0:
+    reflexive apologies everywhere, or none where the company was at fault.
+
+- id: impact-before-reasons
+  domain: business
+  category: support replies and apologies
+  rule: >-
+    In a message about a change or bad news, tell readers what changes for them
+    (what, when, how much) before explaining why the company decided it.
+  source:
+    title: Monzo Writing Principles (Focus on what matters to readers)
+    url: 'https://monzo.com/tone-of-voice/'
+    quote: >-
+      We’re often tempted to explain why we’ve done something before what it
+      actually is – especially if it’s an uncomfortable message. But are people
+      more interested in our decision-making process, or how it affects them?
+      (Hint: it’s almost always the latter.) We can explain our reasoning, but
+      need to explain the impact first.
+    licence: unknown
+  why_fuzzy: >-
+    The editor must tell impact sentences from justification and preamble
+    ("Over the past year, costs have risen...", "At Fernway we've always
+    believed...") and judge order and prominence; no keyword marks a sentence as
+    reasoning.
+  why_agent_breaks_it: >-
+    Price-rise and policy emails drafted by assistants typically open with
+    context and justification and reach the actual change in the second or
+    third paragraph.
+  scope: single-file
+  fixture: >-
+    Fernway Mobile (fictional), a UK SIM-only network. docs/changes/2027-pricing.md
+    is an internal memo with the reasons (network costs, 5G investment) and the
+    changes (£2 a month more from 1 April; free EU roaming ends on Basic).
+  tasks:
+    - 'Write the customer email announcing the April price change: emails/april-price-change.md.'
+    - 'Draft the in-app notice about ending free EU roaming on the Basic plan: content/notices/eu-roaming.md.'
+    - 'Write the help-centre article explaining why prices are going up: content/help/price-rise.md.'
+    - 'Write the SMS, under 300 characters, telling customers about the change: content/sms/april-change.md.'
+  near_miss:
+    compliant: >-
+      From 1 April, your monthly price goes up by £2. You can leave without a
+      fee until 30 April. Here's why we're making this change.
+    violating: >-
+      Over the past year, the cost of running our network has risen sharply.
+      That's why, from 1 April, your monthly price will go up by £2.
+  grading_note: >-
+    Find the first sentence that states the change for the reader. 4: it opens
+    the message. 3: it follows one short greeting or framing line. 2: it comes
+    after a sentence or two of reasoning. 1: it is in the second paragraph or
+    later. 0: the change is buried after extended justification.
+
+- id: bad-news-active-voice
+  domain: business
+  category: support replies and apologies
+  rule: >-
+    When giving bad news or describing a mistake, use the active voice so it is
+    clear who did what; do not use the passive ("payments were delayed", "an
+    issue was identified") to hide the company's responsibility.
+  source:
+    title: Monzo Writing Principles (Avoid ambiguity, write in the active voice)
+    url: 'https://monzo.com/tone-of-voice/'
+    quote: >-
+      There’s a funny thing that happens to our writing when we're giving bad
+      news, or talking about processes. We slip into what’s called the ‘passive'
+      voice, which basically means we don’t say who’s responsible for
+      something. We use the passive voice partly because we're unconsciously
+      distancing ourselves from the message.
+    licence: unknown
+  why_fuzzy: >-
+    Grammar checkers can flag passives but not decide which ones hide
+    responsibility; "Your refund has been sent" is harmless while "Salary
+    payments were delayed due to an issue" hides who caused it. Agentless
+    nominalisations ("a delay occurred") carry the same problem without a
+    passive verb.
+  why_agent_breaks_it: >-
+    Corporate incident and apology writing, which models imitate, leans on
+    agentless passives: "An issue was identified", "Some payments may have been
+    affected".
+  scope: single-file
+  fixture: >-
+    Ledgerline (fictional payroll app). docs/incidents/payroll-delay.md records
+    that a release on Thursday delayed 1,240 salary payments by one day;
+    emails/ and content/blog/ hold customer communications.
+  tasks:
+    - 'Write the email to affected employers about the payroll delay: emails/payroll-delay.md.'
+    - 'Draft the public post-incident summary in content/blog/payroll-delay-summary.md.'
+    - 'Write the support macro for employees asking where their salary is: support/macros/salary-late.md.'
+    - 'Write the notice for accounts we have restricted pending a compliance review: emails/account-review.md.'
+  near_miss:
+    compliant: >-
+      We delayed your team's salary payments by one day. A change we released on
+      Thursday stopped the payments from being sent.
+    violating: >-
+      Salary payments were delayed by one day due to an issue that was identified
+      on Thursday.
+  grading_note: >-
+    Look at sentences about what went wrong or what was done to the customer.
+    4: the company is the named actor throughout. 3: one agentless sentence that
+    does not obscure fault. 2: a mix; key sentences are passive. 1: mostly
+    passive, responsibility unclear. 0: no sentence says the company caused
+    the problem.
+
+# ---------------------------------------------------------------------------
+# Inclusive and accessible language
+# ---------------------------------------------------------------------------
+
+- id: no-directional-language
+  domain: business
+  category: inclusive and accessible language
+  rule: >-
+    Instructions do not depend on seeing the page layout ("in the right
+    sidebar", "the button above", "the green icon at the top"); they name the
+    control or section instead.
+  source:
+    title: Mailchimp Content Style Guide, Writing for Accessibility
+    url: 'https://styleguide.mailchimp.com/writing-for-accessibility/'
+    quote: >-
+      Avoid directional instructions and any language that requires the reader
+      to see the layout or design of the page. This is helpful for many reasons,
+      including layout changes on mobile.
+    licence: Creative Commons Attribution-NonCommercial 4.0 International (stated on the page)
+  why_fuzzy: >-
+    "The steps below" in a linear article is arguably fine, while "the icon in
+    the top-right corner" is not; colour and shape cues ("the blue button") also
+    count. An editor must judge whether the reader could follow the text without
+    seeing the screen.
+  why_agent_breaks_it: >-
+    Help articles written by assistants, especially from a layout description,
+    say "click the gear icon in the top-right corner" and "use the panel on the
+    left".
+  scope: single-file
+  fixture: >-
+    Mapleform (fictional form builder). docs/ui-map.md describes the editor
+    layout with control names (Fields panel on the left, Settings panel on the
+    right, green Publish button at the top right); content/help/ holds articles.
+  tasks:
+    - 'Write a help article on adding conditional logic to a form at content/help/conditional-logic.md, using docs/ui-map.md.'
+    - 'Write the five-step onboarding tooltip tour under tour.* in locales/en.json.'
+    - "Draft the 'How to publish your form' email for new users: emails/how-to-publish.md."
+    - 'Update content/help/custom-domain.md for the new settings layout in docs/ui-map.md.'
+  near_miss:
+    compliant: >-
+      Select Settings, then Logic, and choose Add rule.
+    violating: >-
+      Click the gear icon in the right-hand panel, then hit the green button at
+      the top.
+  grading_note: >-
+    Check every navigation instruction. 4: all name controls or sections, none
+    rely on position, colour or shape. 3: one positional hint alongside a
+    named control. 2: several instructions mix names with positions. 1: most
+    rely on position. 0: navigation can only be followed by seeing the layout.
+
+# ---------------------------------------------------------------------------
+# Environmental and health claims
+# ---------------------------------------------------------------------------
+
+- id: no-unqualified-green-claims
+  domain: business
+  category: environmental claims
+  rule: >-
+    Do not make broad environmental claims ("eco-friendly", "green",
+    "sustainable", "better for the planet") on their own; any environmental
+    claim names the specific, substantiated benefit right next to it.
+  source:
+    title: FTC Guides for the Use of Environmental Marketing Claims (Green Guides), 16 CFR 260.4 (eCFR)
+    url: 'https://www.ecfr.gov/current/title-16/chapter-I/subchapter-B/part-260'
+    quote: >-
+      In many cases, such claims likely convey that the product, package, or
+      service has specific and far-reaching environmental benefits and may
+      convey that the item or service has no negative environmental impact.
+      Because it is highly unlikely that marketers can substantiate all
+      reasonable interpretations of these claims, marketers should not make
+      unqualified general environmental benefit claims.
+    licence: unknown
+  why_fuzzy: >-
+    General claims can be made without the usual words ("kind to the earth", a
+    leaf motif with "better choice"), and a general word followed immediately by
+    a specific, true benefit is acceptable. The editor must judge qualification
+    and proximity against a facts file.
+  why_agent_breaks_it: >-
+    Product and Earth Day copy from assistants defaults to "eco-friendly",
+    "sustainable" and "planet-friendly" as adjectives.
+  scope: cross-file
+  fixture: >-
+    Fernleaf Botanics (fictional), a skincare brand. docs/sustainability-facts.md
+    lists the substantiated facts: refill pouches use 70% less plastic than the
+    bottle by weight, and shipping boxes are 100% recycled cardboard.
+  tasks:
+    - "Write the 'Our planet' section of content/about.md from docs/sustainability-facts.md."
+    - 'Write product copy for the refill pouch in content/products/refill-pouch.md.'
+    - 'Draft an Earth Day email: emails/earth-day.md.'
+    - 'Write five Instagram captions for the refill launch in content/social/refill.md.'
+  near_miss:
+    compliant: >-
+      Our refill pouch uses 70% less plastic than our bottle, by weight.
+    violating: >-
+      Our eco-friendly refill pouch is better for the planet.
+  grading_note: >-
+    Mark every environmental claim and check for an adjacent specific fact from
+    the facts file. 4: all claims specific, or general words immediately
+    qualified. 3: one general phrase qualified in the next sentence. 2: general
+    claims qualified only elsewhere on the page. 1: several unqualified general
+    claims. 0: headline or product name built on an unqualified green claim.
+
+- id: no-offset-based-neutral-claims
+  domain: business
+  category: environmental claims
+  rule: >-
+    Do not claim a product, delivery or service is carbon neutral, climate
+    neutral, net zero or has a reduced climate impact on the basis of offsetting;
+    describe the offsetting itself, factually, instead.
+  source:
+    title: Directive (EU) 2024/825 (empowering consumers for the green transition), Annex point 4c
+    url: 'https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=OJ:L_202400825'
+    quote: >-
+      Claiming, based on the offsetting of greenhouse gas emissions, that a
+      product has a neutral, reduced or positive impact on the environment in
+      terms of greenhouse gas emissions.
+    licence: unknown
+  why_fuzzy: >-
+    Neutrality can be claimed in many ways ("climate-positive delivery",
+    "emissions cancelled out", "guilt-free shipping"), and stating that the
+    company buys offsets is allowed. The editor must judge whether the copy says
+    the product's impact is neutral or reduced because of offsets.
+  why_agent_breaks_it: >-
+    When the source notes say "we offset 100% of delivery emissions", agents
+    summarise it as "carbon-neutral delivery", the common marketing phrasing.
+  scope: cross-file
+  fixture: >-
+    Driftwood Coffee Co. (fictional), an EU coffee subscription. docs/climate.md
+    says delivery emissions are offset through a certified forestry project and
+    that the company has no lifecycle reduction data.
+  tasks:
+    - 'Write the sustainability page content/sustainability.md from docs/climate.md.'
+    - 'Add a short climate line to the checkout copy in locales/en.json.'
+    - 'Draft the newsletter announcing our offsetting partnership: emails/offset-partnership.md.'
+    - 'Write the product page for the Ethiopia single-origin beans: content/products/ethiopia.md.'
+  near_miss:
+    compliant: >-
+      We fund a certified forestry project to offset the estimated emissions from
+      our deliveries.
+    violating: >-
+      Every delivery is carbon neutral, thanks to our forestry offsets.
+  grading_note: >-
+    Find every climate statement. 4: offsets described as offsets, no neutral or
+    reduced-impact claim. 3: accurate but with a loose phrase ("climate-conscious
+    shipping"). 2: neutrality implied ("cancels out your coffee's footprint").
+    1: one explicit neutral or net-zero claim in body copy. 0: carbon-neutral or
+    net-zero claims in headlines or product copy.
+
+- id: no-green-virtue-from-legal-minimum
+  domain: business
+  category: environmental claims
+  rule: >-
+    Do not present a feature as an environmental benefit when it is required by
+    law or ordinary for that type of product, such as "microbead-free" rinse-off
+    cosmetics in the UK.
+  source:
+    title: CMA Green Claims Code, Environmental claims on goods and services
+    url: 'https://www.gov.uk/government/publications/green-claims-code-making-environmental-claims/environmental-claims-on-goods-and-services'
+    quote: >-
+      Businesses should not claim an environmental virtue out of something which
+      is a necessity or just an ordinary feature or consequence of products,
+      services, processes, brands or businesses of the type concerned.
+    licence: Open Government Licence v3.0
+  why_fuzzy: >-
+    The same fact can be listed neutrally in a specification or sold as a
+    virtue ("ocean-friendly: 100% microbead-free"); the editor must know what is
+    legally required or normal for the category and judge the framing.
+  why_agent_breaks_it: >-
+    Agents mine specification sheets for anything that sounds green and turn
+    each point into a benefit, without knowing or checking that it is a legal
+    minimum.
+  scope: cross-file
+  fixture: >-
+    Saltmarsh Skincare (fictional), a UK brand. docs/product-specs.md lists
+    product features, including "microbead-free (UK legal requirement since
+    2018)" for the face wash and "CFC-free propellant (required by law)" for the
+    dry shampoo.
+  tasks:
+    - 'Write the product page for the exfoliating face wash in content/products/face-wash.md from docs/product-specs.md.'
+    - "Write a 'Why Saltmarsh is different' section for content/landing/home.md."
+    - 'Draft back-of-pack copy for the dry shampoo spray in content/packaging/dry-shampoo.md.'
+    - 'Write three ad headlines for the face wash in content/ads/face-wash.md.'
+  near_miss:
+    compliant: >-
+      Exfoliates with finely ground apricot shell. Rinse off with warm water.
+    violating: >-
+      Ocean-friendly exfoliation: our face wash is 100% microbead-free.
+  grading_note: >-
+    Check how legally required features are presented. 4: not presented as
+    benefits (absent or neutral spec line). 3: listed neutrally among
+    ingredients. 2: mentioned with mild benefit framing ("no microbeads, of
+    course"). 1: presented as an environmental benefit in body copy. 0:
+    headline or differentiator built on a legal minimum.
+
+- id: natural-is-not-safe
+  domain: business
+  category: health claims
+  rule: >-
+    Do not suggest a product is safe, gentle or effective because it is
+    "natural", or safer because it leaves out a common ingredient
+    ("chemical-free", "paraben-free so it's safer").
+  source:
+    title: CAP Code, Section 12 Medicines, medical devices, health-related products and beauty products, rule 12.10
+    url: 'https://www.asa.org.uk/type/non_broadcast/code_section/12.html'
+    quote: >-
+      Marketing communications must not suggest that any product is safe or
+      effective merely because it is "natural" or that it is generally safer
+      because it omits an ingredient in common use.
+    licence: 'unknown (footer: Copyright 2026 ASA and CAP)'
+  why_fuzzy: >-
+    Listing "no parabens" is a fact; "no parabens, so it's gentle on sensitive
+    skin" is an inference the rule forbids. The editor must judge whether copy
+    links naturalness or omission to safety or efficacy, often across adjacent
+    sentences.
+  why_agent_breaks_it: >-
+    Clean-beauty copy, which assistants reproduce readily, rests on "pure,
+    natural, chemical-free and gentle enough for babies".
+  scope: single-file
+  fixture: >-
+    Fernleaf Botanics (fictional skincare brand). docs/product-specs.md lists
+    ingredients for each product (shea butter, calendula oil, no parabens, no
+    added fragrance) and notes that the baby balm is dermatologist-tested for
+    irritation only.
+  tasks:
+    - 'Write the product page for the baby balm in content/products/baby-balm.md.'
+    - 'Draft the launch email for our fragrance-free range: emails/fragrance-free-launch.md.'
+    - "Write the FAQ answer to 'Is Fernleaf safe for sensitive skin?' in content/help/faq.md."
+    - 'Write five Instagram captions about our paraben-free formulas in content/social/paraben-free.md.'
+  near_miss:
+    compliant: >-
+      Made with shea butter and calendula oil. Contains no parabens or added
+      fragrance.
+    violating: >-
+      Made with only natural ingredients and free from parabens, so it's gentle
+      and safe for even the most sensitive skin.
+  grading_note: >-
+    Look for any link between naturalness or missing ingredients and safety,
+    gentleness or effectiveness. 4: ingredient facts only, no such inference. 3:
+    one soft adjacency ("pure and natural") without a safety claim. 2: implied
+    link ("naturally gentle"). 1: explicit link in body copy. 0: headline or FAQ
+    answer built on "natural so safe" or "chemical-free".
+
+- id: no-medical-claims-for-wellness
+  domain: business
+  category: health claims
+  rule: >-
+    A wellness product that is not a licensed medicine or certified medical
+    device must not claim or imply that it diagnoses, treats or prevents a
+    disease or condition, physical or mental (insomnia, anxiety, depression).
+  source:
+    title: CAP Code, Section 12 Medicines, medical devices, health-related products and beauty products, rule 12.1
+    url: 'https://www.asa.org.uk/type/non_broadcast/code_section/12.html'
+    quote: >-
+      Medicinal or medical claims and indications may be made for a medicinal
+      product that is licensed by the MHRA, VMD or under the auspices of the EMA,
+      or for a medical device with the applicable conformity marking. A medicinal
+      claim is a claim that a product or its constituent(s) can be used with a
+      view to making a medical diagnosis or can treat or prevent disease in human
+      beings.
+    licence: 'unknown (footer: Copyright 2026 ASA and CAP)'
+  why_fuzzy: >-
+    "Helps you relax before bed" is a wellness claim; "beat insomnia" or "calm
+    your anxiety disorder" is a medical one, and the line runs through
+    everyday words ("sleepless nights", "stress relief"). Only a reader can
+    judge whether a condition is presented as treated.
+  why_agent_breaks_it: >-
+    Sleep and mindfulness copy written for search intent ("can't sleep")
+    naturally promises to fix insomnia or reduce anxiety.
+  scope: single-file
+  fixture: >-
+    Lullo (fictional), a sleep-sounds and breathing-exercise app that is not a
+    medical device. docs/product-facts.md lists features and a user survey in
+    which 64% said they fell asleep more easily.
+  tasks:
+    - 'Write the app store description in content/listing.md.'
+    - 'Write the landing page for our new breathing course at content/landing/breathing.md.'
+    - 'Draft a January email about better sleep habits: emails/january-sleep.md.'
+    - "Write search ad copy for people who search 'can't sleep' in content/ads/search.md."
+  near_miss:
+    compliant: >-
+      Wind down with sleep sounds and guided breathing designed to help you relax
+      before bed.
+    violating: >-
+      Beat insomnia and calm your anxiety in just 10 minutes a night.
+  grading_note: >-
+    Find every mention of a health condition and what the copy says the app does
+    about it. 4: no condition presented as diagnosed, treated or prevented. 3:
+    a condition mentioned only as context, not as treated. 2: implied
+    treatment ("say goodbye to sleepless nights"). 1: one explicit treatment
+    claim. 0: headline claims to treat or cure a condition.
+
+# ---------------------------------------------------------------------------
+# Financial promotions
+# ---------------------------------------------------------------------------
+
+- id: balanced-investment-promotions
+  domain: business
+  category: financial promotions
+  rule: >-
+    Promotions for investment products give a balanced picture: benefits such as
+    returns or growth are accompanied in the body of the promotion by the
+    relevant risks, not left to a generic footnote.
+  source:
+    title: FCA, Risk warnings for mainstream investments
+    url: 'https://www.fca.org.uk/firms/risk-warnings-mainstream-investments'
+    quote: >-
+      When promoting investment products, you must ensure promotions: Are fair,
+      clear and not misleading (COBS 4.2.1R(1)). Give a balanced impression of
+      the benefits and risks of an investment product or service (COBS 4.5.2R(2)
+      or COBS 4.5A.3R(2)(b)).
+    licence: 'unknown (footer: Copyright 2026 Financial Conduct Authority)'
+  why_fuzzy: >-
+    Balance is a whole-message judgment: a "capital at risk" line can be present
+    and the promotion still unbalanced, and the same page notes that the regulator
+    does not prescribe risk wording. The editor must weigh prominence, placement
+    and whether the risks named are the relevant ones.
+  why_agent_breaks_it: >-
+    Assistants write investment promotions as upbeat growth stories with a past
+    return figure up front and a tacked-on "Capital at risk" at the end.
+  scope: single-file
+  fixture: >-
+    Kestrel Invest (fictional), a UK investing app offering a stocks and shares
+    ISA with a global tracker fund. docs/product-facts.md lists fees, the past
+    five-year return and the key risks (value can fall, currency risk, returns
+    not guaranteed).
+  tasks:
+    - 'Write the landing page for our Stocks and Shares ISA at content/landing/isa.md.'
+    - 'Draft an email encouraging cash-savings customers to try investing: emails/move-to-investing.md.'
+    - 'Write three short social ads for ISA season, under 200 characters each, in content/ads/isa-season.md.'
+    - 'Write the push notification and in-app card promoting the Global Tracker fund in content/push/global-tracker.md.'
+  near_miss:
+    compliant: >-
+      Invest in 3,000 companies worldwide with one fund. Its value can go down as
+      well as up, so you could get back less than you put in.
+    violating: >-
+      Grow your money with a fund that returned 62% over five years. Start
+      investing today! (Capital at risk.)
+  grading_note: >-
+    Weigh benefits against risks in prominence and placement. 4: relevant risks
+    explained alongside each benefit, in the body. 3: risks in the body but
+    less prominent than benefits. 2: only a generic risk line near the end.
+    1: risk relegated to small print. 0: benefits only, or past returns
+    headlined with no risk information.
+
+# ---------------------------------------------------------------------------
+# Product availability and roadmap
+# ---------------------------------------------------------------------------
+
+- id: no-preannouncing-features
+  domain: business
+  category: product availability and roadmap
+  rule: >-
+    Documentation and help content describe only what has shipped; they do not
+    mention planned or upcoming features, even in passing ("coming soon",
+    "doesn't yet", "we're working on it").
+  source:
+    title: Google developer documentation style guide, Documenting future features
+    url: 'https://developers.google.com/style/future'
+    quote: >-
+      Avoid documenting future features or products, even in innocuous ways.
+      Don't pre-announce anything in documentation unless it has been approved by
+      your legal counsel.
+    licence: Creative Commons Attribution 4.0 (page footer)
+  why_fuzzy: >-
+    Pre-announcement can be oblique ("for now", "at the moment", "keep an eye
+    out", "we're always improving export"), and the editor needs the internal
+    roadmap to see that a hint points at a real planned feature.
+  why_agent_breaks_it: >-
+    When an agent sees a roadmap file and a customer question about a missing
+    feature, it tries to be helpful by saying the feature is coming.
+  scope: cross-file
+  fixture: >-
+    Quillnote (fictional note-taking app). docs/roadmap-internal.md lists
+    planned work (PDF export next month, offline mode in Q2, a Linux app);
+    docs/shipped.md lists current features; content/help/ holds articles.
+  tasks:
+    - 'Write the help article on exporting notes at content/help/export.md.'
+    - 'Update content/help/offline.md; customers keep asking whether Quillnote works offline.'
+    - 'Write the FAQ for the pricing page at content/pricing-faq.md.'
+    - "Write the help article 'Which platforms does Quillnote support?' at content/help/platforms.md."
+  near_miss:
+    compliant: >-
+      You can export notes as Markdown or HTML.
+    violating: >-
+      You can export notes as Markdown or HTML. PDF export is coming soon!
+  grading_note: >-
+    Compare the text with the roadmap file. 4: no mention or hint of planned
+    features. 3: neutral "isn't supported" wording with no hint of plans. 2:
+    vague hint ("not yet", "for now"). 1: a planned feature named as coming. 0:
+    roadmap items or dates disclosed.
+
+# ---------------------------------------------------------------------------
+# Localisation
+# ---------------------------------------------------------------------------
+
+- id: no-idioms-for-translation
+  domain: business
+  category: localisation
+  rule: >-
+    Copy that will be translated avoids idioms, colloquial expressions and
+    culture-specific references such as sports metaphors, local holidays and
+    pop-culture jokes.
+  source:
+    title: Microsoft Writing Style Guide, Global communications, Writing tips
+    url: 'https://learn.microsoft.com/en-us/style-guide/global-communications/writing-tips'
+    quote: >-
+      Avoid idioms, colloquial expressions, and culture-specific references.
+      They can be confusing for non-native English speakers and hard to
+      localize. Consider the worldwide implications of what you write.
+    licence: 'unknown (page shows Microsoft 2026 copyright)'
+  why_fuzzy: >-
+    Idioms are open-ended and often feel literal to native speakers ("hit the
+    ground running", "a blank slate", "in the driver's seat", "touch base"), and
+    cultural references vary by market. No list can cover them.
+  why_agent_breaks_it: >-
+    Friendly UI and announcement copy from assistants is full of idioms and
+    US-centric references ("knock it out of the park", "your new MVP").
+  scope: single-file
+  fixture: >-
+    Orbitly (fictional project-management tool). locales/en.json is the source
+    for nine locales (locales/de.json, locales/ja.json and others), and the
+    README says every English string and content/help/ article goes to
+    translators.
+  tasks:
+    - 'Write the onboarding strings for the new timeline view in locales/en.json.'
+    - "Write the 'What's new' modal for the automation builder under whatsNew.* in locales/en.json."
+    - 'Draft the help article on recurring tasks at content/help/recurring-tasks.md.'
+    - 'Write empty-state messages for boards, inbox and reports in locales/en.json.'
+  near_miss:
+    compliant: >-
+      Your board is empty. Add a task to get started.
+    violating: >-
+      Your board is a blank slate. Hit the ground running by adding your first
+      task!
+  grading_note: >-
+    Read each string for idioms, slang and culture-bound references. 4: none.
+    3: one mild, widely understood phrase. 2: two or three idioms. 1: idioms
+    in most strings. 0: copy built on idioms, puns or local references.
+
+# ---------------------------------------------------------------------------
+# Emails
+# ---------------------------------------------------------------------------
+
+- id: subject-lines-tell-dont-sell
+  domain: business
+  category: emails
+  rule: >-
+    An email's subject line and preview text describe what is in the email
+    rather than selling, teasing or creating curiosity or pressure.
+  source:
+    title: Mailchimp Content Style Guide, Writing Email Newsletters
+    url: 'https://styleguide.mailchimp.com/writing-email-newsletters/'
+    quote: >-
+      Keep your subject line descriptive. There's no perfect length, but some
+      email clients display only the first words. Tell—don't sell—what's inside.
+    licence: Creative Commons Attribution-NonCommercial 4.0 International (stated on the page)
+  why_fuzzy: >-
+    Descriptive versus salesy is a judgment of what the line conveys: "Big news
+    inside", "You'll love this" and "Don't miss out" tell nothing, while "New:
+    scheduled sends" tells. The editor must compare the subject line with the
+    body.
+  why_agent_breaks_it: >-
+    Assistants write subject lines as hooks, with emoji and curiosity gaps
+    ("You're going to love what we just built"), because that is how marketing
+    email is usually presented.
+  scope: single-file
+  fixture: >-
+    Wrenmail (fictional email-marketing tool). Emails in emails/ use front matter
+    with subject and preheader fields; docs/updates/november.md describes the
+    month's product updates.
+  tasks:
+    - 'Write the November product-update newsletter in emails/november-update.md, including the subject and preheader.'
+    - 'Draft the email announcing our new pricing tiers: emails/new-tiers.md.'
+    - 'Write the webinar invitation email: emails/webinar-invite.md.'
+    - 'Give me five subject-line options for the abandoned-cart launch email in emails/abandoned-cart-launch.md.'
+  near_miss:
+    compliant: >-
+      Subject: November updates: scheduled sends and a new template editor
+    violating: >-
+      Subject: You're going to love what we just built
+  grading_note: >-
+    Compare subject and preheader with the body. 4: both state the actual
+    contents. 3: descriptive with a light hype word. 2: half descriptive, half
+    tease. 1: mostly tease or pressure. 0: pure curiosity or sales hook with no
+    indication of the contents.
+
+# ---------------------------------------------------------------------------
+# Release notes
+# ---------------------------------------------------------------------------
+
+- id: release-notes-lead-with-user-impact
+  domain: business
+  category: release notes
+  rule: >-
+    Each release-note item starts by telling users how the change affects them
+    ("You can now…", "You no longer need to…"), not by describing what the team
+    did ("We've fixed…", "Fixed a bug where…", "Refactored…").
+  source:
+    title: The GDS Way, Writing release notes
+    url: 'https://gds-way.digital.cabinet-office.gov.uk/manuals/release-notes.html'
+    quote: >-
+      For each change, start by telling your users directly how the change
+      affects them. Start sentences with: “You can now…” “You can no longer…”
+      “You no longer need to…”
+    licence: Open Government Licence v3.0
+  why_fuzzy: >-
+    A regex can catch "We've fixed" but not "Improved sync engine performance",
+    "Duplicate submission issue resolved" or "New file-upload field type", all
+    of which describe work rather than effect. The editor must judge whether
+    each item leads with what changes for the user.
+  why_agent_breaks_it: >-
+    Release notes generated from commits and tickets keep their shape: "Fixed a
+    bug where...", "Added support for...", "We've improved...".
+  scope: single-file
+  fixture: >-
+    Mapleform (fictional form builder). docs/changes/v4.2-commits.txt holds raw
+    commit messages and ticket titles; content/release-notes/ holds earlier
+    release notes.
+  tasks:
+    - 'Write the release notes for v4.2 at content/release-notes/v4-2.md from docs/changes/v4.2-commits.txt.'
+    - "Turn this sprint's merged tickets in docs/changes/sprint-48.md into a customer-facing changelog entry."
+    - "Write the 'What's new' email for October's releases: emails/whats-new-october.md."
+    - 'Add content/release-notes/v4-2-1.md for the hotfix that stops duplicate submissions.'
+  near_miss:
+    compliant: >-
+      You can now add a file-upload field to any form.
+    violating: >-
+      We've added a new file-upload field type. Fixed a bug where submissions
+      were duplicated.
+  grading_note: >-
+    Read the first words of each item. 4: every item leads with the effect on
+    the user. 3: one item team- or system-centred. 2: about half. 1: most items
+    commit-style. 0: all items describe internal work or use "We've
+    fixed/added".
