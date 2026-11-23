@@ -10,7 +10,7 @@ import subprocess
 import tempfile
 import zipfile
 
-ROOT = Path(__file__).resolve().parent
+ROOT = Path(__file__).resolve().parent.parent
 PRIVATE_URL = "https://github.com/feuersteiner/agentests-benchmark-evidence.git"
 
 # Scan exports only. Never open an environment file or credential store.

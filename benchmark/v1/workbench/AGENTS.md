@@ -3,7 +3,7 @@
 The frozen fixture dataset is an optional public ZIP. Read [../ARCHIVE.md](../ARCHIVE.md);
 hydrate with `python3 -B benchmark/v1/archive.py restore`. Restored fixtures and
 ZIPs stay ignored. Reports, historical results and unfinished patches belong in
-the optional private evidence repository; read [../../EVIDENCE.md](../../EVIDENCE.md).
+the optional private evidence repository; read [../../evidence/EVIDENCE.md](../../evidence/EVIDENCE.md).
 Research remains tracked for offline catalogue selection and checks.
 
 ## Layout
@@ -52,7 +52,7 @@ invocations outside the repository. Do not start paid runs during maintenance.
 - Never start a paid run as a check; only the owner starts the full run.
 - A pilot's tests are always the 3 that `bun run benchmark:pick` picks, never chosen by hand: do not pick, swap or drop a pilot test yourself, and keep the seed it prints so the pick can be replayed.
 - Never write a measured number (a score, a time, tokens, a cost or a count of blocked commits) into a document unless it came from a real run's archive; never take one from memory, a dry run or an estimate. When a research file changes, recount the README's figures and the `triage.yaml` summary from the files.
-- Never commit raw results or run archives to the public repository. Follow ../../EVIDENCE.md for explicit private versioning; preserve original local evidence. Fixture working copies remain ignored.
+- Never commit raw results or run archives to the public repository. Follow ../../evidence/EVIDENCE.md for explicit private versioning; preserve original local evidence. Fixture working copies remain ignored.
 - Build a dataset entry to `dataset/README.md`, calling no model but the decision calls of `bun run benchmark:prove`, and change nothing outside the entry's own folder.
 - A benchmark Test uses only the `glob`, `grep` and `decide` stages, and its criteria carry standing policy, never case facts; the README's rules of the comparison define both.
 - Change nothing in `core/` for the benchmark's sake: the benchmark measures the package as it ships.

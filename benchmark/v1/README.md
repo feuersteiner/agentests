@@ -8,7 +8,7 @@ work. Skill/gate arms receive the target rule and same-domain companions.
 - [Pilot protocol](pilot/README.md)
 - [Execution and artifact access](run/README.md)
 - [Optional fixture ZIP](ARCHIVE.md)
-- [Private evidence access](../EVIDENCE.md)
+- [Private evidence access](../evidence/EVIDENCE.md)
 
 Measured findings, detailed invocation metadata, historical handoffs, proof
 reports and conversations are kept in the private evidence repository. Historical

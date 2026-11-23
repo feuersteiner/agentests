@@ -2,7 +2,7 @@
 
 Public sources contain methodology, harness code, test definitions and fixture
 manifests. Measured results, scores, detailed run metadata, logs and conversations
-belong in the optional [private evidence repository](EVIDENCE.md).
+belong in the optional [private evidence repository](evidence/EVIDENCE.md).
 
 | Version | Method                                                                                   | Sources                                                       |
 | ------- | ---------------------------------------------------------------------------------------- | ------------------------------------------------------------- |

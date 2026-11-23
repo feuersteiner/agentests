@@ -9,7 +9,7 @@ harness sources stay tracked; help, tests, typechecking and selection need no da
 This folder holds a benchmark that asks two things: whether a team's rule reaches a coding agent's
 work better when the agent is told it or when a gate enforces it, and which of two models makes the
 better gate. It holds the method, described below, the research the dataset is cut from, the
-dataset as it is built, and the harness that runs it. Raw results and detailed history are versioned in the [private evidence repository](../../EVIDENCE.md);
+dataset as it is built, and the harness that runs it. Raw results and detailed history are versioned in the [private evidence repository](../../evidence/EVIDENCE.md);
 [../README.md](../README.md) describes the method and artifact access.
 
 ## The question
@@ -480,7 +480,7 @@ supplies, and only the owner starts it.
 
 This is the archived v1 method, historically named `benchmark-v2`. Historical
 outcomes, invocation metadata, proof limitations and continuation notes are in the
-[private evidence repository](../../EVIDENCE.md). The public fixture download
+[private evidence repository](../../evidence/EVIDENCE.md). The public fixture download
 preserves dataset bytes only; maintenance does not rerun or repair old experiments.
 
 ## Folder structure

@@ -29,11 +29,11 @@ The v2 runner writes ignored `benchmark/v2/results/raw/<run-id>/`. Maintenance
 never runs models. After a separately authorized run, package one batch explicitly:
 
 ```sh
-python3 -B benchmark/evidence.py benchmark/v2/results/raw/<run-id> \
+python3 -B benchmark/evidence/evidence.py benchmark/v2/results/raw/<run-id> \
   --version v2 --batch <run-id>
 ```
 
-Offline storage checks: `python3 -B benchmark/evidence-test.py` and
+Offline storage checks: `python3 -B benchmark/evidence/evidence-test.py` and
 `python3 -B benchmark/v1/archive-test.py`.
 
 The pack command verifies the private origin and remote visibility, refuses
@@ -55,7 +55,7 @@ git add benchmark/private
 
 Never add raw evidence or LFS objects to the public repository. Private archives
 must be uploaded and verified before deleting local originals. Fixture-only public
-release assets use the separate [hydration workflow](v1/ARCHIVE.md).
+release assets use the separate [hydration workflow](../v1/ARCHIVE.md).
 
 Previously published Git history and issue #115 may contain historical results.
 This change does not rewrite history or edit that issue.

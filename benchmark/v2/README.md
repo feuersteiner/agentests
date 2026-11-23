@@ -13,7 +13,7 @@ come from that runtime, never from matching reply text against expected labels.
 - `pilot/`: cases, separate provisional labels, policy assertion, protocol.
 - `run/`: a future full-run plan and honest not-run metadata.
 - `workbench/`: CLI, configurable Luna/Jev settings, offline harness tests.
-- `results/`: tracked empty-state README; raw run files are ignored and [archived privately](../EVIDENCE.md).
+- `results/`: tracked empty-state README; raw run files are ignored and [archived privately](../evidence/EVIDENCE.md).
 
 From a fresh clone, install the locked workspaces and build the public runtime
 from the repository root. No private submodule or fixture download is needed.

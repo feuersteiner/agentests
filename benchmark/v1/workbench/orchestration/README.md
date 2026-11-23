@@ -2,7 +2,7 @@
 
 Public sources retain dataset-building briefs, checkers, proof tooling and
 scoreboard code. Construction reports and unfinished patches are historical
-evidence in the [private repository](../../../EVIDENCE.md); the optional public
+evidence in the [private repository](../../../evidence/EVIDENCE.md); the optional public
 fixture ZIP excludes them. Historical paths in private records describe the
 original cloud checkout.
 

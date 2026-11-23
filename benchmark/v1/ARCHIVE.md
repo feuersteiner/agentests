@@ -52,6 +52,6 @@ release download instead. An inspection restore can use `--destination` with an
 external physical directory (resolve macOS `/tmp`/`/var` aliases first). Existing
 historical defects remain unchanged; hydration does not establish proof validity.
 
-Evidence and construction history have a separate [private workflow](../EVIDENCE.md).
+Evidence and construction history have a separate [private workflow](../evidence/EVIDENCE.md).
 Existing public Git history remains unchanged; removing loose fixtures from this
 checkout does not remove historical Git objects.

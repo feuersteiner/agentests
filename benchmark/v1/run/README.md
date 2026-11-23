@@ -7,7 +7,7 @@ Linux/root for private mount namespaces, authenticated Claude Code, built
 `core/dist` and decision credentials retained in the harness process.
 
 Detailed historical settings, invocation IDs, handoffs and continuation notes are
-in the [private evidence repository](../../EVIDENCE.md). Exclude contaminated
+in the [private evidence repository](../../evidence/EVIDENCE.md). Exclude contaminated
 batches and calibration from comparisons, distinguish quota failures from scored
 outcomes and deduplicate retries. Preserve originals before continuing a run.
 

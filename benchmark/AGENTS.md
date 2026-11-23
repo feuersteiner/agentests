@@ -1,6 +1,6 @@
 # Benchmark guide
 
-Read [README.md](README.md), [EVIDENCE.md](EVIDENCE.md) and the affected version's
+Read [README.md](README.md), [evidence/EVIDENCE.md](evidence/EVIDENCE.md) and the affected version's
 README before changes. Each version separates public pilot definitions, run plans
 and workbench sources from ignored local `results/`. Only artifact-access notes
 belong in public results READMEs. Measured results/scores, detailed run metadata,
@@ -11,6 +11,14 @@ Normal clones/checks never initialize it. Never upload evidence to a public remo
 `v1` is the historical skill-versus-commit-gate experiment, previously called
 `benchmark-v2`. The new `v2` is a separate unrun evaluator pilot with five cases.
 
+## Layout
+
+- `evidence/`: shared private-evidence access/export instructions (`EVIDENCE.md`),
+  explicit packaging CLI (`evidence.py`) and offline privacy/preservation tests
+  (`evidence-test.py`). Tooling lives here; exported evidence belongs in `private/`.
+- `private/`: optional private evidence submodule; never initialized by normal checks.
+- `v1/` and `v2/`: version-specific methods, pilots, run plans and workbench sources.
+
 ## Preservation and privacy
 
 - Preserve datasets, frozen Tests/evals, research quotes and raw evidence. Path
@@ -19,7 +27,7 @@ Normal clones/checks never initialize it. Never upload evidence to a public remo
   and `v1/archive-manifest.json`. Explicit hydration is
   `python3 -B benchmark/v1/archive.py restore`. Keep ZIPs/extracted data ignored.
   Reports, proof results, patches and conversations must never enter fixture ZIPs.
-- Private export: follow `EVIDENCE.md`; verify origin and `isPrivate=true` before
+- Private export: follow `evidence/EVIDENCE.md`; verify origin and `isPrivate=true` before
   any upload. Scan export copies for credentials, inventory original/export hashes
   and verify preservation before deleting originals. Root `.env` and credential
   stores must never be read during maintenance or committed/uploaded.
