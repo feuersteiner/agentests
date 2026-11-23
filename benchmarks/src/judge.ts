@@ -162,6 +162,6 @@ export const runJudge = async (
 
 /** Whether a judge's error says its model is out of credit or usage, rather than failing once. */
 export const isOutOfCredit = (message: string): boolean =>
-	/credit balance|out of credits?|insufficient|quota|billing|usage limit|limit reached|spend(ing)? limit|monthly limit/i.test(
+	/credit balance|out of credits?|insufficient|quota|billing|usage limit|limit reached|hit your [\w .-]*limit|spend(ing)? limit|monthly limit/i.test(
 		message
 	);

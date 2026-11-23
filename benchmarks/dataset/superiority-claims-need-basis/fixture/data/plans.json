@@ -1,0 +1,17 @@
+{
+  "currency": "USD",
+  "billing": "per person per month",
+  "plans": [
+    { "id": "free", "name": "Free", "price": 0, "seats": 5, "guests": 0 },
+    { "id": "team", "name": "Team", "price": 9, "seats": 25, "guests": 5 },
+    { "id": "business", "name": "Business", "price": 16, "seats": 200, "guests": 50 },
+    {
+      "id": "enterprise",
+      "name": "Enterprise",
+      "price": null,
+      "seats": null,
+      "guests": null,
+      "audit_log_months": 12
+    }
+  ]
+}
