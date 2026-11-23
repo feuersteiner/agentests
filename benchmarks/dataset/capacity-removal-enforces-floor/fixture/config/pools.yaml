@@ -1,0 +1,21 @@
+# One pool per subsystem of the Kestrel storage fleet.
+
+api:
+  instance_type: c7.2xlarge
+  min_hosts: 6
+  max_batch: 2
+
+index:
+  instance_type: r7.4xlarge
+  min_hosts: 9
+  max_batch: 1
+
+placement:
+  instance_type: r7.2xlarge
+  min_hosts: 5
+  max_batch: 1
+
+storage:
+  instance_type: i4.8xlarge
+  min_hosts: 24
+  max_batch: 4
