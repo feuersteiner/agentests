@@ -1,0 +1,60 @@
+// Copperleaf data model. After changing it, create a migration with
+// `npm run db:migrate -- --name <what-changed>` and commit the new folder
+// under prisma/migrations/ with this file.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          BigInt   @id @default(autoincrement())
+  email       String   @unique
+  displayName String
+  bio         String?
+  createdAt   DateTime @default(now())
+  posts       Post[]
+  messages    Message[]  @relation("SentMessages")
+  reactions   Reaction[]
+}
+
+model Post {
+  id          BigInt    @id @default(autoincrement())
+  authorId    BigInt
+  author      User      @relation(fields: [authorId], references: [id])
+  title       String
+  slug        String    @unique
+  body        String
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@index([authorId])
+}
+
+model Message {
+  id        BigInt     @id @default(autoincrement())
+  senderId  BigInt
+  sender    User       @relation("SentMessages", fields: [senderId], references: [id])
+  body      String
+  editCount Int        @default(0)
+  createdAt DateTime   @default(now())
+  reactions Reaction[]
+
+  @@index([senderId, createdAt])
+}
+
+model Reaction {
+  id        BigInt   @id @default(autoincrement())
+  messageId BigInt
+  message   Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  userId    BigInt
+  user      User     @relation(fields: [userId], references: [id])
+  emoji     String
+  createdAt DateTime @default(now())
+
+  @@unique([messageId, userId, emoji])
+}

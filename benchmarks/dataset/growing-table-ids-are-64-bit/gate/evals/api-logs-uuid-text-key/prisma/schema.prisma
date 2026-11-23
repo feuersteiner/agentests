@@ -1,0 +1,53 @@
+// Copperleaf data model. After changing it, create a migration with
+// `npm run db:migrate -- --name <what-changed>` and commit the new folder
+// under prisma/migrations/ with this file.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          BigInt   @id @default(autoincrement())
+  email       String   @unique
+  displayName String
+  bio         String?
+  createdAt   DateTime @default(now())
+  posts       Post[]
+  requests    ApiRequestLog[]
+}
+
+model Post {
+  id          BigInt    @id @default(autoincrement())
+  authorId    BigInt
+  author      User      @relation(fields: [authorId], references: [id])
+  title       String
+  slug        String    @unique
+  body        String
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@index([authorId])
+}
+
+/// One row per API request, kept for auditing.
+model ApiRequestLog {
+  id         String   @id @default(uuid())
+  requestId  String   @unique
+  userId     BigInt?
+  user       User?    @relation(fields: [userId], references: [id])
+  method     String
+  path       String
+  statusCode Int
+  durationMs Int
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@index([createdAt])
+}
