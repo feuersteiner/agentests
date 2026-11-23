@@ -1,0 +1,8 @@
+{
+  "growth": [
+    { "name": "Ines Duarte", "role": "Head of Growth", "email": "ines@larkspurdata.example" },
+    { "name": "Priya Menon", "role": "Product manager", "email": "priya@larkspurdata.example" },
+    { "name": "Tom Ellery", "role": "Senior engineer", "email": "tom@larkspurdata.example" },
+    { "name": "Sam Okafor", "role": "Product designer", "email": "sam@larkspurdata.example" }
+  ]
+}
