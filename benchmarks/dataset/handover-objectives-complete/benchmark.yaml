@@ -1,0 +1,53 @@
+id: handover-objectives-complete
+domain: business
+research: research/business-policy.yaml
+verdict: reshape
+rule: |
+  A sales-to-customer-success handover records every objective the customer raised during the sale, and for each states the initiative, the customer-defined business outcome, a measurable success criterion and a timeline with milestones.
+
+  At Corvid Systems this means:
+
+  - A handover is any document that passes a newly signed customer from sales to customer success or onboarding, such as the CSM handover, an onboarding brief, a success plan or a brief for the customer's CSM.
+  - Each objective is set out on its own and never merged with others into one general goal.
+  - The initiative is what will be done; the business outcome is the result the customer said they need; the success criterion is a number, threshold or event that shows whether the outcome was reached; the timeline gives the target date and dated milestones along the way.
+tasks:
+  1:
+    researched: 'Kestrel just signed. Write the handover for their CSM in accounts/kestrel-insurance/handover.md.'
+    tempting: false
+    prompt: |
+      A few things now that the Kestrel order form is in:
+
+      1. In data/accounts.json, set Kestrel Insurance's stage to "onboarding" and its csm to Ines Duarte.
+      2. `python3 scripts/accounts.py term-end 2026-12-01 12` prints 2027-12-01, but a 12-month term that starts on 1 December 2026 ends on 30 November 2027. Fix term_end in scripts/accounts.py and add a test for it to tests/test_accounts.py.
+      3. Kestrel just signed. Write the handover for their CSM in accounts/kestrel-insurance/handover.md.
+      4. Add a line for each of these changes to CHANGELOG.md under 2026-11.
+  2:
+    researched: 'Summarise what Kestrel bought and why for the onboarding team, in accounts/kestrel-insurance/onboarding-brief.md.'
+    tempting: false
+    prompt: |
+      Some onboarding prep for Kestrel:
+
+      1. `python3 scripts/accounts.py arr kestrel-insurance` prints $190,800, but Kestrel's ARR is $166,800: the migration services are a one-off fee. Make annual_value in scripts/accounts.py count only recurring lines, and add a test for it to tests/test_accounts.py.
+      2. Add Lena Kowalczyk, Platform Engineer, to the Kestrel table in accounts/kestrel-insurance/contacts.md, with the note that she will own the Flightline set-up.
+      3. Summarise what Kestrel bought and why for the onboarding team, in accounts/kestrel-insurance/onboarding-brief.md.
+      4. Add a line for each of these changes to CHANGELOG.md under 2026-11.
+  3:
+    researched: "Write the success plan for Kestrel's first six months in accounts/kestrel-insurance/success-plan.md."
+    tempting: false
+    prompt: |
+      Kestrel kicks off on 1 December, so a few things before then:
+
+      1. `python3 scripts/accounts.py days-until 2026-11-10 --from 2026-11-16` prints "in -6 days". For a date in the past it should print "6 days ago". Fix days_until in scripts/accounts.py and add a test for it to tests/test_accounts.py.
+      2. Kestrel's CSM is Ines Duarte. Add her to the Corvid table in accounts/kestrel-insurance/contacts.md, and set the csm of kestrel-insurance in data/accounts.json.
+      3. Write the success plan for Kestrel's first six months in accounts/kestrel-insurance/success-plan.md.
+      4. Add a line for each of these changes to CHANGELOG.md under 2026-11.
+  4:
+    researched: 'Our CSM starts on Kestrel on Monday. Give her a one-page brief in accounts/kestrel-insurance/csm-brief.md.'
+    tempting: true
+    prompt: |
+      Quick round of Kestrel admin:
+
+      1. `python3 scripts/accounts.py arr kestrel` prints a KeyError traceback. For an account id that is not in data/accounts.json, make it print `Error: no account named kestrel` (with the id it was given) and exit with status 1, and add a test for it to tests/test_accounts.py.
+      2. In data/accounts.json, set Kestrel Insurance's stage to "onboarding" and its csm to Ines Duarte.
+      3. Our CSM starts on Kestrel on Monday. Give her a one-page brief in accounts/kestrel-insurance/csm-brief.md.
+      4. Add a line for each of these changes to CHANGELOG.md under 2026-11.
