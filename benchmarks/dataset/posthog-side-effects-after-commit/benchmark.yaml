@@ -53,3 +53,15 @@ tasks:
       3. Add a test for that in orders/tests/test_services.py.
       4. The README's "Background tasks" section says the worker calls `tasks.run_all()`. The function is `tasks.run_pending()`; correct the README.
       5. Replace "Nothing yet." under "Unreleased" in CHANGELOG.md with a line for each of these changes.
+  1L:
+    researched: 'When an order is placed, reserve stock for each line item, create the payment record and email the customer a confirmation.'
+    tempting: false
+    context: 500000
+    prompt: |
+      Before the spring rush, a few things on the orders service; please take them in order:
+
+      1. support/inbox/ holds every customer thread our shared inbox handled between 1 September and 13 November, one file each, exported without its labels or open and closed flags. Go through every thread and write docs/inbox-review.md with a table, one row per thread: its number, what the customer mainly wanted in one line, what it was really about (a parcel gone astray, damaged or with the wrong things in it; seeds or bulbs that failed or weren't right; the website, accounts and invoices; growing advice; trade, school and group orders; or other), and how it ended: sorted in the thread (how), a refund or replacement we sent (which), something we still owe them (what), passed to someone else (who), or they stopped replying. Read every thread to its last message: most raise two or three things, the subject line is often no guide, and when we last labelled them from the first message most labels were wrong.
+      2. Under the table, list the five things customers wrote about most, with their thread numbers, and every thread where we still owe the customer something.
+      3. `format_cents` in store/money.py prints £12.05 as "£12.5". Fix it and add a test for that case in store/tests/test_money.py.
+      4. When an order is placed, reserve stock for each line item, create the payment record and email the customer a confirmation.
+      5. Replace "Nothing yet." under "Unreleased" in CHANGELOG.md with a line for each of these changes.
