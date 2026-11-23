@@ -1,0 +1,19 @@
+version: 1
+id: no-idioms-for-translation
+title: No idioms in copy for translation
+description: Interface strings and help articles that are translated use literal wording, with no idioms, colloquial expressions or culture-specific references.
+select:
+  glob: ['locales/en.json', 'content/help/**/*.md']
+assert:
+  - id: no-idioms
+    description: No idiom, that is no fixed expression whose meaning does not follow from its words.
+    error: Replace the idiom with literal words that say the same thing; a word-for-word translation must keep the meaning.
+    decide: 'Judge only the wording a reader sees: the string values of a JSON file, never its keys, or the text of a Markdown file. That wording contains no idiom, that is no fixed figurative expression whose meaning cannot be worked out from its words, such as "hit the ground running", "a blank slate", "touch base", "in the driver''s seat", "get the ball rolling" or "do the heavy lifting". These are not idioms: an ordinary phrasal verb such as "sign in", "set up" or "log out"; a word in its usual software sense, such as a file that moves to a folder, a script that runs, a link that breaks, a dashboard, or drag and drop; and a placeholder in curly braces.'
+  - id: no-colloquial-expressions
+    description: No slang or casual spoken expression.
+    error: Replace the casual expression with neutral, literal wording.
+    decide: 'The text a reader sees contains no slang or casual spoken expression, such as "gonna", "wanna", "awesome", "no biggie", "no worries", "heads-up", "yay" or "oops".'
+  - id: no-culture-specific-references
+    description: No sports metaphor, named holiday of one culture, or pop-culture reference.
+    error: Remove the reference and say the same thing in words that need no knowledge of one country or culture.
+    decide: 'Judge only the wording a reader sees: the string values of a JSON file, never its keys, or the text of a Markdown file. That wording contains no reference that only readers who know one country or culture would understand: no sports metaphor, that is sports language used figuratively about something other than sport (such as "knock it out of the park", "a slam dunk", "a home run", "your new MVP" or "a game plan"); no named holiday or event of one country or culture (such as Thanksgiving, the Fourth of July or Black Friday); and no reference to a film, TV show, song, meme or celebrity. Words about a sport used literally, in text about that sport, and generic words such as "public holidays" are not such references.'

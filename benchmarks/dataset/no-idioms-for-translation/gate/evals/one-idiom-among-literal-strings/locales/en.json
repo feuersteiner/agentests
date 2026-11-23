@@ -1,0 +1,83 @@
+{
+  "nav": {
+    "boards": "Boards",
+    "inbox": "Inbox",
+    "reports": "Reports",
+    "timeline": "Timeline",
+    "automations": "Automations",
+    "settings": "Settings"
+  },
+  "boards": {
+    "title": "Boards",
+    "newBoard": "New board",
+    "toolbar": {
+      "filter": "Filter",
+      "sort": "Sort",
+      "groupBy": "Group by"
+    },
+    "column": {
+      "add": "Add column",
+      "rename": "Rename column",
+      "delete": "Delete column"
+    },
+    "empty": {
+      "title": "No boards yet",
+      "body": "A board holds the tasks of one project. Create a board to start adding tasks.",
+      "action": "New board"
+    }
+  },
+  "tasks": {
+    "new": "New task",
+    "assignee": "Assignee",
+    "dueDate": "Due date",
+    "overdue": "Overdue by {count} days",
+    "markDone": "Mark as done"
+  },
+  "inbox": {
+    "title": "Inbox",
+    "markAllRead": "Mark all as read",
+    "mentionsOnly": "Mentions only",
+    "empty": {
+      "title": "No notifications",
+      "body": "Mentions, assignments and comments on your tasks appear here."
+    }
+  },
+  "reports": {
+    "title": "Reports",
+    "completedPerWeek": "Tasks completed per week",
+    "dateRange": "Date range",
+    "export": "Export as CSV",
+    "empty": {
+      "title": "No completed tasks",
+      "body": "No tasks were completed in this date range. Try casting a wider net.",
+      "action": "Change date range"
+    }
+  },
+  "onboarding": {
+    "next": "Next",
+    "back": "Back",
+    "skip": "Skip tour",
+    "finish": "Finish",
+    "boards": {
+      "step1Title": "Your board",
+      "step1Body": "A board holds the tasks of one project. Each column is a stage of the work, such as To do or Done.",
+      "step2Title": "Move a task",
+      "step2Body": "Drag a task to another column when its stage changes.",
+      "step3Title": "Invite your team",
+      "step3Body": "Select Share to add teammates. They can see and edit every task on this board."
+    }
+  },
+  "whatsNew": {
+    "close": "Close",
+    "guestAccess": {
+      "title": "New: guest access",
+      "body": "You can now invite people outside your organization as guests. Guests see only the boards you share with them, and they cannot create boards.",
+      "action": "Invite a guest"
+    }
+  },
+  "errors": {
+    "boardNameRequired": "Enter a name for the board.",
+    "uploadTooLarge": "This file is larger than 25 MB. Upload a smaller file.",
+    "network": "Orbitly cannot reach the server. Check your connection and try again."
+  }
+}

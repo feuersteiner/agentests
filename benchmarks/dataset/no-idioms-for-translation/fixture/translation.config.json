@@ -1,0 +1,7 @@
+{
+  "sourceLocale": "en",
+  "targetLocales": ["de", "ja"],
+  "strings": "locales/en.json",
+  "helpArticles": ["index", "create-a-board", "invite-teammates"],
+  "turnaroundDays": 5
+}

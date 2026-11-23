@@ -1,0 +1,69 @@
+{
+  "nav": {
+    "boards": "Boards",
+    "inbox": "Posteingang",
+    "reports": "Berichte",
+    "timeline": "Zeitleiste",
+    "automations": "Automatisierungen",
+    "settings": "Einstellungen"
+  },
+  "boards": {
+    "title": "Boards",
+    "newBoard": "Neues Board",
+    "toolbar": {
+      "filter": "Filtern",
+      "sort": "Sortieren",
+      "groupBy": "Gruppieren nach"
+    },
+    "column": {
+      "add": "Spalte hinzufügen",
+      "rename": "Spalte umbenennen",
+      "delete": "Spalte löschen"
+    }
+  },
+  "tasks": {
+    "new": "Neue Aufgabe",
+    "assignee": "Zuständig",
+    "dueDate": "Fälligkeitsdatum",
+    "overdue": "Seit {count} Tagen überfällig",
+    "markDone": "Als erledigt markieren"
+  },
+  "inbox": {
+    "title": "Posteingang",
+    "markAllRead": "Alle als gelesen markieren",
+    "mentionsOnly": "Nur Erwähnungen"
+  },
+  "reports": {
+    "title": "Berichte",
+    "completedPerWeek": "Erledigte Aufgaben pro Woche",
+    "dateRange": "Zeitraum",
+    "export": "Als CSV exportieren"
+  },
+  "onboarding": {
+    "next": "Weiter",
+    "back": "Zurück",
+    "skip": "Tour überspringen",
+    "finish": "Fertig",
+    "boards": {
+      "step1Title": "Ihr Board",
+      "step1Body": "Ein Board enthält die Aufgaben eines Projekts. Jede Spalte ist ein Arbeitsschritt, zum Beispiel Zu erledigen oder Erledigt.",
+      "step2Title": "Aufgabe verschieben",
+      "step2Body": "Ziehen Sie eine Aufgabe in eine andere Spalte, wenn sich ihr Arbeitsschritt ändert.",
+      "step3Title": "Team einladen",
+      "step3Body": "Wählen Sie Teilen, um Teammitglieder hinzuzufügen. Sie können jede Aufgabe auf diesem Board sehen und bearbeiten."
+    }
+  },
+  "whatsNew": {
+    "close": "Schließen",
+    "guestAccess": {
+      "title": "Neu: Gastzugang",
+      "body": "Sie können jetzt Personen außerhalb Ihrer Organisation als Gäste einladen. Gäste sehen nur die Boards, die Sie mit ihnen teilen, und können keine Boards erstellen.",
+      "action": "Gast einladen"
+    }
+  },
+  "errors": {
+    "boardNameRequired": "Geben Sie einen Namen für das Board ein.",
+    "uploadTooLarge": "Diese Datei ist größer als 25 MB. Laden Sie eine kleinere Datei hoch.",
+    "network": "Orbitly kann den Server nicht erreichen. Prüfen Sie Ihre Verbindung und versuchen Sie es erneut."
+  }
+}
