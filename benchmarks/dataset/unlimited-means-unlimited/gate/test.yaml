@@ -1,0 +1,19 @@
+version: 1
+id: unlimited-means-unlimited
+title: Unlimited means unlimited
+description: Cloudcrate pages and emails never call storage unlimited or boundless, even with a footnote, and state the 2 TB per-user limit wherever they say how much storage the Business plan has.
+select:
+  glob: ['content/**/*.md', 'emails/**/*.md']
+  grep: '[Ss]torage|STORAGE|\b[Ss]tor(e|es|ed|ing)\b|[Uu]nlimited|UNLIMITED|[Ll]imitless|[Ee]ndless|[Ii]nfinite|[Bb]oundless|[Bb]ottomless|\b[Ll]imits?\b|LIMIT|\b[Cc]aps?\b|[Rr]un(ning)? out|\b[Ss]pace\b|\b[Rr]oom\b|[TG]B\b|[Tt]erabyte|[Gg]igabyte|[Aa]s much as|[Qq]uota|[Ff]air[- ]use|[Nn]ever (run|worry|think|delete)|[Ff]orever'
+assert:
+  - id: storage-not-called-unlimited
+    description: Storage space is never called unlimited or described with a synonym, with or without a footnote.
+    error: Storage on Business is capped at 2 TB per user, so do not call storage unlimited, endless or impossible to run out of, even with a footnote or a cap beside it; state the limit instead.
+    decide: 'This question is only about the amount of file storage space that Cloudcrate, a file-hosting service, gives on its plans. Every Cloudcrate plan has a storage limit. The text never claims that storage space is unlimited. Claiming it means any of these: calling storage or space unlimited, limitless, endless, infinite or bottomless; saying storage has no limit or no cap; telling the reader they can store as much as they need or want; or telling the reader they will never run out of space or never have to delete files to make room. It still counts as claiming it when a footnote, an asterisk, brackets, a "fair use" note or a cap stated in the same sentence qualifies the claim. These do not count: calling something other than storage space unlimited, such as guest links or the number of users; stating an amount of storage, such as "2 TB per user"; a loose phrase such as "plenty of room" that does not say storage has no limit; explaining what happens when storage is full; and saying that storage is not unlimited. A text that says nothing about storage space, or that names a different company or product and is not about Cloudcrate, meets this condition.'
+  - id: business-storage-states-limit
+    description: Wherever the copy says how much storage Business has, it states 2 TB per user.
+    error: Where the copy says how much storage Business has, state the real limit, 2 TB per user.
+    grep: 'Business|BUSINESS'
+    decide:
+      - 'The text says nothing about the storage space of the Business plan of Cloudcrate, a file-hosting service. A text that mentions the Business plan only for other things, such as guest links, users, single sign-on or support, or that is about a different company or product, says nothing about it.'
+      - 'The text gives the storage of the Business plan of Cloudcrate, a file-hosting service, as 2 TB per user, in any words (such as "2 TB for each user" or "each user gets 2 TB"), or as a matching total for a stated number of users, such as 10 TB for 5 users.'

@@ -1,0 +1,32 @@
+# Snapframe price list. Finance maintains this file; the checkout reads it.
+# net: the list price of one item, before VAT.
+# sale_net: the price of one item before VAT while a seasonal sale runs. Only best sellers have one.
+currency: GBP
+vat_rate: 0.20
+# Protective packaging. The checkout adds it to every item of every order; it cannot be removed.
+# The amount is final: no VAT is added to it.
+packaging_fee_per_item: 1.00
+products:
+  - id: classic-prints-50
+    name: Classic prints, pack of 50
+    net: 7.50
+    best_seller: false
+  - id: a4-framed-print
+    name: A4 framed print
+    net: 20.00
+    best_seller: false
+  - id: a3-canvas-print
+    name: A3 canvas print
+    net: 28.75
+    sale_net: 23.75
+    best_seller: true
+  - id: photo-book-20
+    name: Photo book, 20 pages
+    net: 17.50
+    sale_net: 15.00
+    best_seller: true
+  - id: photo-mug
+    name: Photo mug
+    net: 9.00
+    sale_net: 7.25
+    best_seller: true

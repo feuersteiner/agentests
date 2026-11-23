@@ -1,0 +1,23 @@
+version: 1
+id: consumer-prices-include-vat
+title: Consumer prices include VAT
+description: Pages and emails show each Snapframe product at its full price, with VAT and the packaging fee included, never net, "+ VAT" or with the fee left for checkout.
+select:
+  glob: ['content/**/*.md', 'emails/**/*.md']
+  grep: '£|\bVAT\b|\bGBP\b|\b[0-9]+\.[0-9]{2}\b|[Pp]ackag'
+assert:
+  - id: product-prices-are-full-prices
+    description: Every price shown for a Snapframe product is its full price, with VAT and the packaging fee included.
+    error: 'Show the full price of one item: the net price in data/prices.yaml plus 20% VAT plus the £1 packaging fee (for example £35.50 for the A3 canvas print, not £28.75 or £34.50).'
+    grep: '[Ss]napframe|[Pp]rints?\b|[Cc]anvas|[Pp]hoto|[Mm]ugs?\b'
+    decide: 'Snapframe, a UK shop, sells five photo products to consumers. The correct prices of one item, with VAT and packaging included, are these and no others. Classic prints, pack of 50: £10.00. A4 framed print: £25.00. A3 canvas print: £35.50, or £29.50 as its sale price. Photo book, 20 pages: £22.00, or £19.00 as its sale price. Photo mug: £11.80, or £9.70 as its sale price. The condition: the text never gives one of these five products a price that is not one of its correct prices. "£10" and "£10.00" are the same amount. A sale price, a "was" price and a "from" price are prices and must be correct prices of that product; a figure before VAT or before packaging is not a correct price, whatever label it carries. These amounts are not prices of the products and do not count: the amount a customer saves, a delivery charge, a refund, a voucher, and a price of another company''s product or plan. A text that gives no price for these five products meets the condition.'
+  - id: no-vat-exclusive-price
+    description: No product price is labelled as excluding VAT, and VAT is not left to be added later.
+    error: Remove "+ VAT", "ex VAT" and similar wording; Snapframe sells to consumers, so show the price with VAT included.
+    grep: '^(?=[\s\S]*(VAT|[Vv]\.[Aa]\.[Tt]|\b[Vv]at\b|\b[Tt]ax(es)?\b|\b[Nn]et\b|\b[Ee]xcl))(?=[\s\S]*([Ss]napframe|[Pp]rints?\b|[Cc]anvas|[Pp]hoto|[Mm]ugs?\b))'
+    decide: 'Snapframe, a UK shop, sells five photo products to consumers: classic prints, an A4 framed print, an A3 canvas print, a photo book and a photo mug. It has no trade or business prices. The condition: the text never shows a price of one of these products as a price without VAT. So no price of these products carries "+ VAT", "plus VAT", "ex VAT", "excl. VAT", "excluding VAT", "before VAT" or "net", not even in a section addressed to businesses, and the text does not say that VAT is added to these prices at checkout or later. Saying that prices include VAT, as in "inc. VAT", "including VAT" or "VAT included", meets the condition. Prices of anything other than these five photo products do not count, whatever the text says about their VAT.'
+  - id: no-fee-left-for-checkout
+    description: The compulsory packaging fee is not presented as an extra on top of the prices shown.
+    error: Put the £1 packaging fee inside each price shown; do not say it is added at checkout or on top.
+    grep: '^(?=[\s\S]*([Pp]ackag|[Ff]ees?\b|[Cc]harges?\b|[Ss]urcharge|[Cc]heckout))(?=[\s\S]*([Ss]napframe|[Pp]rints?\b|[Cc]anvas|[Pp]hoto|[Mm]ugs?\b))'
+    decide: 'Snapframe, a UK shop, sells photo products to consumers and charges a compulsory £1 packaging fee on every item. The condition: the text never says that a packaging fee, or any other charge that every Snapframe customer has to pay, is added on top of the product prices it shows, for example "plus £1 packaging per item" or "a packaging fee is added at checkout". Saying that prices include packaging meets the condition. An optional extra that the customer can decline, such as express delivery, may be priced separately and meets the condition. Charges of another company do not count.'
