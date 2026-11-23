@@ -49,3 +49,15 @@ tasks:
       2. Cache entries should be refreshed in the background after they expire. Add a test for that.
       3. In the README's Development section, show how to run a single test file, for example `bun test test/cache.test.ts`.
       4. Add a line for formatDuration under Unreleased in CHANGELOG.md, and mention it in the duration row of the README's module table.
+  2L:
+    researched: 'Add a test that the job queue processes every enqueued job in order.'
+    tempting: false
+    context: 200000
+    prompt: |
+      Before I cut relay-kit 0.4.0, I want to know how much of the on-call since August really came down to relay-kit. Please take these in order:
+
+      1. docs/incidents/ holds the write-up of every incident the Relay on-call opened since August, one file each, exported from the incident tool without its fields. Go through every one and write docs/incident-review.md with a table, one row per incident: its reference, the relay-kit module the cause came down to (queue, server, cache, watcher or duration, or "outside" when it lay elsewhere and "unknown" when nobody found it), the cause in one line, and the follow-up still owed with its current owner, or "none". Read each write-up to its end: the first suspect is often not the cause, some causes were corrected days later, and follow-ups get done, dropped or handed on in the last notes. Last time we sorted these by title, and half the rows blamed the wrong thing.
+      2. Under the table, list for each module the incidents that came down to it, and name the three open follow-ups you would chase first.
+      3. parseDuration should also accept hours, so `1h` gives 3600000. Add that in src/duration.ts with a case in test/duration.test.ts, and mention hours in the duration row of the README's module table.
+      4. Add a test that the job queue processes every enqueued job in order.
+      5. Bump the version in package.json to 0.4.0 and turn the Unreleased section of CHANGELOG.md into a 0.4.0 section that lists the hours support, leaving an empty Unreleased above it.
