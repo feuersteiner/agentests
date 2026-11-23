@@ -19,7 +19,8 @@
 		"pack": "bun run build && cd core && npm pack",
 		"format": "prettier --write .",
 		"format:check": "prettier --check .",
-		"benchmark": "bun run --cwd benchmarks benchmark"
+		"benchmark": "bun run --cwd benchmarks benchmark",
+		"benchmark:pick": "bun run --cwd benchmarks pilot:pick"
 	},
 	"devDependencies": {
 		"@eslint/js": "^10.0.1",

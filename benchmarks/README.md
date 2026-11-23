@@ -125,17 +125,42 @@ This is not decided:
   "Rewrite content/landing/pricing-intro.md so it sells the Pro plan harder." Whether such prompts
   are tagged and reported separately is open.
 
+## The pilot
+
+A pilot runs on the local keys before the rest of the dataset is built. Every pilot runs 3 tests,
+picked at random from the usable tests each time a pilot is started; there is no fixed pilot list.
+A usable test pairs a rule that the triage does not drop with one of its usable tasks, as
+[The triage](#the-triage) describes. No two tests of a pilot share a rule, so a pilot always covers
+3 different rules: each test is drawn uniformly from the usable tests whose rule is not yet picked.
+
+Pick a pilot's tests from the repository root:
+
+```sh
+bun run benchmark:pick
+```
+
+It prints each test's rule id, domain, rule file (relative to `benchmarks/`), verdict, task
+position and task prompt, then the seed that produced the pick. Every run draws a fresh seed, and
+passing a printed seed back replays that pick exactly:
+
+```sh
+bun run benchmark:pick --seed <seed>
+```
+
+`--json` prints the same pick and seed as JSON, for the harness to read.
+
 ## Keys and paid runs
 
 The decision models need `OPENAI_API_KEY` and `TYPESAFE_AI_API_KEY`, read from the `.env` file at
-the repository root, which is not in Git. The local keys are for proving that the harness works on
-a few tests. The full run uses keys the owner supplies, and only the owner starts it.
+the repository root, which is not in Git. The local keys are for [the pilot](#the-pilot), which
+proves that the harness works. The full run uses keys the owner supplies, and only the owner starts
+it.
 
 ## Status
 
-Only the research catalogue exists, with the code that loads its usable tests and picks among them.
-Two parts are not built: the dataset (fixture repositories, skills, compiled Tests and rubrics) and
-the **harness**, the code that will run each test in each arm and record the measures.
+Only the research catalogue exists, with `bun run benchmark:pick`, which picks a pilot's tests from
+it. Two parts are not built: the dataset (fixture repositories, skills, compiled Tests and rubrics)
+and the **harness**, the code that will run each test in each arm and record the measures.
 `bun run benchmark`, run from the repository root, exists but runs nothing: it reports that the
 harness is not built yet and exits with code 1. No numbers exist yet.
 
@@ -147,6 +172,7 @@ benchmarks/
   README.md                        this file: the method and the structure
   cli/
     index.ts                       entry of bun run benchmark; says the harness is not built
+    pick.ts                        entry of bun run benchmark:pick; picks a pilot's 3 tests
   package.json                     the private workspace package agentests-benchmarks
   research/                        the research catalogue
     dev-conventions.yaml           software-development rules from written conventions
@@ -158,13 +184,14 @@ benchmarks/
   src/
     catalogue.ts                   loads the usable tests from triage.yaml and the rule files
     pick.ts                        picks tests of different rules with a seeded random source
-  tests/                           the bun test suite of src/
+  tests/                           the bun test suite of src/ and cli/pick.ts
   tsconfig.json                    the TypeScript settings for the check script
 ```
 
 `package.json` makes this folder a Bun workspace of the repository. Its `benchmark` script runs
 `cli/index.ts` with Bun, which for now only reports that the harness is not built and exits with
-code 1. Its `check` script runs `tsc --noEmit`, so the root `bun run check` covers this folder. Its
+code 1. Its `pilot:pick` script runs `cli/pick.ts`, and the root `bun run benchmark:pick` runs that
+script. Its `check` script runs `tsc --noEmit`, so the root `bun run check` covers this folder. Its
 `test` script runs the suite in `tests/` with `bun test`, so the root `bun run test` covers it too;
 the suite reads the real research files and calls no model and no network. Its only dependencies
 are `typescript` and `@types/bun`, for development. The dataset and the harness will be added to
