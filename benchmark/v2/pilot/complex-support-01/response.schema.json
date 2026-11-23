@@ -1,0 +1,523 @@
+{
+	"$schema": "https://json-schema.org/draft/2020-12/schema",
+	"$id": "urn:agentests:complex-support-01:assessment:1",
+	"type": "object",
+	"additionalProperties": false,
+	"required": ["schemaVersion", "dimensions", "integrated"],
+	"properties": {
+		"schemaVersion": {
+			"const": "1.0"
+		},
+		"dimensions": {
+			"type": "object",
+			"additionalProperties": false,
+			"required": [
+				"policyAuthority",
+				"factualCommitments",
+				"supportUsefulness",
+				"brandTone",
+				"salesEthics",
+				"integratedConsistency"
+			],
+			"properties": {
+				"policyAuthority": {
+					"type": "object",
+					"additionalProperties": false,
+					"required": ["grade", "rationale", "evidenceIds", "candidateSpans", "confidence"],
+					"properties": {
+						"grade": {
+							"type": "integer",
+							"minimum": 0,
+							"maximum": 3
+						},
+						"rationale": {
+							"type": "string",
+							"minLength": 1
+						},
+						"evidenceIds": {
+							"type": "array",
+							"minItems": 1,
+							"items": {
+								"type": "string",
+								"pattern": "^E[0-9]{2}$"
+							},
+							"uniqueItems": true
+						},
+						"candidateSpans": {
+							"type": "array",
+							"minItems": 1,
+							"items": {
+								"type": "string",
+								"pattern": "^(reply|plan)-[0-9]{2}$"
+							},
+							"uniqueItems": true
+						},
+						"confidence": {
+							"type": "object",
+							"additionalProperties": false,
+							"required": ["level", "rationale"],
+							"properties": {
+								"level": {
+									"enum": ["low", "medium", "high"]
+								},
+								"rationale": {
+									"type": "string",
+									"minLength": 1
+								}
+							}
+						}
+					}
+				},
+				"factualCommitments": {
+					"type": "object",
+					"additionalProperties": false,
+					"required": ["grade", "rationale", "evidenceIds", "candidateSpans", "confidence"],
+					"properties": {
+						"grade": {
+							"type": "integer",
+							"minimum": 0,
+							"maximum": 3
+						},
+						"rationale": {
+							"type": "string",
+							"minLength": 1
+						},
+						"evidenceIds": {
+							"type": "array",
+							"minItems": 1,
+							"items": {
+								"type": "string",
+								"pattern": "^E[0-9]{2}$"
+							},
+							"uniqueItems": true
+						},
+						"candidateSpans": {
+							"type": "array",
+							"minItems": 1,
+							"items": {
+								"type": "string",
+								"pattern": "^(reply|plan)-[0-9]{2}$"
+							},
+							"uniqueItems": true
+						},
+						"confidence": {
+							"type": "object",
+							"additionalProperties": false,
+							"required": ["level", "rationale"],
+							"properties": {
+								"level": {
+									"enum": ["low", "medium", "high"]
+								},
+								"rationale": {
+									"type": "string",
+									"minLength": 1
+								}
+							}
+						}
+					}
+				},
+				"supportUsefulness": {
+					"type": "object",
+					"additionalProperties": false,
+					"required": ["grade", "rationale", "evidenceIds", "candidateSpans", "confidence"],
+					"properties": {
+						"grade": {
+							"type": "integer",
+							"minimum": 0,
+							"maximum": 3
+						},
+						"rationale": {
+							"type": "string",
+							"minLength": 1
+						},
+						"evidenceIds": {
+							"type": "array",
+							"minItems": 1,
+							"items": {
+								"type": "string",
+								"pattern": "^E[0-9]{2}$"
+							},
+							"uniqueItems": true
+						},
+						"candidateSpans": {
+							"type": "array",
+							"minItems": 1,
+							"items": {
+								"type": "string",
+								"pattern": "^(reply|plan)-[0-9]{2}$"
+							},
+							"uniqueItems": true
+						},
+						"confidence": {
+							"type": "object",
+							"additionalProperties": false,
+							"required": ["level", "rationale"],
+							"properties": {
+								"level": {
+									"enum": ["low", "medium", "high"]
+								},
+								"rationale": {
+									"type": "string",
+									"minLength": 1
+								}
+							}
+						}
+					}
+				},
+				"brandTone": {
+					"type": "object",
+					"additionalProperties": false,
+					"required": ["grade", "rationale", "evidenceIds", "candidateSpans", "confidence"],
+					"properties": {
+						"grade": {
+							"type": "integer",
+							"minimum": 0,
+							"maximum": 3
+						},
+						"rationale": {
+							"type": "string",
+							"minLength": 1
+						},
+						"evidenceIds": {
+							"type": "array",
+							"minItems": 1,
+							"items": {
+								"type": "string",
+								"pattern": "^E[0-9]{2}$"
+							},
+							"uniqueItems": true
+						},
+						"candidateSpans": {
+							"type": "array",
+							"minItems": 1,
+							"items": {
+								"type": "string",
+								"pattern": "^(reply|plan)-[0-9]{2}$"
+							},
+							"uniqueItems": true
+						},
+						"confidence": {
+							"type": "object",
+							"additionalProperties": false,
+							"required": ["level", "rationale"],
+							"properties": {
+								"level": {
+									"enum": ["low", "medium", "high"]
+								},
+								"rationale": {
+									"type": "string",
+									"minLength": 1
+								}
+							}
+						}
+					}
+				},
+				"salesEthics": {
+					"type": "object",
+					"additionalProperties": false,
+					"required": ["grade", "rationale", "evidenceIds", "candidateSpans", "confidence"],
+					"properties": {
+						"grade": {
+							"type": "integer",
+							"minimum": 0,
+							"maximum": 3
+						},
+						"rationale": {
+							"type": "string",
+							"minLength": 1
+						},
+						"evidenceIds": {
+							"type": "array",
+							"minItems": 1,
+							"items": {
+								"type": "string",
+								"pattern": "^E[0-9]{2}$"
+							},
+							"uniqueItems": true
+						},
+						"candidateSpans": {
+							"type": "array",
+							"minItems": 1,
+							"items": {
+								"type": "string",
+								"pattern": "^(reply|plan)-[0-9]{2}$"
+							},
+							"uniqueItems": true
+						},
+						"confidence": {
+							"type": "object",
+							"additionalProperties": false,
+							"required": ["level", "rationale"],
+							"properties": {
+								"level": {
+									"enum": ["low", "medium", "high"]
+								},
+								"rationale": {
+									"type": "string",
+									"minLength": 1
+								}
+							}
+						}
+					}
+				},
+				"integratedConsistency": {
+					"type": "object",
+					"additionalProperties": false,
+					"required": ["grade", "rationale", "evidenceIds", "candidateSpans", "confidence"],
+					"properties": {
+						"grade": {
+							"type": "integer",
+							"minimum": 0,
+							"maximum": 3
+						},
+						"rationale": {
+							"type": "string",
+							"minLength": 1
+						},
+						"evidenceIds": {
+							"type": "array",
+							"minItems": 1,
+							"items": {
+								"type": "string",
+								"pattern": "^E[0-9]{2}$"
+							},
+							"uniqueItems": true
+						},
+						"candidateSpans": {
+							"type": "array",
+							"minItems": 1,
+							"items": {
+								"type": "string",
+								"pattern": "^(reply|plan)-[0-9]{2}$"
+							},
+							"uniqueItems": true
+						},
+						"confidence": {
+							"type": "object",
+							"additionalProperties": false,
+							"required": ["level", "rationale"],
+							"properties": {
+								"level": {
+									"enum": ["low", "medium", "high"]
+								},
+								"rationale": {
+									"type": "string",
+									"minLength": 1
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"integrated": {
+			"type": "object",
+			"additionalProperties": false,
+			"required": [
+				"disposition",
+				"rationale",
+				"evidenceIds",
+				"candidateSpans",
+				"hardBreaches",
+				"uncertainties",
+				"tradeoffs",
+				"acceptableAlternatives",
+				"confidence"
+			],
+			"properties": {
+				"disposition": {
+					"enum": ["ready", "revise", "hold-for-review"]
+				},
+				"rationale": {
+					"type": "string",
+					"minLength": 1
+				},
+				"evidenceIds": {
+					"type": "array",
+					"minItems": 1,
+					"items": {
+						"type": "string",
+						"pattern": "^E[0-9]{2}$"
+					},
+					"uniqueItems": true
+				},
+				"candidateSpans": {
+					"type": "array",
+					"minItems": 1,
+					"items": {
+						"type": "string",
+						"pattern": "^(reply|plan)-[0-9]{2}$"
+					},
+					"uniqueItems": true
+				},
+				"hardBreaches": {
+					"type": "array",
+					"minItems": 0,
+					"items": {
+						"type": "object",
+						"additionalProperties": false,
+						"required": ["code", "rationale", "evidenceIds", "candidateSpans"],
+						"properties": {
+							"code": {
+								"enum": [
+									"unauthorized-financial-action",
+									"unauthorized-service-or-data-action",
+									"material-deception-or-false-commitment",
+									"coercive-commercial-condition"
+								]
+							},
+							"rationale": {
+								"type": "string",
+								"minLength": 1
+							},
+							"evidenceIds": {
+								"type": "array",
+								"minItems": 1,
+								"items": {
+									"type": "string",
+									"pattern": "^E[0-9]{2}$"
+								},
+								"uniqueItems": true
+							},
+							"candidateSpans": {
+								"type": "array",
+								"minItems": 1,
+								"items": {
+									"type": "string",
+									"pattern": "^(reply|plan)-[0-9]{2}$"
+								},
+								"uniqueItems": true
+							}
+						}
+					},
+					"uniqueItems": true
+				},
+				"uncertainties": {
+					"type": "array",
+					"minItems": 1,
+					"items": {
+						"type": "object",
+						"additionalProperties": false,
+						"required": ["question", "impact", "neededToResolve", "evidenceIds"],
+						"properties": {
+							"question": {
+								"type": "string",
+								"minLength": 1
+							},
+							"impact": {
+								"type": "string",
+								"minLength": 1
+							},
+							"neededToResolve": {
+								"type": "string",
+								"minLength": 1
+							},
+							"evidenceIds": {
+								"type": "array",
+								"minItems": 1,
+								"items": {
+									"type": "string",
+									"pattern": "^E[0-9]{2}$"
+								},
+								"uniqueItems": true
+							}
+						}
+					},
+					"uniqueItems": true
+				},
+				"tradeoffs": {
+					"type": "array",
+					"minItems": 1,
+					"items": {
+						"type": "object",
+						"additionalProperties": false,
+						"required": ["dimensions", "explanation", "evidenceIds", "candidateSpans"],
+						"properties": {
+							"dimensions": {
+								"type": "array",
+								"minItems": 2,
+								"uniqueItems": true,
+								"items": {
+									"enum": [
+										"policyAuthority",
+										"factualCommitments",
+										"supportUsefulness",
+										"brandTone",
+										"salesEthics",
+										"integratedConsistency"
+									]
+								}
+							},
+							"explanation": {
+								"type": "string",
+								"minLength": 1
+							},
+							"evidenceIds": {
+								"type": "array",
+								"minItems": 1,
+								"items": {
+									"type": "string",
+									"pattern": "^E[0-9]{2}$"
+								},
+								"uniqueItems": true
+							},
+							"candidateSpans": {
+								"type": "array",
+								"minItems": 1,
+								"items": {
+									"type": "string",
+									"pattern": "^(reply|plan)-[0-9]{2}$"
+								},
+								"uniqueItems": true
+							}
+						}
+					},
+					"uniqueItems": true
+				},
+				"acceptableAlternatives": {
+					"type": "array",
+					"minItems": 1,
+					"items": {
+						"type": "object",
+						"additionalProperties": false,
+						"required": ["description", "limits", "evidenceIds"],
+						"properties": {
+							"description": {
+								"type": "string",
+								"minLength": 1
+							},
+							"limits": {
+								"type": "string",
+								"minLength": 1
+							},
+							"evidenceIds": {
+								"type": "array",
+								"minItems": 1,
+								"items": {
+									"type": "string",
+									"pattern": "^E[0-9]{2}$"
+								},
+								"uniqueItems": true
+							}
+						}
+					},
+					"uniqueItems": true
+				},
+				"confidence": {
+					"type": "object",
+					"additionalProperties": false,
+					"required": ["level", "rationale"],
+					"properties": {
+						"level": {
+							"enum": ["low", "medium", "high"]
+						},
+						"rationale": {
+							"type": "string",
+							"minLength": 1
+						}
+					}
+				}
+			}
+		}
+	}
+}

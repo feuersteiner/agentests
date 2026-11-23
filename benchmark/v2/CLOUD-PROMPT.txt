@@ -1,0 +1,496 @@
+CLOUD TASK: EXPAND THE COMPLEX SUPPORT DOSSIER SUITE FROM ONE SITUATION TO TEN
+
+Execute this task to completion in a separate cloud workspace. This document is
+forward-looking task and method instructions. The public repository supplies all
+required starting material. No local computer, local environment file, private
+conversation, private evidence repository, historical run, or external skill is
+needed. The user may be offline throughout the task. Finish the authorized work,
+including independent reviews and offline integration checks; do not stop after
+a plan, research list, example case, or partial scaffold.
+
+1. AUTHORIZED OUTCOME AND BOUNDARIES
+
+Expand the accepted complex benchmark concept into exactly ten distinct complex
+business situations: preserve complex-support-01 and author complex-support-02
+through complex-support-10 using the fixed topic mapping below. Supply five
+completed external-reply/internal-plan alternatives per situation. Research and
+author nine substantial source-grounded fictional dossiers, provisional reviewer
+expectations, and the minimal benchmark-only suite tooling and documentation
+needed to validate and prepare all ten offline.
+
+There will be ten situations and fifty candidate pairs. Each future assessment
+of the complete suite would request six dimensional judgments per pair, yielding
+300 dimensional assessments plus fifty integrated judgments per model per
+repeat. These are not 300 independent cases. Repeats and alternative drafts do
+not increase the count of independent business situations. The original five
+simple refund cases remain a separate frozen pilot and do not count toward ten.
+
+This task authorizes research, fixture authorship, benchmark-workbench changes,
+offline validation and preparation, and independent review. It does not authorize
+measured model evaluation, producer calls, calibration, paid benchmark/proof runs,
+a structured model-output execution adapter, or a library rewrite. Do not modify
+core source. Do not convert probabilities or binary findings into ordinal grades.
+Do not claim the completed suite can execute graded model evaluations. Report
+the execution adapter as the next separately scoped technical decision.
+
+The existing core returns binary findings and passing probabilities/scores;
+reason also returns a score. It does not execute this dossier's ordinal grades,
+citation fields or structured response schema. Criteria arrays use a maximum
+passing score, and a cleared escalation stage skips later stages. Multiple
+binary assertions do not supply the missing structured assessment contract.
+
+Research and authoring workers may use their normal agent tools to accomplish
+this task; that does not authorize invoking candidate-producing or evaluator
+models as a benchmark experiment. Do not call the existing live pilot runner as
+an integration check. Offline commands must not load environment files, import
+provider clients unnecessarily, make inference requests, or request credentials.
+
+The user approved the complex case concept, not every authored label. All new
+candidate expectations remain synthetic, provisional, and not human reviewed.
+Independent agent review improves construction quality but is not human review
+or empirical evaluator validation. Do not describe this as a fully real customer
+dataset, a training corpus, a certified standard, or a held-out performance set.
+
+Keep user-facing reports concise and factual. Refer to the acting system as an
+agent; avoid anthropomorphic language, first-person agent pronouns, and using the
+user's name. If a form of address is useful, use sir. Keep to this task. Routine
+choices within these boundaries need no further user confirmation. An unexpected
+large change beyond scope should be proposed before implementation; this is not
+a reason to stop the already authorized nine-case expansion.
+
+2. SELF-CONTAINED CLOUD BOOTSTRAP
+
+Use the public repository https://github.com/feuersteiner/agentests.git and branch
+benchmark-v2. The legacy origin https://github.com/feuersteiner/agent-tests.git
+redirects to the same repository. Verify repository identity and branch contents
+before editing. If the cloud service already supplied a checkout, inspect its
+origin, branch, status, and HEAD first. Preserve unrelated changes and avoid
+resetting a supplied workspace. Otherwise a fresh checkout can use:
+
+    git clone --branch benchmark-v2 --single-branch https://github.com/feuersteiner/agentests.git agentests
+    cd agentests
+    git fetch origin benchmark-v2
+    git status --short
+    git rev-parse HEAD
+
+Never clone recursively, initialize the optional private submodule, restore v1
+fixture archives, or fetch LFS evidence. Do not read, copy, print, create, or upload
+an environment file or credential store. Public fixture sources are sufficient.
+All paths below are repository-relative. Do not introduce dependencies on any
+author's home directory, local machine, historical output, or untracked files.
+
+Use this team reading inventory before design or edits. Every worker must read
+the applicable AGENTS.md and assigned contract; the coordinator may delegate
+the complete exemplar/contract audit to one fresh Sol worker and consume its
+compact summary instead of loading the entire exemplar into coordinator context:
+
+    AGENTS.md
+    benchmark/AGENTS.md
+    benchmark/README.md
+    benchmark/evidence/EVIDENCE.md
+    benchmark/v2/README.md
+    benchmark/v2/pilot/README.md
+    benchmark/v2/pilot/complex-support-01/README.md
+    benchmark/v2/pilot/complex-support-01/manifest.json
+    benchmark/v2/pilot/complex-support-01/task.json
+    benchmark/v2/pilot/complex-support-01/rubric.json
+    benchmark/v2/pilot/complex-support-01/response.schema.json
+    benchmark/v2/pilot/complex-support-01/sources.json
+    benchmark/v2/pilot/complex-support-01/summary.json
+    benchmark/v2/pilot/complex-support-01/candidates/p01.json through p05.json
+    benchmark/v2/pilot/complex-support-01/reviewer/expectations.json
+    benchmark/v2/workbench/dossier.ts
+    benchmark/v2/workbench/dossier-cli.ts
+    benchmark/v2/workbench/tests/dossier.test.ts
+    benchmark/v2/workbench/tests/harness.test.ts
+    package.json
+    benchmark/v2/workbench/package.json
+    core/package.json
+    lefthook.yml
+    .gitignore
+    .prettierignore
+
+The exemplar-audit worker must read all twenty ordered case 01 documents and
+the contract files above, then summarize depth, required structure, privacy
+boundaries and relevant examples for the team. Case workers should read shared
+schemas/contracts and relevant representative case 01 documents, expanding to
+the complete exemplar when needed for quality. Do not require every worker to
+reload all twenty documents, other cases or construction history. Read additional
+applicable AGENTS.md before touching a path. Do not blindly copy the exemplar's
+specific policies, amounts, conclusions, or sources.
+Its frozen public context has 20 documents, 10,114 whitespace-delimited words
+and 68,686 UTF-8 bytes. Its five complete packets range from 88,882 to 92,162
+bytes. These are fixture sizes, not model context-use measurements or tokens.
+
+Use Node 22 or newer and the repository's declared Bun version/locked workspace.
+Inspect actual scripts and lockfile before running setup. Install dependencies
+once for the shared checkout, then build core once before dependent checks:
+
+    bun --no-env-file install --frozen-lockfile
+    bun --no-env-file run build
+    bun --no-env-file run --cwd benchmark/v2/workbench dossier:validate
+    bun --no-env-file run --cwd benchmark/v2/workbench check
+    bun --no-env-file run --cwd benchmark/v2/workbench test
+
+Use --no-env-file for all offline Bun commands, including package-manager tools.
+Do not run root test concurrently with another operation rebuilding core/dist:
+the root script sequences core build/tests before other workspace tests because
+concurrent deletion/rebuilding of core/dist can break dependent workbenches.
+Assign one integration owner for dependencies, builds, shared tests and tooling.
+Record any tool-version/setup problem accurately rather than changing core or
+unfreezing the lockfile to make the environment convenient.
+
+3. PARALLEL WORK AND OWNERSHIP
+
+The main coordinator only orchestrates: planning, assignment, monitoring,
+integration decisions, and review. Delegate code and content edits to workers.
+Parallelize aggressively within available worker slots, without launching more
+workers than the service supports. Prefer fresh gpt-6.1-sol workers for research,
+each case, substantive reviews, coding, and integration. Use gpt-6.1-terra for
+mechanical tasks such as inventories, formatting, link checks, hash checks and
+cross-reference scans. Mostly use gpt-6.1-sol.
+
+Check actual available models and worker limits before claiming a model was
+used. Do not silently substitute another model. If a named model is unavailable,
+report that limitation accurately and progress with available authorized Sol
+workers where possible. If the service cannot honor a requested model, preserve
+that distinction in the completion report. Worker models are authoring/review
+agents, not measured benchmark subjects. Do not invent worker identities.
+
+Prefer one fresh case worker per new case, queued as slots become available.
+Give each worker a narrow assignment, the necessary common contract, and the
+case 01 files needed as a template. Workers must not delegate further. Use fresh
+workers for later cases and independent reviews instead of accumulating many
+large dossiers in one worker's context. Keep a compact progress inventory.
+
+Case workers own only their assigned complex-support-NN directory. One separate
+integration worker owns shared workbench code, suite registry, shared tests and
+version documentation. Case workers may author against the existing format
+while integration generalizes the loader. They must not patch the validator to
+fit their own case. Assign independent cross-review after each case is complete;
+the sole reviewer cannot be its author. Queue integration and review work when
+slots are limited, while keeping all available slots productively occupied.
+
+Use disjoint path ownership in a shared checkout, or explicitly managed isolated
+worktrees with an integration plan. Avoid overlapping writes. All Git index,
+commit and merge operations must be serial and controlled by the coordinator;
+workers must not independently stage, commit, push or rewrite history. Building
+and dependency installation must not race across workers. Integration changes
+need an independent review as well as case-content reviews.
+
+4. FIXED SITUATION SELECTION
+
+Use exactly this mapping. Give each case a distinct descriptive title and list
+the IDs and titles in a suite inventory. Do not silently replace an approved topic
+because another source is easier to find. Sources may inspire a fictional
+composite without matching every requested conflict in one real incident.
+
+01 complex-support-01: Preserve the existing exceptional usage-invoice dossier.
+Its source-grounded fictional setting includes collected funds, unclear notice
+and cause, conditional authority, continuity, renewal pressure and privacy.
+
+02 complex-support-02: Security incident during enterprise renewal. Incomplete
+logs, premature support assurance that the incident is contained, sales security
+promises, legal disclosure constraints, and a customer demanding answers before
+renewal. Force reconciliation of honest updates, confidentiality, sales pressure
+and uncertainty; neither blanket secrecy nor invented certainty solves the case.
+
+03 complex-support-03: Data loss and recovery. Uncertain backups, conflicting
+recovery estimates, customer deadlines and compensation beyond support authority.
+Recovery safety, operational ownership, truthful commitments and commercial
+pressure must interact; do not reduce the task to offering a refund.
+
+04 complex-support-04: Grandfathered pricing. An old sales commitment conflicts
+with new terms, notice is disputed, and auto-renewal is pending. Distinguish the
+evidence of notice, signatory scope, effective dates, billing state and informed
+customer choice. Make commercial options real and consent-dependent.
+
+05 complex-support-05: Failed enterprise implementation. Promised launch readiness
+meets unreliable integrations, disputed responsibilities and a contractual customer
+deadline. Include technical dependencies, meaningful ownership disagreement,
+approval boundaries, and the risks of using sales language as a delivery promise.
+
+06 complex-support-06: Accessibility complaint before launch. A critical workflow
+is unusable; workarounds carry risks; sales and marketing made accessibility
+claims. Address user impact, a practical response, claims correction, launch
+pressure and authority without fabricating accessibility certification or law.
+
+07 complex-support-07: Marketplace transaction dispute. Buyer and seller evidence
+conflict, proposed remedies harm opposite parties, and fraud signals are
+inconclusive. Model platform authority and obligations to both parties, privacy,
+money/service states, support usefulness and commercial incentives.
+
+08 complex-support-08: Account suspension appeal. Suspicious activity and
+enforcement affect legitimate operations, while disclosure could expose detection
+methods. Differentiate observed signals, allegations, appeal authority, safe
+interim access, useful explanations and confidential operational detail.
+
+09 complex-support-09: Data residency commitment. Sales assurances conflict with
+infrastructure facts, contract ambiguity and subprocessors; migration is
+technically difficult. Distinguish current state, contractual interpretation,
+authorized commitments, customer deadlines, evidence gaps and migration risk.
+
+10 complex-support-10: Product retirement and migration. Long-term availability
+promises conflict with retirement plans; the replacement lacks key features;
+support, sales and marketing offer inconsistent alternatives. Include realistic
+continuity choices, migration limits, approval scope and honest customer consent.
+
+Across every case, brand, support, sales, policy and authority must influence one
+another. These must be nine materially different business dilemmas, not nine
+cosmetic variations of a small percentage refund. Do not enforce one preferred
+business outcome or the rule that waiving policy is always best.
+
+5. PUBLIC RESEARCH, PROVENANCE AND REUSE
+
+Research primary public sources for each new situation: first-party incident
+reports, official notices and policies, original customer reports, public issue
+threads, maintained public datasets or pinned repository artifacts where useful.
+Prefer direct primary evidence over a chain of secondary summaries. Browse and
+verify actual contents; never invent a source, quotation, date, license or claim.
+An original customer allegation is evidence that an allegation was made, not
+automatic verification of its substance. Distinguish customer claims, company
+statements, independently established facts and missing information.
+
+Record direct URLs, stable post/issue identifiers or pinned commits, publication
+dates, actual retrieval dates, retrieval URLs when redirects matter, update
+uncertainty, attributed claim scope, and reuse basis in sources.json. Use current
+cloud retrieval dates, not copied template dates. Do not backdate a current policy
+to establish historical authority. Later outcomes must not secretly resolve an
+earlier decision at its cutoff. Clearly separate the fictional decision date from
+the dates of public inspiration and from source retrieval.
+
+Publicly readable does not mean open licensed. Verify explicit reuse permission
+before reproducing licensed data and comply with its terms. Where transcript
+reuse permission is unverified, use brief original factual paraphrases with
+attribution plus independently authored fictional context. Do not publish copied
+transcripts, raw source dumps, screenshots or customer personal identifiers.
+Do not describe paraphrases as raw real training data. Do not imply that fictional
+dialogue, contracts, policies, authority limits or named signatories are real.
+All fictional business records and candidate dialogue must be clearly synthetic.
+
+Follow the existing source-representation contract where suitable: an attributed
+paragraph associated with a source ID, local SHA-256 and hash-scope description.
+The hash of a local paraphrase is not the hash of an original webpage. Never
+substitute one for the other. The current validator assumes exactly seven sources
+and zero quoted words per dossier; minimal integration should allow justified
+source counts per case while preserving strict provenance checks. Do not add
+irrelevant sources to satisfy the template's seven-source assumption.
+
+The cloud workspace must contain everything needed for offline fixture checks.
+Keep sufficient attributed factual context in the authored fixture; do not require
+private downloads, stored browsing sessions, local raw pages or live links at
+validation time. Link verification is a separate research/check step, not part of
+offline suite preparation. Brief factual grounding should support the dilemma;
+it must not serve as an excuse to pad the rest with repeated boilerplate.
+
+6. DOSSIER AND CANDIDATE AUTHORING CONTRACT
+
+Each new directory should contain the same purposeful components as case 01:
+README.md, manifest.json, task.json, rubric.json, response.schema.json,
+sources.json, summary.json, documents/, candidates/p01.json through p05.json,
+and reviewer/expectations.json. Use versioned headers, a clear decision cutoff,
+ordered evidence IDs, neutral candidate IDs and stable reply/plan span IDs.
+Adapt scenario text, chronology and normative anchors to the new use case.
+
+Author 15 to 25 meaningful ordered records per new situation. Aim for 8,000 to
+12,000 substantive context words or comparable depth to case 01; the current
+offline contract enforces at least 8,000. Twenty documents is a useful reference,
+not a rigid target within the supported range. Distribute consequential evidence
+across records so a responsible decision needs reconciliation. Include plausible
+stale versions, distractors, contradictory records and limited unknowns. Make
+enough facts knowable to permit useful action; do not make everything uncertain.
+
+Examples of useful records include dated customer exchanges, account/order
+details, current and superseded policy, approval/signatory records, technical
+findings with limits, operations timelines, sales commitments, brand guidance,
+legal/disclosure guidance and customer-consent records. Choose records that
+matter to the case. Check roles, amounts, dates, deadlines, time zones, versions,
+effective dates and causality across every document and candidate. Guidance
+cannot cite an approval that did not exist when it was written. A later note
+must carry a later timestamp; do not create a chronology inconsistency by copying
+the template's approval or counsel times into a different timeline.
+
+Supply exactly five completed reply/plan pairs per case. Include at least two
+meaningfully different defensible routes; a polished but materially harmful
+alternative; an incomplete response; and a genuinely contested interpretation.
+Their neutral p01..p05 identifiers must not advertise quality. Vary ordering and
+dimensional strengths across cases so candidate number, length, politeness or
+one stock phrase is not a label shortcut. Each internal plan must be specific
+enough to check authority and consistency with the external reply.
+
+A strong draft may be ready while the underlying incident or account remains
+unresolved. Responsible interim protection, an accountable owner and a bounded
+update can be defensible. Do not manufacture disagreement solely by missing a
+comma or requiring one canonical wording. Commercial alternatives should have
+real limitations and distinct tradeoffs. Different candidates may be strong on
+tone yet weak on authority, useful yet overconfident, or cautious yet ineffective.
+
+Preserve the six stable dimension IDs for comparison:
+policyAuthority, factualCommitments, supportUsefulness, brandTone, salesEthics,
+integratedConsistency. Write use-case-specific normative 0..3 ordinal anchors.
+Grades are ordered quality categories, not probabilities or interval quantities.
+Require cited evidence IDs and exact candidate reply/plan span IDs, explanations,
+and confidence separate from grade. Integrated disposition remains ready,
+revise, or hold-for-review, with tradeoffs, uncertainties and alternatives.
+
+Critical breaches must prevent readiness when supported and unresolved; they
+cannot disappear into an average or be outweighed by pleasant tone. Preserve
+the complete dimensional profile even when a breach controls disposition.
+Genuine authority/interpretation ambiguity may justify hold-for-review, but do
+not use that label merely because a responsible pending action is unfinished.
+
+Reviewer expectations should provide per-dimension ranges, concrete rationales,
+evidence IDs, candidate spans, acceptable integrated dispositions, uncertainties,
+disagreements and acceptable alternative routes. Explain why reasonable reviewers
+could differ. Keep them provisional and separate from model inputs. Do not force
+all six dimensions to have identical grades just because a candidate has an
+overall favorable or unfavorable disposition.
+
+7. PREVENT ANSWER LEAKAGE AND FREEZE INPUTS
+
+Raw business records contain the situation, not fixture-author verdicts. Normative
+policy and actual dated business authority are legitimate evidence. Statements
+that a particular candidate or case route is acceptable, expected grades,
+case-specific solution menus and author explanations of the correct resolution
+belong only in reviewer material. Inspect especially legal guidance, chronology,
+publishing/audit records, task instructions and rubric permittedAlternatives or
+knownTensions for disguised answer hints. General principles may stay visible;
+case-specific accepted solutions must not.
+
+summary.json is a reviewer/provenance navigation aid and stays out of packets.
+Sources and manifest metadata may support validation and inventories; their
+source-selection judgments and label metadata are not assessment inputs. Never
+package expected ranges, reviewer notes, other candidates or author diagnoses.
+Each assessment packet contains the task, normative rubric and output schema,
+identical complete ordered context, and exactly one completed reply/plan pair.
+
+Maintain the deep explicit input allowlist. Reject unexpected nested annotations
+in rubric/schema contracts, including reviewerNote/comments hidden inside an
+anchor, breach, disposition or schema node. Candidate projection must admit only
+the intended span IDs and text. Reviewer canary perturbations must not change a
+single packet byte. Input-only preparation must not open reviewer files at all;
+full validation must separately check reviewer hashes and references. Document
+this distinction. Never weaken integrity checks just to accept new dossiers.
+
+Measure actual UTF-8 bytes and nonempty whitespace-delimited words separately
+for ordered context, replies/plans and complete serialized packets. JSON overhead
+means full-packet bytes differ from context bytes. Name tokenizer and encoding
+if token counts are genuinely measured; otherwise keep token counts null and
+explain why. Never estimate tokens and present them as measured values.
+
+Finalize formatting before recomputing every affected manifest SHA-256 and local
+source-representation hash. Check headers, IDs, version fields, all cross-references
+and summary/reviewer spans. Verify measurements from actual file contents.
+Preserve every byte of the original five simple inputs and all case 01 fixture
+files; preserve their packet hashes. Capture baseline case 01 packet hashes in a
+regression before refactoring. Do not edit frozen case 01 to make a generalized
+validator easier. Changes to its surrounding documentation may describe the
+suite, but its frozen fixture/input files remain unchanged.
+
+8. MINIMAL BENCHMARK SUITE INTEGRATION
+
+The current dossier loader hardcodes complex-support-01, one scenario, its cutoff,
+status, six dimensions and source count. The CLI defaults and tests are also
+single-case. Copying nine folders is not sufficient. Assign one integration
+worker to minimally generalize the benchmark workbench to registered case IDs,
+validated paths and scenario-specific cutoffs while preserving case 01 behavior.
+Keep each dossier's scenarioCount equal to one; the suite registry counts ten.
+
+Add a readable registry/inventory for exactly the ten approved IDs and explicit
+single-case and suite-wide validation/preparation commands. Preserve existing
+default single-case commands and serialized packet construction for case 01.
+Document actual new CLI syntax with offline examples and implement useful help.
+Enforce exactly five alternatives in every registered suite case, reject duplicate
+IDs and missing/unregistered members, and keep original refund-pilot commands
+and data independent. Do not expose a misleading run/grade command.
+
+Preparation must remain deterministic, credential-free and offline. Write only
+under ignored benchmark/v2/results/prepared/. Reject path traversal, absolute
+path escape, symlink redirection and existing destinations. Never overwrite a
+prepared set. Use explicit per-case subdirectories and a suite inventory so
+candidate p01 in one case cannot collide with p01 in another. Validate before
+claiming full integrity; input-only preparation must retain its reviewer-free
+property. Do not write generated packets into public fixture directories.
+
+9. INDEPENDENT REVIEW AND OFFLINE ACCEPTANCE
+
+Each case needs independent review of source attribution/reuse, chronology and
+roles, meaningful document depth, competing defensible routes, authority and
+consent, dimensions/ranges, critical breaches and input/reviewer separation.
+Review the actual documents and candidate spans, not just the README. Correct
+concrete findings, then recheck affected references and hashes. Preserve real
+review disagreements in provisional expectations where appropriate rather than
+declaring all ambiguity solved. Agent reviews cannot certify human labels.
+
+An independent tooling review should examine generalized loading, registry
+integrity, frozen packet compatibility, leakage boundaries, output-path safety,
+and the distinction between preparation and execution. Add meaningful regression
+tests for suite coverage, deterministic packet hashes, original packet retention,
+reviewer perturbation/canaries, nested annotation rejection, input-only reviewer
+independence, missing/duplicate registrations, reference corruption and safe
+outputs. Do not add redundant tests that merely repeat implementation strings.
+
+Run focused checks first, then required workspace checks after integration.
+Inspect actual scripts rather than blindly copying commands or assuming old test
+counts. The existing v2 tests and core suite must keep passing. A typical final
+sequence, adjusted only to the scripts actually implemented, includes:
+
+    bun --no-env-file run --cwd benchmark/v2/workbench check
+    bun --no-env-file run --cwd benchmark/v2/workbench test
+    bun --no-env-file run --cwd benchmark/v2/workbench validate
+    bun --no-env-file run --cwd benchmark/v2/workbench dossier:validate
+    bun --no-env-file --no-install benchmark/v2/workbench/dossier-cli.ts --help
+    bun --no-env-file run check
+    bun --no-env-file run lint
+    bun --no-env-file run test
+    git diff --check
+
+Also run the documented new ten-case validation and preparation commands with a
+fresh ignored output destination. Confirm fifty packets, complete same-case
+context, one candidate each, accurate inventory sizes/hashes, and byte-identical
+old packets. Confirm output privacy with git check-ignore. Check new relative
+documentation links and primary URLs separately. Keep raw logs and construction
+history private/ignored; public files contain method, provenance and fixtures,
+not construction transcripts or historical run evidence. Scan changed files for
+credential patterns and accidentally included private material without opening
+environment files. Do not initialize submodules or run live models for proof.
+
+10. DELIVERY, GIT AND PERSISTENCE
+
+Finish all nine new dossiers, cross-reviews, minimal suite integration and checks.
+Provide a concise final table with all ten IDs/titles, primary source references,
+document counts, exact context word/byte counts, five candidates each, full-packet
+size inventory location and review status. Report total situations/candidates,
+actual commands and check outcomes, any unsupported requested worker models,
+unresolved substantive limitations, and the graded-adapter next decision.
+
+Provide a readable diff summary and the exact workspace/review artifact where
+the user can recover changes after the cloud session. Use the cloud platform's
+normal reviewable diff or PR-artifact mechanism when available within its given
+permissions. Explicitly state persistence and remote availability; do not imply
+the user's local computer has synchronized. Do not discard completed work when
+the user is offline or leave it only in a transient process buffer.
+
+If the platform cannot retain the reviewable diff or workspace, export a
+downloadable patch or archive that includes all new untracked fixture files as
+well as modifications to tracked files. Exclude private evidence, secrets,
+environment files, logs, dependency/build output and generated prepared packets.
+Verify the export contains the complete intended changes and provide its usable
+download artifact. Do not claim remote availability without a verified retained
+artifact. This fallback requires no new push permission.
+
+This prompt does not grant new commit, push, PR-publication, deployment or merge
+permission for the cloud changes. Complete and retain the reviewable work without
+waiting for publishing authorization. If the cloud task bootstrap independently
+and explicitly authorizes a commit or publication action, follow that scope and
+report the exact result. Otherwise deliver the platform's retained diff/workspace
+and state that it has not been committed/pushed. Do not force push, rewrite history
+or touch historical issues. If a commit is authorized, use the repository's
+type-plus-emoji convention, for example feat🧪: expand complex support fixtures,
+and never add Codex as author/co-author attribution.
+
+Acceptance means ten complete, distinct situations; fifty completed candidate
+pairs; provisional cited reviewer expectations; independently reviewed content
+and tooling; deterministic offline suite validation/preparation; preserved frozen
+inputs; passed appropriate checks; and recoverable changes. Graded inference,
+human label review, benchmark measurement and publishing remain separate work.

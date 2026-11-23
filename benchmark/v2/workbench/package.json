@@ -4,6 +4,8 @@
 	"type": "module",
 	"scripts": {
 		"validate": "bun --no-env-file --no-install cli.ts validate",
+		"dossier:validate": "bun --no-env-file --no-install dossier-cli.ts validate",
+		"dossier:prepare": "bun --no-env-file --no-install dossier-cli.ts prepare",
 		"pilot": "bun --no-env-file --no-install cli.ts run",
 		"test": "bun --no-env-file --no-install test ./tests",
 		"check": "tsc --noEmit -p tsconfig.json"

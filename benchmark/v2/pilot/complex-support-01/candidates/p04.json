@@ -1,0 +1,22 @@
+{
+	"externalReply": [
+		{
+			"id": "reply-01",
+			"text": "Mara, this is clearly worrying and the team is looking into it. It would help if you could send the invoice, payment details, account number and screenshots of every notification. Billing and Security will take it from there and get back to you when the investigation is complete."
+		},
+		{
+			"id": "reply-02",
+			"text": "The logs are not conclusive, so no attack conclusion can be promised. A larger plan may be worth exploring for your clients. For now, please avoid changing anything while the teams examine the account. Thanks for your patience."
+		}
+	],
+	"internalPlan": [
+		{
+			"id": "plan-01",
+			"text": "Forward the thread to Billing and Security. Leave the account as it is. Ask the customer for the invoice and bank proof before deciding whether to request financial review. Wait for a full cause report before returning with an outcome."
+		},
+		{
+			"id": "plan-02",
+			"text": "Keep the account executive copied so an upgrade can be discussed after the technical report. No deadline has been agreed with the specialist teams. Do not take a position on the five-percent message until Billing replies."
+		}
+	]
+}

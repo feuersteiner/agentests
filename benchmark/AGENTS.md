@@ -9,7 +9,9 @@ in the optional PRIVATE `benchmark/private` submodule, with large archives in LF
 Normal clones/checks never initialize it. Never upload evidence to a public remote.
 
 `v1` is the historical skill-versus-commit-gate experiment, previously called
-`benchmark-v2`. The new `v2` is a separate unrun evaluator pilot with five cases.
+`benchmark-v2`. `v2` contains the frozen original five-case evaluator pilot and a
+separate complex support dossier with offline preparation only. Execution history
+and measured evidence remain private.
 
 ## Layout
 
@@ -49,7 +51,10 @@ Normal clones/checks never initialize it. Never upload evidence to a public remo
   `benchmark:pick` is offline. `benchmark`, `benchmark:pilot` and `benchmark:prove`
   make paid calls; their help does not. Fixture hydration stays explicit.
 - v2: `bun --no-env-file run --cwd benchmark/v2/workbench check`, `test` and
-  `validate`. Keep exactly five pilot cases and separate provisional labels.
+  `validate`, plus `dossier:validate`. Preserve the original five pilot cases,
+  packets and harness. Keep the additional dossier separate and its provisional
+  reviewer expectations outside evaluator inputs. Dossier preparation is not
+  graded evaluation execution and never authorizes live inference.
 - The v1 agent loop requires Linux/root for `unshare --mount`, authenticated
   Claude Code, built `core/dist` and decision credentials. Offline checks work
   on macOS. Keys stay in the harness process, outside agent workspaces/transcripts.

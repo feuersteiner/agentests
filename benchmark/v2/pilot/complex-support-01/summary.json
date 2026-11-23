@@ -1,0 +1,74 @@
+{
+	"version": "1.0",
+	"status": "authored navigation and claim inventory, not ground truth labels; excluded from model packets",
+	"claims": [
+		{
+			"id": "historical-outcome",
+			"status": "attributed-company-statement",
+			"evidenceIds": ["E01"],
+			"sourceIds": ["S02", "S03"],
+			"claim": "Historical company response says the customer would not be charged; not an unsettled alternative in this task."
+		},
+		{
+			"id": "incident-finances",
+			"status": "synthetic-record",
+			"evidenceIds": ["E04", "E07"],
+			"sourceIds": [],
+			"claim": "Gross fictional incident $104500; $600 settled; $103900 unpaid; authorized remedy has not been posted."
+		},
+		{
+			"id": "notice",
+			"status": "mixed-record-and-claim",
+			"evidenceIds": ["E03", "E10"],
+			"sourceIds": [],
+			"claim": "One receiving-server success, one expired job, no proof of human receipt, confirmed pre-invoice review failure."
+		},
+		{
+			"id": "cause",
+			"status": "unresolved",
+			"evidenceIds": ["E08", "E18", "E19"],
+			"sourceIds": [],
+			"claim": "Partial sample and ambiguous customer checker record cannot establish DDoS, intentional testing or full causal allocation."
+		},
+		{
+			"id": "authority",
+			"status": "synthetic-conditional-approval",
+			"evidenceIds": ["E05", "E07", "E16"],
+			"sourceIds": [],
+			"claim": "Director approval permits full relief with conditions; a narrow interpretation question supports a bounded review alternative."
+		},
+		{
+			"id": "continuity",
+			"status": "synthetic-consent",
+			"evidenceIds": ["E02", "E09", "E18"],
+			"sourceIds": [],
+			"claim": "Linden asset replacement is authorized; blanket shutdown is not; mitigation cannot guarantee no new usage."
+		},
+		{
+			"id": "commercial-choice",
+			"status": "synthetic-record",
+			"evidenceIds": ["E11", "E12", "E15"],
+			"sourceIds": [],
+			"claim": "No annual or cancellation consent; upgrade lacks cap and retrospective remedy; information request survives fee relief."
+		},
+		{
+			"id": "source-era",
+			"status": "historical-date-boundary",
+			"evidenceIds": ["E01", "E20"],
+			"sourceIds": ["S04", "S06", "S07"],
+			"claim": "Later public posts and current terms do not establish earlier policy; fictional product draft is not current authority."
+		}
+	],
+	"uncertainties": [
+		{
+			"question": "Was the retry configuration executed and was any load test intentional?",
+			"evidenceIds": ["E18", "E19"],
+			"effect": "Approval interpretation, not automatic disqualification or proof of cause."
+		},
+		{
+			"question": "Which traffic mechanism explains the full transfer?",
+			"evidenceIds": ["E08", "E19"],
+			"effect": "Final attribution remains open independently of commercial relief."
+		}
+	]
+}

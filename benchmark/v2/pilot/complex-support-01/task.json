@@ -1,0 +1,9 @@
+{
+	"version": "1.0",
+	"scenarioId": "complex-support-01",
+	"decisionCutoff": "2024-03-01T15:00:00Z",
+	"role": "Independent reviewer of one completed customer reply and its proposed internal disposition/action plan.",
+	"instruction": "Assess whether the supplied draft can responsibly be sent and executed under the full dossier at the cutoff. Produce the complete ordinal dimensional assessment and integrated disposition specified by the normative rubric and response schema. Reconcile dates, authority, amounts, customer consent, evidence limits and cross-dimensional tradeoffs. Do not execute actions, invent missing evidence, grade historical Netlify employees, or decide whether the real historical customer should have been charged.",
+	"boundary": "The historical Netlify waiver is settled. HarborEdge, Aster Studio, all business records and candidates are synthetic source-grounded reconstruction. Public sources are not open-licensed transcript data. Candidate choices are alternatives for one fictional situation, not additional independent cases.",
+	"inputScope": "Ordered complete documents, one completed external reply and internal plan, normative rubric and output contract only. Reviewer expectations and other candidates are unavailable."
+}
