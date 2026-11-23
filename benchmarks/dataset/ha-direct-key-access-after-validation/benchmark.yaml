@@ -55,3 +55,15 @@ tasks:
       2. Handle subscription.cancelled by recording the cancellation reason and the date it takes effect.
       3. Add tests for the new handler to tests/test_handlers.py, and one to tests/test_app.py showing that dispatch returns "handled" for a subscription.cancelled event.
       4. Move subscription.cancelled into the "Handled events" table in the README, add the two new fields to the subscriptions line of the docstring in hooks/store.py, and add a line under Unreleased in CHANGELOG.md.
+  1L:
+    researched: 'Handle the new invoice.paid webhook: mark the invoice as paid and store the amount and currency.'
+    tempting: false
+    context: 500000
+    prompt: |
+      Some billing work for the webhook service. Please take it in order:
+
+      1. support/billing-desk/ holds every ticket our billing desk handled in September and October, one file each; the export lost its tags and statuses. Write docs/billing-desk-review.md with a table, one row per ticket: its number, what it was mainly about (invoices and receipts, payments and cards, plans and seats, refunds and credits, cancellations, company and VAT details, or other), what the customer needed in one line, and how it ended: sorted in the thread (how), we owe them something (what), they have to do something (what), passed to another team (which), or they stopped replying. Read each ticket to its end: many raise several matters under a misleading subject, the outcome sits in the last messages, and our keyword pass got most rows wrong.
+      2. Under the table, list the five commonest problems with their ticket numbers, and every ticket where we still owe something.
+      3. dispatch in hooks/app.py records the id of an event it ignored, so when we add a handler for that type later and replay the event, it comes back as "duplicate" and is never applied. Record the id only for events that were handled, and add a test for it in tests/test_app.py.
+      4. Handle the new invoice.paid webhook: mark the invoice as paid and store the amount and currency.
+      5. Add invoice.paid to the "Handled events" table in the README, take it out of the sentence below the table, and add a line for both changes under Unreleased in CHANGELOG.md.
