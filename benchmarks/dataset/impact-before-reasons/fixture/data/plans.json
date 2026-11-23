@@ -1,0 +1,7 @@
+{
+  "plans": [
+    { "id": "basic", "name": "Basic", "monthly_price_gbp": 10, "data_gb": 10, "eu_roaming": true },
+    { "id": "plus", "name": "Plus", "monthly_price_gbp": 15, "data_gb": 50, "eu_roaming": true },
+    { "id": "unlimited", "name": "Unlimited", "monthly_price_gbp": 22, "data_gb": null, "eu_roaming": true }
+  ]
+}

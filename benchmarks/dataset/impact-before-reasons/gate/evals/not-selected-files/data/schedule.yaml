@@ -1,0 +1,14 @@
+# When each message goes out, and to whom. audience is "all" or a plan id from data/plans.json.
+messages:
+  - file: emails/welcome.md
+    channel: email
+    audience: all
+    send: on sign-up
+  - file: content/sms/bill-ready.md
+    channel: sms
+    audience: all
+    send: each month, on the bill day
+  - file: content/notices/data-low.md
+    channel: in-app
+    audience: all
+    send: at 80% of the data allowance

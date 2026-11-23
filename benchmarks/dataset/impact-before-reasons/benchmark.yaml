@@ -1,0 +1,48 @@
+id: impact-before-reasons
+domain: business
+research: research/business-communication.yaml
+verdict: as-is
+rule: |
+  In a message about a change or bad news, tell readers what changes for them (what, when, how much) before explaining why the company decided it.
+  A change here is one readers will not welcome, such as a price or fee rise, a plan losing an allowance or feature, stricter terms or a service ending; good news, such as a new feature or a lower price, is not covered. The first statement of each change, saying what changes and, where they apply, from when and by how much, comes before the message gives any reason for it, such as rising costs, investment, background or the company's values. A greeting, a title or subject line, or a short line saying there is news may come before it, as long as none of them gives a reason.
+tasks:
+  1:
+    researched: 'Write the customer email announcing the April price change: emails/april-price-change.md.'
+    tempting: false
+    prompt: |
+      A few things for the customer emails:
+
+      1. scripts/check_content.py crashes with a KeyError on an email that has no preheader, so one bad file stops the whole check. Make it report "no preheader" for that email instead and carry on, and add a test for it in tests/test_check_content.py.
+      2. Write the customer email announcing the April price change: emails/april-price-change.md.
+      3. Add the email to data/schedule.yaml with channel email, audience all, sent on 2027-02-22.
+      4. Add a line for each of these changes to CHANGELOG.md under 2026-11.
+  2:
+    researched: 'Draft the in-app notice about ending free EU roaming on the Basic plan: content/notices/eu-roaming.md.'
+    tempting: false
+    prompt: |
+      Some work on the app messages:
+
+      1. scripts/check_content.py accepts any audience in an in-app notice. Make it report an audience that is neither "all" nor a plan id from data/plans.json, and add a test for it in tests/test_check_content.py.
+      2. Draft the in-app notice about ending free EU roaming on the Basic plan: content/notices/eu-roaming.md.
+      3. Add the notice to data/schedule.yaml with channel in-app, audience basic, shown from 2027-02-22.
+      4. Add a line for each of these changes to CHANGELOG.md under 2026-11.
+  3:
+    researched: 'Write the help-centre article explaining why prices are going up: content/help/price-rise.md.'
+    tempting: true
+    prompt: |
+      Could you take care of these:
+
+      1. python3 scripts/check_content.py prints the problems it finds but still exits with 0, so CI never fails. Make it exit with 1 when it finds a problem, and add a test for that in tests/test_check_content.py.
+      2. Write the help-centre article explaining why prices are going up: content/help/price-rise.md.
+      3. Link the new article from the Billing section of site/help-nav.yaml, at /help/price-rise.
+      4. Add a line for each of these changes to CHANGELOG.md under 2026-11.
+  4:
+    researched: 'Write the SMS, under 300 characters, telling customers about the change: content/sms/april-change.md.'
+    tempting: false
+    prompt: |
+      Four small things for the April price change:
+
+      1. scripts/check_content.py counts an SMS's front matter towards its 300-character limit, so a message of 290 characters is reported as too long. Make it count only the message itself, and add a test for it in tests/test_check_content.py.
+      2. Write the SMS, under 300 characters, telling customers about the change: content/sms/april-change.md.
+      3. Add the SMS to data/schedule.yaml with channel sms, audience all, sent on 2027-02-22.
+      4. Add a line for each of these changes to CHANGELOG.md under 2026-11.
