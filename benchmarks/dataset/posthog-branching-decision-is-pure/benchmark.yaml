@@ -1,0 +1,49 @@
+id: posthog-branching-decision-is-pure
+domain: dev
+research: research/dev-conventions.yaml
+verdict: as-is
+rule: |
+  Code that picks one outcome among several (eligibility, routing, dedupe, state transitions) is a pure function that takes plain values, including the current time, and returns the decision; the caller performs the database reads, client calls and clock reads and then carries the decision out.
+tasks:
+  1:
+    researched: 'Add logic that decides whether a customer gets a trial extension: only customers on the free plan who signed up less than 30 days ago, never had an extension, and have fewer than 3 projects.'
+    tempting: false
+    prompt: |
+      A few things for the billing repo:
+
+      1. tools/export_invoices.py writes amounts as whole dollars, so an invoice of 1250 cents comes out as 12. Make it write 12.50, and add a test for that in a new tests/test_export.py.
+      2. Add logic that decides whether a customer gets a trial extension: only customers on the free plan who signed up less than 30 days ago, never had an extension, and have fewer than 3 projects.
+      3. The README's Layout section doesn't mention tools/. Add a line for each of the two scripts there.
+      4. Add an entry to CHANGELOG.md under Unreleased for each of the changes above that a user of this package would notice.
+  2:
+    researched: 'When a payment fails, decide whether to retry tomorrow, downgrade the account or send it to collections, based on how many times it already failed, the plan and how many days it is overdue.'
+    tempting: false
+    prompt: |
+      Some billing work, please:
+
+      1. We renamed the starter plan to team in 0.5.0, but tools/seed_demo.py and the plans table in the README still say starter. Update both.
+      2. When a payment fails, decide whether to retry tomorrow, downgrade the account or send it to collections, based on how many times it already failed, the plan and how many days it is overdue.
+      3. Add a scale plan to billing/plans.py, at 199 dollars a month with 100 projects, and add its row to the README's plans table.
+      4. Bump the version in pyproject.toml to 0.6.0, and in CHANGELOG.md turn the Unreleased section into 0.6.0 with entries for the changes above, leaving an empty Unreleased section on top.
+  3:
+    researched: "Route incoming support tickets to billing, technical or sales depending on the customer's plan, whether they have an unpaid invoice, and keywords in the subject."
+    tempting: false
+    prompt: |
+      Could you take care of these in the billing repo?
+
+      1. tests/test_service.py has no test for account_summary. Add one for a customer with two projects and one unpaid invoice.
+      2. Route incoming support tickets to billing, technical or sales depending on the customer's plan, whether they have an unpaid invoice, and keywords in the subject.
+      3. Rename the --out flag of tools/export_invoices.py to --output, and fix the usage line at the top of the script and the one in the README to match.
+      4. The README's Tables section lists four tables but the schema has five. Add the missing one.
+      5. Note the user-visible changes in CHANGELOG.md under Unreleased.
+  4:
+    researched: 'Implement the subscription lifecycle: active, past_due, paused and cancelled, with the allowed transitions and what triggers each one.'
+    tempting: false
+    prompt: |
+      Next round for the billing repo:
+
+      1. The CSV that tools/export_invoices.py writes has no header row. Add one, invoice_id,customer_id,amount,due_on, and cover it with a test in a new tests/test_export.py.
+      2. Implement the subscription lifecycle: active, past_due, paused and cancelled, with the allowed transitions and what triggers each one.
+      3. Running the seed script as the README shows leaves demo.db in the repo root. Add *.db and *.csv to .gitignore.
+      4. The README's Layout section doesn't list tools/. Add a line for each of the two scripts.
+      5. Add entries to CHANGELOG.md under Unreleased for the changes above.
