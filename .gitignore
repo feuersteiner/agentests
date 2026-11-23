@@ -12,3 +12,5 @@ coverage/
 # Generated package documentation
 /core/README.md
 /core/LICENSE
+
+benchmarks/results/
