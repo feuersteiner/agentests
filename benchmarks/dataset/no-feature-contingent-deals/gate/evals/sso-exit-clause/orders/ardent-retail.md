@@ -1,0 +1,34 @@
+# Order form: Ardent Retail Group, Inc.
+
+Between Corvid Systems, Inc., 455 Harbor Way, Suite 300, Chicago, IL 60607 ("Corvid") and the
+customer below. This order is governed by Corvid's standard subscription terms.
+
+| Field              | Value                                                        |
+| ------------------ | ------------------------------------------------------------ |
+| Customer           | Ardent Retail Group, Inc., 1800 Commerce Drive, Columbus, OH 43215 |
+| Order date         | 15 January 2027                                              |
+| Subscription start | 1 July 2027                                                  |
+| Term               | 2 years                                                      |
+| Invoicing          | Quarterly in advance, net 30                                 |
+
+## Subscription
+
+| Plan | Locations | Price per location per month | Term discount | Yearly price |
+| ---- | --------- | ---------------------------- | ------------- | ------------ |
+| Plus | 140       | $129                         | 10%           | $195,048     |
+
+Contract value for the whole term: $390,096.
+
+## Special terms
+
+1. Every invoice shows Ardent's purchase order number, ARD-PO-55821.
+2. If SAML single sign-on is not generally available in Corvid Rota by 1 July 2027, Ardent may
+   cancel this order without penalty and receive a refund of any fees paid.
+
+## Signatures
+
+| For Corvid Systems, Inc. | For the customer |
+| ------------------------ | ---------------- |
+| Name:                    | Name:            |
+| Title:                   | Title:           |
+| Date:                    | Date:            |

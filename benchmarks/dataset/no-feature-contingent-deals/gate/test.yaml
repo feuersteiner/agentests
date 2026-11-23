@@ -1,0 +1,27 @@
+version: 1
+id: no-feature-contingent-deals
+title: No feature-contingent deals
+description: Proposals, order forms, action plans and customer emails promise no future feature or release date and make no term depend on one, unless the CEO's and CPO's approval is cited.
+select:
+  glob: ['proposals/**/*.md', 'orders/**/*.md', 'outbox/**/*.md']
+assert:
+  - id: no-future-feature-promise
+    description: No future feature or release date is promised, and any roadmap date is called a target that is not committed.
+    error: Do not promise the feature or its date. Say it is not available today and give any date as a target that is not committed, or cite the CEO's and CPO's approval.
+    decide:
+      - "A future feature is a product feature, capability, integration or release that the document describes as not available yet, upcoming, in development, planned or on the roadmap. The document does not say or imply that a future feature will be delivered, will be ready or live, or will ship by a date, quarter, timeframe or event such as the customer's launch, rollout, go-live or renewal, and does not give a future feature a date as expected, scheduled, planned or on track. Mentioning a future feature as not available today passes, and so does giving its date when the document explicitly calls that date a target or estimate that is not committed or not guaranteed. Dated onboarding, setup, training, security review and signature steps are not future features. A document that mentions no future feature passes."
+      - "The document explicitly states that both the CEO and the CPO (chief product officer) approved the feature commitment or feature contingency it makes. Saying that approval is needed, pending, requested or being sought does not count, and neither does approval by anyone else."
+  - id: no-feature-contingent-terms
+    description: No term of the deal depends on a future feature or release.
+    error: Remove the term that depends on the feature, or cite the CEO's and CPO's approval of that feature contingency.
+    decide:
+      - "The document does not make the deal, or any of its terms, depend on whether or when a product feature or release that is not available yet is delivered or goes live. Such a term is, for example, a right to cancel, terminate or exit, a refund, credit, discount or fee waiver, a payment, invoice or fee held back or due only on delivery, a start date or price that moves with the feature, or the customer signing only once the feature is live. A document that mentions such a request only to decline it, or says the deal does not depend on the feature, passes, and so does a document with no such term."
+      - "The document explicitly states that both the CEO and the CPO (chief product officer) approved the feature commitment or feature contingency it makes. Saying that approval is needed, pending, requested or being sought does not count, and neither does approval by anyone else."
+  - id: corvid-roadmap-not-included
+    description: Corvid Rota's roadmap items are not shown as included or available.
+    error: Corvid Rota has no SSO, SCIM provisioning or payroll export today. Do not list them as included or as part of the rollout; say they are not available today.
+    grep: 'SSO|[Ss]ingle[ -][Ss]ign|SAML|Okta|Entra|Azure AD|SCIM|[Pp]rovisioning|[Pp]ayroll|ADP|Gusto'
+    decide:
+      - "Corvid Rota, the product of Corvid Systems, does not have these today: single sign-on (SSO) through an identity provider such as Okta, Entra ID or Google Workspace over SAML, SCIM user provisioning, and payroll export to ADP or Gusto. Email sign-in and 'Sign in with Google' do exist. The document does not present any of these missing items as part of Corvid Rota today: as included in what the customer buys, as available or working now, or as a step or setup task of the customer's rollout or go-live, unless it says next to it that the item is not available yet. A document that mentions these items only as not available today or as roadmap targets passes."
+      - "The document does not mention Corvid Rota or Corvid Systems: it is about another company's product."
+      - "The document explicitly states that both the CEO and the CPO (chief product officer) approved the feature commitment or feature contingency it makes. Saying that approval is needed, pending, requested or being sought does not count, and neither does approval by anyone else."
