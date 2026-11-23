@@ -1,0 +1,5 @@
+{
+  "team": { "price_per_seat": 240, "minimum_seats": 10 },
+  "business": { "price_per_seat": 420, "minimum_seats": 50 },
+  "enterprise": { "price_per_seat": 600, "minimum_seats": 200 }
+}
