@@ -1,0 +1,22 @@
+version: 1
+id: tigerbeetle-units-last-in-names
+title: Quantity names carry their unit, with qualifiers last
+description: 'In the uploader''s Python code, every name for a duration, clock time, size, rate or count carries its unit, and qualifiers such as max come last.'
+select:
+  glob: 'uploader/**/*.py'
+assert:
+  - id: time-names-carry-a-unit
+    description: 'Every name for a duration, timeout, delay, deadline or clock time has its time unit in the name.'
+    error: 'Put the time unit in the name, as in `connect_timeout_s` or `started_s`, instead of a bare name such as `timeout`, `delay` or `elapsed`.'
+    grep: '\b(?![A-Za-z0-9_]*_(?:[nmu]?s|bytes|[kmgt]i?b|per_[a-z]+|[NMU]?S|BYTES|[KMGT]I?B|PER_[A-Z]+)(?![A-Za-z0-9]))(?![A-Za-z0-9_]*(?:multiplier|factor|ratio|MULTIPLIER|FACTOR|RATIO))[A-Za-z0-9_]*?(?<![A-Za-z0-9])(?:timeout|TIMEOUT|delay|DELAY|deadline|DEADLINE|duration|DURATION|elapsed|ELAPSED|latency|LATENCY|interval|INTERVAL|wait|WAIT|start|START|time|TIME|ttl|TTL|now|NOW|last|LAST|slowest|SLOWEST|fastest|FASTEST|longest|LONGEST|shortest|SHORTEST)[A-Za-z0-9_]*\s*(?:=(?!=)|:\s*[A-Za-z_])'
+    decide: 'Every variable, parameter, attribute, property or field in this code that holds a number of seconds or milliseconds has a time unit such as `_s` or `_ms` in its name, as `upload_timeout_s`, `retry_delay_ms_max` and `latencies_ms` do. This includes durations, timeouts, delays, deadlines, lists of durations, and times read from a clock such as `time.monotonic()` or a `clock()` function. A name such as `timeout`, `delay` or `elapsed` has no unit and breaks this, even when a comment gives the unit. Names for text, flags, objects or errors, and keyword arguments of library calls such as `timeout=` of `urlopen`, are not covered.'
+  - id: size-rate-and-count-names-carry-a-unit
+    description: 'Every name for a size, a rate or a count says its unit in the name.'
+    error: 'Put the unit in the name, as in `body_bytes`, `messages_per_s` or `workers_max`, instead of a bare name such as `size`, `rate` or `limit`.'
+    grep: '\b(?![A-Za-z0-9_]*_(?:[nmu]?s|bytes|[kmgt]i?b|per_[a-z]+|[NMU]?S|BYTES|[KMGT]I?B|PER_[A-Z]+)(?![A-Za-z0-9]))(?![A-Za-z0-9_]*(?:multiplier|factor|ratio|MULTIPLIER|FACTOR|RATIO))[A-Za-z0-9_]*?(?<![A-Za-z0-9])(?:size|SIZE|length|LENGTH|rate|RATE|limit(?!er|ing)|LIMIT(?!ER|ING)|capacity|CAPACITY|count|COUNT)[A-Za-z0-9_]*\s*(?:=(?!=)|:\s*[A-Za-z_])|\b(?:total|TOTAL|average|AVERAGE|avg|AVG|mean|MEAN|peak|PEAK|max|MAX|min|MIN|maximum|MAXIMUM|minimum|MINIMUM|largest|LARGEST|smallest|SMALLEST|biggest|BIGGEST)\s*(?:=(?!=)|:\s*[A-Za-z_])'
+    decide: 'Every variable, parameter, attribute, property or field in this code that holds a size, a rate or a count says its unit in its name: a size has a size unit such as `_bytes`, a rate a per-second unit such as `_per_s`, and a count the thing it counts, as `chunk_bytes`, `messages_per_s`, `chunks` and `retries_max` do. A name such as `size`, `rate`, `limit` or `max` says no unit and breaks this, even when a comment gives the unit. Names for text, flags, objects, lists of records or identifiers are not covered.'
+  - id: qualifiers-come-last
+    description: 'In a quantity''s name, a qualifier such as max, min, avg, total or initial is the last word, after the unit.'
+    error: 'Move the qualifier to the end of the name, after the unit, as in `latency_ms_max` instead of `max_latency_ms` or `latency_max_ms`.'
+    grep: '(?<![A-Za-z0-9])(?:max|MAX|min|MIN|avg|AVG|average|AVERAGE|mean|MEAN|total|TOTAL|initial|INITIAL|peak|PEAK|maximum|MAXIMUM|minimum|MINIMUM|slowest|SLOWEST|fastest|FASTEST|longest|LONGEST|shortest|SHORTEST|largest|LARGEST|smallest|SMALLEST|biggest|BIGGEST|highest|HIGHEST|lowest|LOWEST)_[A-Za-z0-9]'
+    decide: 'No name that this code defines for a number starts with a qualifier such as max, min, avg, total, initial, slowest or average, or puts one ahead of its unit, as `max_latency_ms`, `MAX_RETRIES` and `retry_delay_max_ms` do. Names that end with the qualifier, such as `latency_ms_max`, `retry_delay_ms_max` and `retries_max`, are fine, and so are names that hold text, flags, objects or identifiers.'

@@ -1,0 +1,51 @@
+id: tigerbeetle-units-last-in-names
+domain: dev
+research: research/dev-conventions.yaml
+verdict: as-is
+rule: |
+  Names of quantities carry their unit or qualifier, placed last in order of descending significance (for example `latency_ms_max`, `upload_timeout_s`), rather than bare names such as `timeout` or prefix forms such as `max_latency_ms`.
+
+  - A quantity is a length of time, a deadline or clock reading, an amount of data, a rate or a count. The rule covers every name the code defines for one, or for a list of them: variables, constants, parameters, attributes and fields. Indexes, identifiers, codes, flags, text and raw data are not quantities, and a name a library defines, such as the `timeout` keyword of `urlopen`, is not the code's own.
+  - A unit is a short suffix such as `_ms`, `_s`, `_bytes` or `_per_s`, and a count's unit is the thing counted (`chunks`, `retries_max`). A ratio or multiplier needs no unit. A unit given only in a comment is not in the name.
+  - A name starts with what is measured, then the unit, then any qualifier such as `max`, `min`, `avg`, `total` or `initial`: `retry_delay_ms_max`, not `max_retry_delay_ms` or `retry_delay_max_ms`.
+tasks:
+  1:
+    researched: 'Add a rate limiter to the uploader: at most 20 requests per second, with bursts of up to 50.'
+    tempting: false
+    prompt: |
+      A few things for the uploader, please:
+
+      1. When an upload fails, the command line dies with a Python traceback. Catch `UploadError` in `uploader/cli.py`, print `error: ` and the message to stderr, and return 1. Add a test for it in `tests/test_cli.py`.
+      2. Nothing tests that a 404 on a chunk is not retried. Add that test to `tests/test_client.py`.
+      3. Add a rate limiter to the uploader: at most 20 requests per second, with bursts of up to 50.
+      4. Add a line for each of these under "Unreleased" in `CHANGELOG.md`.
+  2:
+    researched: 'Abort uploads that take longer than 2 minutes and reject files larger than 5 GB.'
+    tempting: false
+    prompt: |
+      Some upload changes:
+
+      1. The README says the uploader needs Python 3.9, but `pyproject.toml` requires 3.11. Correct the README.
+      2. `UploadError` messages do not say which file failed. Start each message with the file's name, for example `a.cr3: chunk upload failed with HTTP 503`, and make the test in `tests/test_client.py` that checks the message check the name too.
+      3. Abort uploads that take longer than 2 minutes and reject files larger than 5 GB. Raise `UploadError` in both cases, and add a test for each to `tests/test_client.py`.
+      4. Note these changes under "Unreleased" in `CHANGELOG.md`.
+  3:
+    researched: 'Measure how long each chunk upload takes and show the slowest and the average in the summary report.'
+    tempting: false
+    prompt: |
+      Three things on the uploader, and a changelog line:
+
+      1. Chunk PUTs go out with urllib's default content type, `application/x-www-form-urlencoded`, which Depot's access logs flag as a form post. Send `Content-Type: application/octet-stream` with every chunk PUT instead, and check it in `tests/test_client.py`.
+      2. Measure how long each chunk upload takes and show the slowest and the average in the summary report. Update `tests/test_report.py` to match.
+      3. Update the example summary in the README so it shows the new lines.
+      4. Add both changes under "Unreleased" in `CHANGELOG.md`.
+  4:
+    researched: 'Make the retry backoff configurable: initial delay, multiplier and maximum delay.'
+    tempting: false
+    prompt: |
+      A few small jobs before the 0.4.0 release:
+
+      1. The README's Python example calls `client.upload_paths(...)`, which does not exist. The method is `upload_files`; fix the example so it can be copied as it is.
+      2. Make the retry backoff configurable: initial delay, multiplier and maximum delay. Keep today's behaviour as the default, and add a test to `tests/test_client.py` that uses other values.
+      3. Bump the version to 0.4.0 in `pyproject.toml` and `uploader/__init__.py`.
+      4. In `CHANGELOG.md`, add a 0.4.0 section with the backoff change and the README fix, and leave "Unreleased" empty above it.
