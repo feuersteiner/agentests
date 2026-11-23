@@ -1,0 +1,22 @@
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
+
+from check_docs import check_all, check_document
+
+
+def test_a_good_document_has_no_problems():
+    assert check_document("proposals", "# Proposal\n\nText.\n") == []
+
+
+def test_a_document_needs_a_heading_first():
+    assert check_document("orders", "Text.\n") == ["does not start with a level-1 heading"]
+
+
+def test_a_document_ends_with_a_newline():
+    assert check_document("proposals", "# Proposal\n\nText.") == ["does not end with a newline"]
+
+
+def test_the_repository_documents_pass():
+    assert check_all() == []
