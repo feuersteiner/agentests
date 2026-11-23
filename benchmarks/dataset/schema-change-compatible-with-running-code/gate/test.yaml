@@ -1,0 +1,22 @@
+version: 1
+id: schema-change-compatible-with-running-code
+title: Schema changes work with the running code
+description: A Rails migration keeps every existing column and table under its name and type, so the release still running when it is applied keeps working, and it never adds safety_assured.
+select:
+  glob: 'db/migrate/*.rb'
+  grep: 'ActiveRecord::Migration'
+assert:
+  - id: no-safety-assured
+    description: 'The migration does not use strong_migrations'' safety_assured.'
+    error: 'Remove safety_assured. Make the migration safe instead: add the new column now, write both columns in the code, and remove, rename or retype the old column in a later deploy.'
+    grep: '(^|\n)[^#\n]*safety_assured'
+  - id: keeps-existing-columns-and-tables
+    description: 'Run forward, the migration removes or renames no column or table that existed before it.'
+    error: 'The running release still uses this column or table. Add the new column (or table) and copy the data in this migration, write both from the code, and remove or rename the old one in a later deploy, after the model lists it in ignored_columns.'
+    grep: 'remove_(?!index|foreign_key|check_constraint)\w+|rename_\w+|drop_\w+|\.\s*(remove\w*|rename)\b|\bexecute\b|\brevert\b|DROP|RENAME|[Dd]rop\s+(column|table)|[Rr]ename\s+(column|to)'
+    decide: 'Answer about the forward direction of this Rails migration: its change method, its up method, or the up direction of a reversible block. Answer no if the forward direction removes or renames a column or a table that existed before this migration. It does that only with one of these: remove_column, remove_columns, remove_reference, remove_belongs_to, remove_timestamps, rename_column, drop_table, drop_join_table, rename_table, t.remove, t.remove_references or t.rename inside change_table, revert followed by the class name of an earlier migration (such as revert AddSomethingToTable or revert CreateSomething), which removes the columns or tables that earlier migration added, or SQL run with execute that contains DROP COLUMN, RENAME COLUMN, DROP TABLE or RENAME TO. Removing or renaming a column or table that the same forward direction created first does not count. Otherwise answer yes: add_column, add_reference, add_index, create_table, UPDATE and INSERT statements, update_all, change_column_default, change_column_null, remove_index, remove_foreign_key and remove_check_constraint all leave every existing column and table in place. Ignore the down method and the down direction of a reversible block.'
+  - id: keeps-existing-column-types
+    description: 'Run forward, the migration changes the type of no column that existed before it.'
+    error: 'The running release still reads and writes this column with its old type. Add a new column of the new type, copy the data into it, write both from the code, and remove the old column in a later deploy.'
+    grep: 'change_column\b|\.\s*change\b|\bexecute\b|ALTER|[Aa]lter\s+column|\bUSING\b'
+    decide: 'Answer about the forward direction of this Rails migration: its change method, its up method, or the up direction of a reversible block. Answer no if the forward direction changes the data type of a column that existed before this migration. It does that only with change_column, with t.change inside change_table, or with SQL run with execute that contains ALTER COLUMN with TYPE or SET DATA TYPE, for example turning an integer column into a decimal one. Changing the type of a column that the same forward direction added first does not count. Otherwise answer yes: adding new columns of any type, copying or converting data into a new column with UPDATE or update_all, change_column_default, change_column_null and change_column_comment all leave the type of every existing column as it was. Ignore the down method and the down direction of a reversible block.'

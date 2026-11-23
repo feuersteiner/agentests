@@ -1,0 +1,4 @@
+#!/usr/bin/env ruby
+# Runs the plain-Ruby tests under test/lib. They need only Ruby and minitest.
+$LOAD_PATH.unshift File.expand_path("../lib", __dir__)
+Dir[File.expand_path("../test/lib/**/*_test.rb", __dir__)].sort.each { |file| require file }
