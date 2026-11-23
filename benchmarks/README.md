@@ -123,6 +123,7 @@ and record the measures; and the results. No numbers exist yet.
 benchmarks/
   AGENTS.md                        rules for coding agents working in this folder
   README.md                        this file: the method and the structure
+  package.json                     the private workspace package agentests-benchmarks
   research/                        the research catalogue
     dev-conventions.yaml           software-development rules from written conventions
     dev-incidents.yaml             software-development rules from real incidents
@@ -131,7 +132,8 @@ benchmarks/
     skills.yaml                    a survey of skills, for arm 2
 ```
 
-The dataset, the harness and the results will be added to this folder; their layout is not decided.
+`package.json` makes this folder a Bun workspace of the repository. The dataset, the harness and
+the results will be added to this folder; their layout is not decided.
 
 ## The research catalogue
 

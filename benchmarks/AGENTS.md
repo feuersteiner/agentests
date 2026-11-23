@@ -3,6 +3,7 @@
 ## Layout
 
 - `README.md`: the method and the folder's structure, for people; read it before any change here.
+- `package.json`: the private workspace package `agentests-benchmarks`.
 - `research/`: the research catalogue the dataset will be cut from: four rule files (`dev-conventions.yaml`, `dev-incidents.yaml`, `business-communication.yaml`, `business-policy.yaml`) and `skills.yaml`, a survey of skills; the README lists their fields and counts.
 
 Status: only `research/` exists; the dataset, the harness and the results are not built.

@@ -1,0 +1,6 @@
+{
+	"name": "agentests-benchmarks",
+	"private": true,
+	"type": "module",
+	"license": "MIT"
+}
