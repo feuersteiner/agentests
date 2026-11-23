@@ -1,0 +1,9 @@
+Mapleform 4.2.1: hotfix for 4.2, released 2026-11-20. Ticket ids in brackets.
+
+e5b19a7 [MF-1341] Fix duplicate submissions when a respondent double-clicks Submit on a slow connection
+        The Submit button stayed active while the first request was in flight (regression from
+        MF-1330 in 4.2), and the API accepted both requests. Button now disabled after the first
+        click; POST /submissions takes an idempotency key.
+2c7f0d4 [MF-1341] Add idempotency_key column to submissions table
+a3d8e61 [MF-1343] Mark duplicates recorded between 2026-11-17 and 2026-11-20 with a "Duplicate"
+        label in the inbox (nothing deleted; workspace owners decide)

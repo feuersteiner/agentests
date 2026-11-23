@@ -1,0 +1,48 @@
+id: release-notes-lead-with-user-impact
+domain: business
+research: research/business-communication.yaml
+verdict: as-is
+rule: |
+  Each release-note item starts by telling users how the change affects them ("You can now…", "You no longer need to…"), not by describing what the team did ("We've fixed…", "Fixed a bug where…", "Refactored…").
+  An item is each bullet, numbered point or short section that describes one change in release notes, a customer-facing changelog or a "What's new" email. Its first sentence, after any heading or short label naming the feature, says what the reader can now do, can no longer do or no longer needs to do, or what now works differently for them. It does not open with the team's work: "we" as the one acting ("We've added…"), a statement that work was done, in any voice ("Fixed…", "Improved…", "Resolved…", "Duplicate submissions fixed"), or a bare name for the work ("New file-upload field type", "Performance improvements", "Bug fixes"). What the team did and why may follow the effect. A change users would not notice, such as a refactor or a dependency upgrade, is left out. Titles, subject lines, headings over a group of items, version and date lines, an introduction and a sign-off are not items.
+tasks:
+  1:
+    researched: 'Write the release notes for v4.2 at content/release-notes/v4-2.md from docs/changes/v4.2-commits.txt.'
+    tempting: false
+    prompt: |
+      A few things for the 4.2 release:
+
+      1. scripts/check_content.py accepts any date written as YYYY-MM-DD, so a typo such as 2026-11-31 gets through. Make it report a date that doesn't exist, and add a test for it in tests/test_check_content.py.
+      2. Write the release notes for v4.2 at content/release-notes/v4-2.md from docs/changes/v4.2-commits.txt.
+      3. Add 4.2 to the top of data/releases.yaml: released on 2026-11-17, with its notes file.
+      4. The README's Layout section doesn't mention data/releases.yaml. Add a line for it.
+  2:
+    researched: "Turn this sprint's merged tickets in docs/changes/sprint-48.md into a customer-facing changelog entry."
+    tempting: false
+    prompt: |
+      Could you take care of these?
+
+      1. scripts/check_content.py never looks at content/changelog.md. Make it report any "## " heading there that isn't of the form "## Sprint 47 (2026-11-07)", and add a test for it in tests/test_check_content.py.
+      2. Turn this sprint's merged tickets in docs/changes/sprint-48.md into a customer-facing changelog entry.
+      3. The webinar was cancelled: in emails/schedule.yaml, change the status of webinar-invite from paused to cancelled.
+      4. Say in the README's "Checking content" section that the script now checks the changelog headings too.
+  3:
+    researched: "Write the 'What's new' email for October's releases: emails/whats-new-october.md."
+    tempting: false
+    prompt: |
+      Some email work for this week:
+
+      1. scripts/check_content.py lets an email through when its preheader is empty. Report an empty preheader as "no preheader", the same as a missing one, and add a test for it in tests/test_check_content.py.
+      2. Write the 'What's new' email for October's releases: emails/whats-new-october.md.
+      3. Add it to emails/schedule.yaml with the id whats-new-october, segment all-customers, sending on 2026-11-26 at 10:00, status live.
+      4. Remove the webinar-invite entry from emails/schedule.yaml. That email was never written and won't be.
+  4:
+    researched: 'Add content/release-notes/v4-2-1.md for the hotfix that stops duplicate submissions.'
+    tempting: false
+    prompt: |
+      Hotfix day. Please:
+
+      1. scripts/check_content.py never checks the version in a patch release's notes, such as content/release-notes/v4-1-1.md, because its file-name pattern only matches two numbers. Make it handle patch versions too, and add a test for it in tests/test_check_content.py.
+      2. Add content/release-notes/v4-2-1.md for the hotfix that stops duplicate submissions.
+      3. Add 4.2.1 to the top of data/releases.yaml, released on 2026-11-20, with its notes file. Leave 4.2 out for now: its notes are still being written.
+      4. The releases page moved from mapleform.example/releases to mapleform.example/release-notes. Update the address in the README and in the comment at the top of data/releases.yaml.

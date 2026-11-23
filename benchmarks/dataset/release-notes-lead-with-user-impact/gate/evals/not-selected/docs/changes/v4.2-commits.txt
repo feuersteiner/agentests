@@ -1,0 +1,17 @@
+Mapleform 4.2: commits merged to release/4.2 between 2026-10-22 and 2026-11-14.
+Released 2026-11-17. Ticket ids in brackets.
+
+a91f3c2 [MF-1288] Add file-upload field type (PDF, JPG, PNG, DOCX; max 10 MB per file)
+5d02e7b [MF-1288] Store uploaded files in a per-workspace bucket
+c3e8a10 [MF-1301] Fix bug where conditional logic skipped rules on questions after a page break
+77b1d4f [MF-1307] Refactor submissions inbox query layer
+e0c4a9b [MF-1310] Add bulk delete to submissions inbox (select up to 500 at once)
+19ad6f2 [MF-1312] Fix CSV export dropping the last row on forms with a page break
+b84e5c1 [MF-1315] Improve builder load time for forms with 100+ fields (lazy-load field settings)
+2f6d903 [MF-1319] Slack integration: allow posting to private channels
+8c7a5e0 [MF-1320] Bump pdfkit 0.13 -> 0.15
+4be1f27 [MF-1322] Webhooks: retry failed deliveries 3 times with backoff (1 min, 10 min, 1 h)
+d1a0c38 [MF-1325] Remove Print view from submissions (superseded by Export > PDF since 4.0)
+6e2b8f1 [MF-1326] CI: run builder e2e tests in parallel
+f03c5d9 [MF-1329] Remove beta flag code for page breaks
+e7714aa [MF-1330] Submit button: send the submission as soon as it is clicked (optimistic submit)
