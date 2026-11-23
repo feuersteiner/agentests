@@ -1,0 +1,26 @@
+{
+  "cases": [
+    {
+      "id": "2026-009",
+      "type": "performance",
+      "opened": "2026-08-04",
+      "status": "closed",
+      "outcome": "no action",
+      "investigating_officer": "Marcus Lee"
+    },
+    {
+      "id": "2026-011",
+      "type": "conduct",
+      "opened": "2026-09-22",
+      "status": "hearing held",
+      "investigating_officer": "Priya Shah"
+    },
+    {
+      "id": "2026-014",
+      "type": "conduct",
+      "opened": "2026-11-16",
+      "status": "investigation complete",
+      "investigating_officer": "Priya Shah"
+    }
+  ]
+}
