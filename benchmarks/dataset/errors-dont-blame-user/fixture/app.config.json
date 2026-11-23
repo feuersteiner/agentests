@@ -1,0 +1,22 @@
+{
+  "appName": "Ledgerline",
+  "features": {
+    "payslipEmails": true,
+    "pensionReports": false
+  },
+  "employeeFields": ["name", "email", "niNumber", "annualSalary"],
+  "import": {
+    "maxRows": 2000,
+    "requiredColumns": ["name", "email", "ni_number", "annual_salary"]
+  },
+  "emails": {
+    "from": "Ledgerline <payroll@ledgerline.example>",
+    "transactional": [
+      { "file": "emails/payroll-scheduled.md", "trigger": "payroll.scheduled" },
+      { "file": "emails/payslips-ready.md", "trigger": "payroll.paid" }
+    ]
+  },
+  "support": {
+    "email": "support@ledgerline.example"
+  }
+}

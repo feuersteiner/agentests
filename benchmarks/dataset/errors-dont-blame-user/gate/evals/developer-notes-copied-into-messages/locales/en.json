@@ -1,0 +1,61 @@
+{
+  "nav": {
+    "payroll": "Payroll",
+    "employees": "Employees",
+    "reports": "Reports",
+    "settings": "Settings"
+  },
+  "signup": {
+    "title": "Create your Ledgerline account",
+    "fields": {
+      "email": "Work email",
+      "password": "Password",
+      "companyName": "Company name",
+      "payeReference": "Employer PAYE reference"
+    },
+    "help": {
+      "password": "At least 12 characters.",
+      "payeReference": "Three digits, a slash, then up to ten letters and digits, for example 123/AB45678. It is on letters from HMRC about PAYE."
+    },
+    "errors": {
+      "emailFormat": "ERR_VALIDATION: email does not match pattern ^[^@\\s]+@[^@\\s]+$",
+      "emailTaken": "409 Conflict: duplicate key users.email",
+      "passwordLength": "Password validation failed: length < 12",
+      "companyNameEmpty": "Field company_name is null",
+      "payeReferenceFormat": "PAYE ref regex mismatch (expected NNN/AANNNNN)"
+    },
+    "submit": "Create account"
+  },
+  "import": {
+    "title": "Import employees",
+    "help": "Upload a CSV file with one row per employee. The first row holds the column names: name, email, ni_number, annual_salary.",
+    "action": "Upload file",
+    "done": "{{rowCount}} employees imported.",
+    "errors": {
+      "not_csv": "The user picked the wrong kind of file: {{fileName}}. Only .csv files can be imported. In Excel and Google Sheets the export is under File > Save as or File > Download.",
+      "missing_columns": "The user deleted or renamed required columns in the header row: {{columns}}. Add them back and upload the file again.",
+      "missing_email": "The user left the email cell empty in {{rowCount}} rows. Download the failing rows, add the emails and upload the file again.",
+      "too_many_rows": "This file has {{rowCount}} rows. One file can hold up to {{maxRows}}. Split it into smaller files and upload them one at a time."
+    }
+  },
+  "employee": {
+    "fields": {
+      "name": "Full name",
+      "email": "Email",
+      "niNumber": "National Insurance number",
+      "annualSalary": "Annual salary",
+      "taxCode": "Tax code"
+    },
+    "help": {
+      "taxCode": "The tax code is on the employee's P45 or latest payslip, for example 1257L."
+    },
+    "errors": {
+      "nameEmpty": "Enter the employee's full name.",
+      "salaryNegative": "Enter an annual salary of £0 or more."
+    }
+  },
+  "errors": {
+    "sessionExpired": "This session ended after 30 minutes without activity. Sign in again to continue.",
+    "server": "Something went wrong on our side and these changes were not saved. Try again in a few minutes."
+  }
+}

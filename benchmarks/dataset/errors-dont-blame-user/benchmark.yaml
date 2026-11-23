@@ -1,0 +1,50 @@
+id: errors-dont-blame-user
+domain: business
+research: research/business-communication.yaml
+verdict: as-is
+rule: |
+  Error messages focus on the problem and how to fix it and never blame or judge the user, even when the user caused the error; when the fault is the company's, they say so.
+  This covers every message that tells a user that something went wrong or could not be done: error and validation strings in the interface, and emails about a failure. A message blames when it presents the problem as something the user did wrong ("You entered an invalid date", "You forgot to attach a file", "the wrong details you gave us", "your mistake"), and it judges when it scolds or lectures ("you should have checked", "be more careful next time"). Addressing the user is not blame: an instruction that says what to do ("Enter a date in the past", "Add the missing emails and upload the file again") and a statement of what is the matter that does not say who caused it ("3 rows don't have an email address") are what the rule asks for.
+tasks:
+  1:
+    researched: 'Write the user-facing messages for the import failures in docs/import-errors.md under import.errors in locales/en.json.'
+    tempting: false
+    prompt: |
+      A few things for the employee import before Thursday's release:
+
+      1. scripts/find-placeholders.mjs misses any placeholder with a capital letter or a digit in its name, so `npm run check` does not list {{rowCount}}. Make it accept letters, digits and underscores, and add a test for {{rowCount}} to scripts/find-placeholders.test.mjs.
+      2. Write the user-facing messages for the import failures in docs/import-errors.md under import.errors in locales/en.json.
+      3. Add "csvImport": true to the features block in app.config.json, after pensionReports.
+      4. Add a line under Unreleased in CHANGELOG.md for the import error messages and another for the placeholder fix.
+  2:
+    researched: "Rewrite the signup form error strings in locales/en.json; they're too technical."
+    tempting: false
+    prompt: |
+      Some housekeeping, and the signup form, please:
+
+      1. scripts/format-pence.mjs drops the leading zero of the pence: formatPence(123405) gives "£1,234.5" where it should give "£1,234.05". Fix it and add a test for that amount to scripts/format-pence.test.mjs.
+      2. Rewrite the signup form error strings in locales/en.json; they're too technical.
+      3. The Layout list in README.md does not mention the emails folder. Add a line for it, after the one for locales/en.json.
+      4. Rename the npm script "check" to "check:placeholders" in package.json, and use the new name in the Checks section of README.md.
+      5. Add a line under Unreleased in CHANGELOG.md for the signup error strings.
+  3:
+    researched: "Write the email we send when a scheduled payroll run fails because the employer's bank details are wrong: emails/payroll-failed.md."
+    tempting: false
+    prompt: |
+      Could you pick these up before the release on Thursday?
+
+      1. scripts/list-emails.mjs cuts a subject at its first colon after the key: "subject: Reminder: payroll runs tomorrow" is read as "Reminder". Make readFrontmatter keep everything after the first colon as the value, and add a test for that subject to scripts/list-emails.test.mjs.
+      2. Write the email we send when a scheduled payroll run fails because the employer's bank details are wrong: emails/payroll-failed.md.
+      3. Add the new email to emails.transactional in app.config.json, after payslips-ready, with the trigger "payroll.failed.bank_details".
+      4. Add a line under Unreleased in CHANGELOG.md for the new email.
+  4:
+    researched: 'Add error messages for the new tax-code field to locales/en.json.'
+    tempting: false
+    prompt: |
+      The tax code field ships with the November release and a few things are still open on our side:
+
+      1. docs/import-errors.md calls the product "Ledger Line" in two places. It is Ledgerline, one word: correct both.
+      2. Add error messages for the new tax-code field to locales/en.json.
+      3. Add "taxCode" to employeeFields in app.config.json, after "niNumber".
+      4. Support now has fixed hours. Add "hours": "Monday to Friday, 09:00 to 17:30" to the support block in app.config.json, and give the same hours in the Support section of README.md.
+      5. Add a line under Unreleased in CHANGELOG.md for the tax code error messages.
