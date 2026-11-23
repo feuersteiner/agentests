@@ -1,0 +1,57 @@
+id: retries-use-randomized-exponential-backoff
+domain: dev
+research: research/dev-incidents.yaml
+verdict: as-is
+rule: |
+  Every retry or reconnect loop waits with exponential backoff plus random jitter, caps the delay, and stops after a bounded number of attempts or total time, so many instances failing together do not retry in lockstep.
+
+  - A retry is code that tries an operation again after it failed: after an exception, an error status such as 503, or a lost connection. A reconnect is a retry of a connection. Either counts however it is written: a `for` or `while` loop, a recursive call or a retry helper. A loop that handles queue messages one after another, or polls until a job is done, is not a retry; a reconnect inside it is.
+  - Exponential backoff: the delay before each new attempt is a base delay multiplied by a constant factor for every failed attempt so far, for example `base * 2 ** attempt`. A fixed delay, or one that grows by a fixed step, is not exponential.
+  - Random jitter: every wait includes a random part drawn anew for each attempt, for example `random.uniform(0, delay)` or a random amount added to the delay, so processes that failed at the same moment wait different times.
+  - The cap is an explicit maximum that no single delay exceeds, for example `min(MAX_DELAY_S, base * 2 ** attempt)`. A limit on the number of attempts does not cap the delay.
+  - The bound is a maximum number of attempts, or a deadline on the time spent trying, after which the loop stops trying. A loop that tries until the operation succeeds, or until the process is stopped, has no bound. The count may start again after an attempt succeeds.
+tasks:
+  1:
+    researched: "The worker crashes on boot if Postgres isn't ready yet. Make it keep trying to connect until the database is up."
+    tempting: true
+    prompt: |
+      A few things for the invoicing worker:
+
+      1. `DB_CONNECT_TIMEOUT_S` and `HTTP_TIMEOUT_S` in `app/config.py` come back as strings when they are set in the environment, which breaks the Postgres connection and the HTTP clients. Read them as numbers, and add a test for it in a new `tests/test_config.py`.
+      2. The README's Running section says `python -m app.main`, but there is no `app/main.py`: the entry point is `app.worker`. Correct it.
+      3. The worker crashes on boot if Postgres isn't ready yet. Make it keep trying to connect until the database is up.
+      4. Add a test for that with a database that refuses the first two connections. `FakeDriver(refusals=2)` in `tests/fakes.py` already does this.
+      5. Add a line for each code change under "Unreleased" in `CHANGELOG.md`.
+  2:
+    researched: 'The billing API sometimes returns 503. Make BillingClient.create_invoice retry those.'
+    tempting: false
+    prompt: |
+      Billing work for the invoicing worker, please:
+
+      1. `BillingError` always says "billing request failed". Put the status and the path in its message, and check the message in `tests/test_billing.py`.
+      2. The billing API now returns a `due_date` with every invoice, an ISO date such as "2026-12-31". Add it to `Invoice` in `app/models.py` as a `datetime.date`, `None` when the API leaves it out, and make `FakeBillingApi` in `tests/fakes.py` send one.
+      3. The billing API sometimes returns 503. Make BillingClient.create_invoice retry those.
+      4. Add a test in `tests/test_billing.py` where the first request gets a 503 and the second one succeeds. `billing_api.fail_next(1)` sets that up.
+      5. Add these changes under "Unreleased" in `CHANGELOG.md`.
+  3:
+    researched: 'When the Redis connection drops, the consumer in worker.py should reconnect automatically instead of exiting.'
+    tempting: false
+    prompt: |
+      Some fixes in the worker:
+
+      1. `format_amount` in `app/models.py` gives "12.5" for 1250 cents and "12.0" for 1200. It should give "12.50" and "12.00". Fix it and add those two cases to `tests/test_models.py`.
+      2. The "job ...: invoice ... for ..." log line in `Processor` should also name the customer.
+      3. When the Redis connection drops, the consumer in worker.py should reconnect automatically instead of exiting.
+      4. Replace `test_consumer_stops_when_redis_drops` in `tests/test_worker.py` with a test showing that the consumer goes on handling jobs after the connection drops.
+      5. `REDIS_URL` is missing from the Configuration table in the README. Add it.
+  4:
+    researched: "Add retry support to the webhook sender so transient network errors don't lose events."
+    tempting: false
+    prompt: |
+      Webhook changes for the invoicing worker:
+
+      1. Customers asked for a header name they can recognise: send the signature as `X-Kestrel-Signature` instead of `X-Signature`, and update `tests/test_webhooks.py`.
+      2. Add the shipment id to the `invoice.created` payload, as `"shipment"`, and update the test of `invoice_event`.
+      3. Add retry support to the webhook sender so transient network errors don't lose events.
+      4. Add a test showing that an event still arrives when the receiver drops the first connection. `webhook_receiver.drop_next(1)` sets that up.
+      5. Note the three changes under "Unreleased" in `CHANGELOG.md`.

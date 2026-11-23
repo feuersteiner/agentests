@@ -1,0 +1,13 @@
+[project]
+name = "invoicing-worker"
+version = "0.4.0"
+description = "Kestrel Freight's invoicing worker"
+requires-python = ">=3.11"
+dependencies = []
+
+[project.optional-dependencies]
+production = ["psycopg>=3.1", "redis>=5.0"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
