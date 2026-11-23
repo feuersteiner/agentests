@@ -1,0 +1,19 @@
+version: 1
+id: privacy-right-to-object-separate
+title: The right to object gets its own heading
+description: Privacy notices, signup-form notices and privacy FAQs under website/ and help/ tell readers about their right to object under its own heading, box or FAQ question that says how to use it, not only as one item in a list of rights.
+select:
+  glob: ['website/**/*.md', 'help/**/*.md']
+  grep: '[Pp]rivacy|PRIVACY|[Pp]ersonal (data|information|details)|[Dd]ata [Pp]rotection|DATA PROTECTION|GDPR|[Ll]egitimate interest|[Rr]ight to object|[Oo]bject(ing)? to|[Nn]ewsletter|NEWSLETTER|[Uu]nsubscrib|UNSUBSCRIB|[Oo]pt[- ]?out|[Mm]arketing (e-?mails?|messages?|communications?)|[Yy]our (personal )?(data|information)\b'
+assert:
+  - id: right-to-object-has-own-part
+    description: The privacy text tells readers about their right to object under its own heading, box or FAQ question, not only as one item in a list of rights or a clause among other information.
+    error: Give the right to object its own heading, box or FAQ question, saying what readers can object to (the use of their data for analytics and fraud prevention, and marketing) and how; a bullet or a clause among the other rights is not enough.
+    decide:
+      - 'The text gives the right to object a part of its own: a heading, a FAQ question, a box (a quoted block or a callout) or a paragraph that starts with a bold label, whose topic is only the right to object, that is the reader''s right to tell the company to stop using their data for some purpose, such as analytics, fraud prevention or marketing. Examples of such a heading, question or label: "Your right to object", "Objecting to our use of your data", "How to stop marketing emails", "Can I object to how you use my data?". A sub-heading for it inside a "Your rights" section counts. These do not count: a heading, question or label about rights in general or about several things, such as "Your rights", "Your choices" or "What are my rights?"; an item of a list, even one that starts with a bold label or is all in bold; and a sentence inside a paragraph, table or answer about something else.'
+      - 'The main subject of this text is not privacy. It is, for example, a home page, a pricing page, a product page or a help article about using a product, and any mention of personal data in it is a sentence or two in passing, such as a link to a privacy notice or a line about how an email address will be used. A privacy notice, a privacy policy, a privacy FAQ or a privacy notice for a signup form has privacy as its main subject and does not meet this condition.'
+      - 'This text is about a company other than Tessellate and never mentions Tessellate, and every use of personal data it describes is something other than marketing and legitimate interests: for example carrying out an order or a contract, or meeting a legal duty. Marketing includes marketing emails, newsletters and offers; legitimate interests include analytics, fraud prevention and security.'
+  - id: right-to-object-part-says-how
+    description: The part about the right to object says how to use it.
+    error: Say in the right-to-object part how to object, for example by emailing privacy@tessellate.example, with the unsubscribe link in every marketing email, or with the setting in the app.
+    decide: 'If the text gives the right to object a part of its own (a heading, a FAQ question, a box or a paragraph with a bold label, whose topic is the reader''s right to object or to stop marketing), that part itself says how to use the right: for example by emailing an address or a named team, by writing to the company, by using a setting or a page, by a link, or with the unsubscribe link in marketing emails. Such a part that only says the reader has the right, and gives no way to use it, does not meet this condition. A text with no such part meets this condition.'
