@@ -1,0 +1,23 @@
+version: 1
+id: no-credentials-in-logs
+title: No credentials in logs
+description: Source files under src/ never hand a log call a credential header, a secret setting or an error that carries a request, at any level.
+select:
+  glob: 'src/**/!(*.test|*.spec).ts'
+  grep: 'console\.(log|debug|info|warn|error|trace|dir)\(|[Ll]og(ger)?\??\.(trace|debug|info|warn|error|fatal)\('
+assert:
+  - id: no-credential-headers
+    description: No log call is given a credential header's value, directly or inside a whole request, response or headers object.
+    error: Log the fields you need, and headers only with Authorization, Cookie, Set-Cookie and X-Api-Key removed or replaced by [redacted]; never a whole request, response, Headers object or fetch options.
+    decide: 'Every logging call in this file (a console method such as console.log, or a logger''s trace, debug, info, warn, error or fatal method) leaves out the values of the Authorization, Cookie, Set-Cookie and X-Api-Key headers. A call breaks this when it is given request.headers, response.headers or another Headers object, Object.fromEntries of headers, a spread or copy of headers, a whole Request or Response, or the options object given to fetch, unless all four of those headers were first deleted from it or replaced with a placeholder such as [redacted]; replacing only some of them still breaks it. The result of a function imported from another file, such as a redaction helper, is not judged here. Header names, whether a header is present, and single non-secret headers such as user-agent or x-request-id may be logged.'
+  - id: no-secret-settings
+    description: No log call is given a token, key, password or connection string, whether from the configuration, the environment or anywhere else.
+    error: Log only non-secret values; show a token, key or password as set or [redacted], and a connection string with its password replaced; never the whole config, process.env or Bun.env.
+    decide:
+      - 'Every logging call in this file (a console method such as console.log, or a logger''s trace, debug, info, warn, error or fatal method) leaves out credentials: access or bearer tokens, API keys, passwords, secrets, private keys, and database or connection URLs that contain a password. A call breaks this when it is given such a value, or the whole configuration object, process.env or Bun.env, or a copy or spread of them, unless every credential in it was first removed or replaced with a placeholder such as [redacted]. The Config that sluice''s loadConfig returns holds two credentials, upstreamToken and databaseUrl (a Postgres URL with a password), so a spread of it that replaces only one of them still breaks it. The result of a function imported from another file, such as a helper that makes a safe view of the configuration, is not judged here. Setting names, whether a setting is set, a connection URL with its password replaced, and ports, hosts, timeouts and log levels may be logged.'
+      - 'In this file, configuration reaches logging calls only through a function imported from another file, such as a helper that makes a safe view of the configuration: no logging call (a console method such as console.log, or a logger''s trace, debug, info, warn, error or fatal method) is given the configuration object itself, one of its fields, process.env, Bun.env, or a token, key, password or connection URL directly.'
+  - id: no-error-carrying-credentials
+    description: No log call is given an error that carries a request, its headers or a credential.
+    error: Log the error's name and message with the method, URL and status you need, not an error object that stores the request, its headers or the fetch options.
+    grep: '[Ee]rr|[Ee]xception|catch|[Cc]ause|reject'
+    decide: 'No logging call in this file (a console method such as console.log, or a logger''s trace, debug, info, warn, error or fatal method) is given an error object that this file builds with a request, its headers, the options given to fetch, or a token, key, password or cookie stored in it, for example an instance of an error class defined in this file that keeps the request it failed on. An error caught in a catch block or a promise rejection and logged as it was caught does not break this, and neither does an error''s name, message, stack, code or status.'
