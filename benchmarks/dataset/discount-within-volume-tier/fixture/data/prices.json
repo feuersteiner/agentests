@@ -1,0 +1,8 @@
+{
+  "currency": "USD",
+  "products": {
+    "events": { "name": "Events", "unit": 1000000, "price": 50 },
+    "recordings": { "name": "Session recordings", "unit": 1000, "price": 20 },
+    "warehouse_gb": { "name": "Warehouse sync", "unit": 1, "price": 1 }
+  }
+}
