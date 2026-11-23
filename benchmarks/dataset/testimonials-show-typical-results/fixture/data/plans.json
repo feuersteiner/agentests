@@ -1,0 +1,23 @@
+{
+  "currency": "GBP",
+  "plans": [
+    {
+      "id": "monitor",
+      "name": "Monitor",
+      "price_pence": 1900,
+      "per": "site per month",
+      "sensors": 1,
+      "history_months": 12,
+      "alerts": ["email"]
+    },
+    {
+      "id": "monitor-plus",
+      "name": "Monitor Plus",
+      "price_pence": 3500,
+      "per": "site per month",
+      "sensors": 4,
+      "history_months": 12,
+      "alerts": ["email", "sms"]
+    }
+  ]
+}

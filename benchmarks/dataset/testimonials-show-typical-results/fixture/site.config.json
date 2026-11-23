@@ -1,0 +1,13 @@
+{
+  "site": "kilowatch.example",
+  "nav": [
+    { "label": "Home", "path": "/" },
+    { "label": "Pricing", "path": "/pricing" }
+  ],
+  "deck": {
+    "sections": ["overview", "product"]
+  },
+  "support": {
+    "email": "help@kilowatch.example"
+  }
+}
