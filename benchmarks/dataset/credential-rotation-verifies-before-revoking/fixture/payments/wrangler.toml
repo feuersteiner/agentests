@@ -1,0 +1,15 @@
+# payments. The top-level settings are the development environment.
+# Secrets: TILLPOINT_API_KEY.
+name = "payments-dev"
+main = "src/index.js"
+compatibility_date = "2026-06-01"
+
+[vars]
+TILLPOINT_API = "https://sandbox.tillpoint.example/v2"
+
+[env.production]
+name = "payments"
+routes = [{ pattern = "pay.fennelprints.example/*", zone_name = "fennelprints.example" }]
+
+[env.production.vars]
+TILLPOINT_API = "https://api.tillpoint.example/v2"

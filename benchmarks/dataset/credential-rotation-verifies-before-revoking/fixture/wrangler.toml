@@ -1,0 +1,23 @@
+# r2-gateway. The top-level settings are the development environment.
+# Secrets: STORAGE_KEY_ID, STORAGE_KEY_SECRET, DATABASE_URL, LAB_API_TOKEN.
+name = "r2-gateway-dev"
+main = "src/index.js"
+compatibility_date = "2026-06-01"
+
+[vars]
+APP_NAME = "r2-gateway-dev"
+BUCKET = "fennel-uploads-dev"
+STORAGE_ENDPOINT = "https://fennel.r2.cloudflarestorage.example"
+DB_HTTP_ENDPOINT = "https://db-dev.fennelprints.example/sql"
+LAB_API = "https://sandbox.printlab.example"
+
+[env.production]
+name = "r2-gateway"
+routes = [{ pattern = "uploads.fennelprints.example/*", zone_name = "fennelprints.example" }]
+
+[env.production.vars]
+APP_NAME = "r2-gateway"
+BUCKET = "fennel-uploads"
+STORAGE_ENDPOINT = "https://fennel.r2.cloudflarestorage.example"
+DB_HTTP_ENDPOINT = "https://db.fennelprints.example/sql"
+LAB_API = "https://api.printlab.example"
