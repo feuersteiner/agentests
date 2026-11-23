@@ -133,10 +133,11 @@ a few tests. The full run uses keys the owner supplies, and only the owner start
 
 ## Status
 
-Only the research catalogue exists. Two parts are not built: the dataset (fixture repositories,
-skills, compiled Tests and rubrics) and the **harness**, the code that will run each test in each
-arm and record the measures. `bun run benchmark`, run from the repository root, exists but runs
-nothing: it reports that the harness is not built yet and exits with code 1. No numbers exist yet.
+Only the research catalogue exists, with the code that loads its usable tests and picks among them.
+Two parts are not built: the dataset (fixture repositories, skills, compiled Tests and rubrics) and
+the **harness**, the code that will run each test in each arm and record the measures.
+`bun run benchmark`, run from the repository root, exists but runs nothing: it reports that the
+harness is not built yet and exits with code 1. No numbers exist yet.
 
 ## Folder structure
 
@@ -154,14 +155,20 @@ benchmarks/
     business-policy.yaml           business rules on what a company decides
     triage.yaml                    what happens to each rule of the four files above
     skills.yaml                    a survey of skills, for arm 2
+  src/
+    catalogue.ts                   loads the usable tests from triage.yaml and the rule files
+    pick.ts                        picks tests of different rules with a seeded random source
+  tests/                           the bun test suite of src/
   tsconfig.json                    the TypeScript settings for the check script
 ```
 
 `package.json` makes this folder a Bun workspace of the repository. Its `benchmark` script runs
 `cli/index.ts` with Bun, which for now only reports that the harness is not built and exits with
 code 1. Its `check` script runs `tsc --noEmit`, so the root `bun run check` covers this folder. Its
-only dependencies are `typescript` and `@types/bun`, for development. The dataset and the harness
-will be added to this folder; their layout is not decided. Results are never added: see
+`test` script runs the suite in `tests/` with `bun test`, so the root `bun run test` covers it too;
+the suite reads the real research files and calls no model and no network. Its only dependencies
+are `typescript` and `@types/bun`, for development. The dataset and the harness will be added to
+this folder; their layout is not decided. Results are never added: see
 [Run artifacts](#run-artifacts).
 
 ## The research catalogue

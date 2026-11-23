@@ -4,11 +4,14 @@
 
 - `README.md`: the method and the folder's structure, for people; read it before any change here.
 - `cli/index.ts`: the entry `bun run benchmark` runs; for now it prints that the harness is not built, points to `README.md`, and exits with code 1. It runs nothing and calls no model.
-- `package.json`: the private workspace package `agentests-benchmarks`; `benchmark` runs `cli/index.ts` with Bun and `check` runs `tsc --noEmit`; its only dependencies are the dev dependencies `typescript` and `@types/bun`.
+- `package.json`: the private workspace package `agentests-benchmarks`; `benchmark` runs `cli/index.ts` with Bun, `check` runs `tsc --noEmit` and `test` runs `bun test ./tests`; its only dependencies are the dev dependencies `typescript` and `@types/bun`.
+- `src/catalogue.ts`: `loadTests()` reads `research/triage.yaml` and the rule files it names with `Bun.YAML` and returns the usable tests, one per rule whose verdict is not `drop` and per task its `usable_tasks` allows (all four when absent), in the triage's order; it is the only module that validates, and throws a clear error on a missing or malformed file.
+- `src/pick.ts`: `seededRandom(seed)`, a mulberry32 generator, and `pickTests(tests, count, random)`, which draws each test uniformly from the tests whose rule is not yet picked, so no two share a rule, and throws when there are fewer rules than picks.
+- `tests/`: the `bun test` suite of `src/`, with `helpers/research.ts` for temporary research folders and the raw triage; it reads the real research files and never reaches a model or the network.
 - `tsconfig.json`: the TypeScript settings for `check`, modelled on `core/tsconfig.json`.
 - `research/`: the research catalogue the dataset will be cut from: four rule files (`dev-conventions.yaml`, `dev-incidents.yaml`, `business-communication.yaml`, `business-policy.yaml`), `triage.yaml`, which records for each of their rules whether it is used as-is, restated with standing policy, reshaped or dropped, and which of its tasks are usable, and `skills.yaml`, a survey of skills; the README lists their fields and counts.
 
-Status: only `research/` exists, with the `benchmark` script as a placeholder that reports the harness is not built and exits with code 1; the dataset and the harness are not built. Results never live in this folder.
+Status: only `research/` exists, with the code in `src/` that loads its usable tests and picks among them, and the `benchmark` script as a placeholder that reports the harness is not built and exits with code 1; the dataset and the harness are not built. Results never live in this folder.
 
 ## Rules
 

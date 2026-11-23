@@ -5,7 +5,8 @@
 	"license": "MIT",
 	"scripts": {
 		"benchmark": "bun cli/index.ts",
-		"check": "tsc --noEmit"
+		"check": "tsc --noEmit",
+		"test": "bun test ./tests"
 	},
 	"devDependencies": {
 		"@types/bun": "^1.4.4",
