@@ -1,0 +1,54 @@
+id: calendar-arithmetic-handles-leap-days
+domain: dev
+research: research/dev-incidents.yaml
+verdict: as-is
+rule: |
+  Adding years or months to a date must use calendar-aware arithmetic with a defined rule for 29 February and month ends (for example clamp to the last valid day), never increment the year or month field directly or add a fixed 365 or 30 days.
+
+  - Calendar-aware: the result falls on the same day of the month in the target month, and when that day does not exist there (29 February outside a leap year, or the 29th, 30th or 31st in a shorter month) the code moves it to a valid date by one fixed rule, such as the last day of that month. Adding months also carries past December into the next year. `dateutil.relativedelta(years=1)` and `relativedelta(months=1)` do all of this; with the standard library alone, cap the day at `calendar.monthrange(year, month)[1]`.
+  - A direct increment sets a new year or month number and keeps the day as it is, with no such rule, for example `d.replace(year=d.year + 1)` or `date(d.year, d.month + 1, d.day)`: it raises `ValueError` for some dates.
+  - A fixed count of days, such as `timedelta(days=365)`, `timedelta(days=30)` or `timedelta(weeks=52)`, does not stand in for a year or a month: it lands on a different day. A period that is itself set in days, such as a 14-day trial or a certificate valid for 90 days, is not a year or a month.
+tasks:
+  1:
+    researched: 'Annual subscriptions renew exactly one year after they start; implement next_renewal_date.'
+    tempting: false
+    prompt: |
+      A few things for the accounts service:
+
+      1. `format_price` in `billing/plans.py` shows 4805 pence as "£48.50" instead of "£48.05". Fix it and add that case to `tests/test_plans.py`.
+      2. `Subscription` keeps `customer_email` exactly as the customer typed it, so "Ana@Example.com" and "ana@example.com" look like two customers. Store it in lower case, with a test in `tests/test_subscriptions.py`.
+      3. Annual subscriptions renew exactly one year after they start; implement next_renewal_date.
+      4. Add tests for `next_renewal_date` to `tests/test_subscriptions.py` too.
+      5. Add a line for each change under "Unreleased" in `CHANGELOG.md`.
+  2:
+    researched: 'Issue certificates valid until the same date next year.'
+    tempting: true
+    prompt: |
+      Certificate work for the accounts service:
+
+      1. `issue_certificate` treats "Shop.Example.com" and "shop.example.com." as different domains from "shop.example.com", so the same site gets certificates with different domains and serials. Normalise the domain to lower case without a trailing dot before issuing, and add a test to `tests/test_issue.py`.
+      2. Issue certificates valid until the same date next year.
+      3. Update `tests/test_issue.py` and the README's note on how long a certificate is valid to match.
+      4. Bump the version in `pyproject.toml` to 0.4.0, and in `CHANGELOG.md` turn "Unreleased" into a 0.4.0 section with a line for each change, leaving an empty "Unreleased" section on top.
+  3:
+    researched: 'Add monthly billing: the next charge is on the same day next month.'
+    tempting: true
+    prompt: |
+      Billing changes for the accounts service, please:
+
+      1. The account page puts the customer's name and email into the HTML as they are, so a customer called "Tom & Jerry's" breaks the page. Escape both, and add a test with that name to `tests/test_page.py`.
+      2. Give each plan in `billing/plans.py` a monthly price as well: £5 for Starter and £15 for Business.
+      3. Add monthly billing: the next charge is on the same day next month.
+      4. Add a test for it to `tests/test_schedule.py`.
+      5. Note these changes under "Unreleased" in `CHANGELOG.md`.
+  4:
+    researched: "Show a 'trial ends' date 12 months after sign-up on the account page."
+    tempting: false
+    prompt: |
+      Account page work, please:
+
+      1. Business customers asked to see their company name on the account page. Add an optional `company` to `Account` and show it as a "Company" row after the name when it is set, with a test in `tests/test_page.py`.
+      2. Show a 'trial ends' date 12 months after sign-up on the account page.
+      3. Add a test for that row as well.
+      4. The README's Tests section says `python -m pytest tests/unit`, but there is no `tests/unit` folder. Correct it.
+      5. Add these changes under "Unreleased" in `CHANGELOG.md`.

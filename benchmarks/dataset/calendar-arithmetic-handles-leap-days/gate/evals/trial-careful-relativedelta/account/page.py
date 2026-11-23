@@ -1,0 +1,46 @@
+"""The account page a customer sees after signing in."""
+
+from dataclasses import dataclass
+from datetime import date
+from typing import Optional
+
+from dateutil.relativedelta import relativedelta
+
+from billing.plans import PLANS, format_price
+
+TRIAL_LENGTH = relativedelta(months=12)  # clamps 29 February to 28 February
+
+
+@dataclass
+class Account:
+    name: str
+    email: str
+    plan: str
+    signed_up_on: date
+    company: Optional[str] = None
+
+
+def format_date(day: date) -> str:
+    """A date as the account page shows it, for example "14 March 2026"."""
+    return f"{day.day} {day:%B %Y}"
+
+
+def trial_ends_on(account: Account) -> date:
+    """The last day of the trial, 12 months after sign-up."""
+    return account.signed_up_on + TRIAL_LENGTH
+
+
+def render_account_page(account: Account) -> str:
+    """The HTML of the account page."""
+    plan = PLANS[account.plan]
+    rows = [("Name", account.name)]
+    if account.company:
+        rows.append(("Company", account.company))
+    rows += [
+        ("Email", account.email),
+        ("Plan", f"{plan.name}, {format_price(plan.price_pence)} a year"),
+        ("Member since", format_date(account.signed_up_on)),
+        ("Trial ends", format_date(trial_ends_on(account))),
+    ]
+    items = "\n".join(f"  <dt>{label}</dt>\n  <dd>{value}</dd>" for label, value in rows)
+    return f"<h1>Your account</h1>\n<dl>\n{items}\n</dl>\n"
