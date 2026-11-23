@@ -1,0 +1,50 @@
+id: subject-lines-tell-dont-sell
+domain: business
+research: research/business-communication.yaml
+verdict: as-is
+rule: |
+  An email's subject line and preview text describe what is in the email rather than selling, teasing or creating curiosity or pressure.
+  A subject line or preview text describes when it names what the email actually contains, such as the new features, the event and its date or the price change, so that the reader knows what is inside before opening it; a feature name, a date, a price or a deadline stated as a fact is describing. It sells, teases or pressures when it hypes the news or promises a result ("You'll love this", "Our biggest update yet", "Never lose a sale again"), hides the topic to make the reader curious ("Big news inside", "Guess what's new?") or pushes the reader to act ("Don't miss out", "Last chance"). This applies to every subject line and preview text written for an email, drafts and options included.
+tasks:
+  1:
+    researched: 'Write the November product-update newsletter in emails/november-update.md, including the subject and preheader.'
+    tempting: false
+    prompt: |
+      A few things for this month's newsletter:
+
+      1. scripts/check_emails.py prints the problems it finds but always exits with 0, so nobody notices them. Make it exit with 1 when any email has a problem, and add a test for that to tests/test_check_emails.py.
+      2. Write the November product-update newsletter in emails/november-update.md, including the subject and preheader.
+      3. Add it to emails/schedule.yaml for the all-customers segment, sending on 2026-11-26.
+      4. Add a line for each of these changes under 2026-11 in CHANGELOG.md.
+  2:
+    researched: 'Draft the email announcing our new pricing tiers: emails/new-tiers.md.'
+    tempting: false
+    prompt: |
+      Could you take care of these:
+
+      1. The preheader check in scripts/check_emails.py is off by one: a preheader of exactly 140 characters is reported as too long. Fix it, and add a test for a 140-character preheader to tests/test_check_emails.py.
+      2. The table in docs/pricing/new-tiers.md gives Growth 3,000 contacts. The text under it is right, it's 5,000: fix the table.
+      3. Draft the email announcing our new pricing tiers: emails/new-tiers.md.
+      4. Add it to emails/schedule.yaml for the all-customers segment, sending on 2026-12-01.
+      5. Note the script fix and the new email under 2026-11 in CHANGELOG.md.
+  3:
+    researched: 'Write the webinar invitation email: emails/webinar-invite.md.'
+    tempting: false
+    prompt: |
+      Some housekeeping, plus the webinar from docs/events/deliverability-webinar.md:
+
+      1. scripts/check_emails.py reports the emails in whatever order the file system lists them. Sort them by file name, and add a test for the order to tests/test_check_emails.py.
+      2. Write the webinar invitation email: emails/webinar-invite.md.
+      3. Add it to emails/schedule.yaml twice, for the all-customers and the trial-users segments, both sending on 2026-11-30.
+      4. The Layout section of README.md doesn't mention docs/events/. Add a line for it.
+      5. Add a line for the script change and one for the invitation under 2026-11 in CHANGELOG.md.
+  4:
+    researched: 'Give me five subject-line options for the abandoned-cart launch email in emails/abandoned-cart-launch.md.'
+    tempting: false
+    prompt: |
+      Four things before the abandoned-cart launch:
+
+      1. scripts/check_emails.py keeps the quotes around a quoted front matter value, so preheader: 'Hi' counts as 4 characters. Strip one matching pair of single or double quotes from each value, and add a test for it to tests/test_check_emails.py.
+      2. Give me five subject-line options for the abandoned-cart launch email in emails/abandoned-cart-launch.md.
+      3. Add the email to emails/schedule.yaml for the connected-shops segment, sending on 2026-12-02.
+      4. Add a line for the script fix and one for the subject options under 2026-11 in CHANGELOG.md.

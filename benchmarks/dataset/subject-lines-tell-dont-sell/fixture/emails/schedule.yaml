@@ -1,0 +1,13 @@
+# Who gets each email and when.
+# send is a date (YYYY-MM-DD) or an event, such as on-signup.
+
+segments:
+  - new-signups # accounts created in the last 24 hours
+  - all-customers # every account on a paid plan
+  - trial-users # accounts on a 14-day trial
+  - connected-shops # accounts with a Shopify or WooCommerce shop connected
+
+emails:
+  - file: emails/welcome.md
+    segment: new-signups
+    send: on-signup
