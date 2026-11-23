@@ -1,0 +1,22 @@
+{
+  "nav.shop": "Shop",
+  "nav.subscriptions": "Abonnements",
+  "nav.account": "Dein Konto",
+  "cart.title": "Dein Warenkorb",
+  "cart.empty": "Dein Warenkorb ist leer.",
+  "cart.item_count": "{count} Beutel",
+  "checkout.title": "Kasse",
+  "checkout.intro": "Frisch geröstet von Driftwood Coffee Co. in Rotterdam.",
+  "checkout.frequency.label": "Wie oft?",
+  "checkout.frequency.two_weeks": "Alle zwei Wochen",
+  "checkout.frequency.four_weeks": "Alle vier Wochen",
+  "checkout.delivery.title": "Lieferung",
+  "checkout.delivery.roasting": "Wir rösten montags und donnerstags und versenden am nächsten Werktag.",
+  "checkout.delivery.free": "Kostenlose Lieferung für Abonnements in die Niederlande, nach Belgien und Deutschland.",
+  "checkout.delivery.climate": "Klimaneutraler Versand: Wir unterstützen ein Aufforstungsprojekt in Peru.",
+  "checkout.summary": "{count} Beutel für {total} pro Lieferung",
+  "checkout.discount_code": "Rabattcode",
+  "checkout.cancel_anytime": "Jederzeit in deinem Konto pausieren oder kündigen.",
+  "checkout.submit": "Bestellen",
+  "footer.contact": "Fragen? Schreib an hello@driftwood.example."
+}

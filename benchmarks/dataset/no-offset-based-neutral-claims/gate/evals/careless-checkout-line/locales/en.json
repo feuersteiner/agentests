@@ -1,0 +1,22 @@
+{
+  "nav.shop": "Shop",
+  "nav.subscriptions": "Subscriptions",
+  "nav.account": "Your account",
+  "cart.title": "Your basket",
+  "cart.empty": "Your basket is empty.",
+  "cart.item_count": "{count} bags",
+  "checkout.title": "Checkout",
+  "checkout.intro": "Freshly roasted by Driftwood Coffee Co. in Rotterdam.",
+  "checkout.frequency.label": "How often?",
+  "checkout.frequency.two_weeks": "Every two weeks",
+  "checkout.frequency.four_weeks": "Every four weeks",
+  "checkout.delivery.title": "Delivery",
+  "checkout.delivery.roasting": "We roast on Mondays and Thursdays and ship the next working day.",
+  "checkout.delivery.free": "Free delivery on subscriptions to the Netherlands, Belgium and Germany.",
+  "checkout.delivery.climate": "Carbon-neutral delivery, thanks to our forestry offsets.",
+  "checkout.summary": "{count} bags for {total} per delivery",
+  "checkout.discount_code": "Discount code",
+  "checkout.cancel_anytime": "Pause or cancel any time from your account.",
+  "checkout.submit": "Place order",
+  "footer.contact": "Questions? Write to hello@driftwood.example."
+}
