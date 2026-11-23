@@ -1,0 +1,9 @@
+{
+  "name": "lullo-content",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "node scripts/check-content.mjs",
+    "test": "node --test"
+  }
+}

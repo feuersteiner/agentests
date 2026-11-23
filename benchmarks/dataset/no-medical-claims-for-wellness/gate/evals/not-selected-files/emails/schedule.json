@@ -1,0 +1,5 @@
+{
+  "emails": [
+    { "file": "emails/welcome.md", "audience": "new", "send": "signup" }
+  ]
+}

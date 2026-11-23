@@ -1,0 +1,23 @@
+{
+  "currency": "GBP",
+  "plans": [
+    {
+      "id": "free",
+      "name": "Free",
+      "monthly_price": 0,
+      "yearly_price": 0,
+      "sounds": 20,
+      "breathing_exercises": 3,
+      "offline": false
+    },
+    {
+      "id": "plus",
+      "name": "Plus",
+      "monthly_price": 4.99,
+      "yearly_price": 39.99,
+      "sounds": 120,
+      "breathing_exercises": 9,
+      "offline": true
+    }
+  ]
+}
