@@ -64,13 +64,20 @@ or fail.
 
 ## What each run records
 
-| Measure                                      | Arms    |
-| -------------------------------------------- | ------- |
-| The judge's score, from 0 to 4               | All     |
-| Wall time to the final commit                | All     |
-| The agent's tokens and cost                  | All     |
-| The decision model's tokens and cost         | 3 and 4 |
-| How many commits the pre-commit hook blocked | 3 and 4 |
+| Measure                                                                        | Arms    |
+| ------------------------------------------------------------------------------ | ------- |
+| The judge's score, from 0 to 4                                                 | All     |
+| Wall time to the final commit                                                  | All     |
+| The agent's tokens and cost                                                    | All     |
+| The decision model's tokens and cost                                           | 3 and 4 |
+| How many commits the pre-commit hook blocked                                   | 3 and 4 |
+| Whether the agent opened the Test's files, `TEST.md` and `test.yaml`           | 3 and 4 |
+| Whether the agent changed the Test's files                                     | 3 and 4 |
+| Whether the agent bypassed the hook, for example with `git commit --no-verify` | 3 and 4 |
+
+In arms 3 and 4 the fixture is set up as the product is really used: the Test's files and the hook
+sit in the repository in plain sight, and nothing is hidden from the agent. The last three measures
+show whether the agent read the Test, edited it or went around the hook.
 
 ## One run per arm
 
