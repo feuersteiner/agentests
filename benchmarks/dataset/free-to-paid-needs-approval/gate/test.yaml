@@ -1,0 +1,21 @@
+version: 1
+id: free-to-paid-needs-approval
+title: Free-to-paid needs approval
+description: Pricing, packaging and planning documents take nothing off the Free tier unless product leadership's confirmation is cited or the change is marked as pending it.
+select:
+  glob: ['pricing/**/*.md', 'planning/**/*.md', 'blog/**/*.md']
+assert:
+  - id: free-features-stay-free
+    description: No Free feature moves to a paid tier without product leadership's confirmation.
+    error: Keep the feature on Free, or cite product leadership's confirmation of the move or mark it as pending that confirmation.
+    grep: '[Ff]ree|[Aa]udit|[Ss]earch|[Nn]avigat|[Ff]orum|[Cc]ommunity'
+    decide:
+      - "Brindle's Free tier today includes code search and navigation, saved searches, the audit log and the community forum. The document does not propose, plan or announce taking any of these off Free: it does not move one to a paid tier or paid add-on, make it paid-only for new workspaces, or remove it from Free."
+      - "Every change in the document that takes code search and navigation, saved searches, the audit log or the community forum off Brindle's Free tier, by moving it to a paid tier or paid add-on, making it paid-only for new workspaces or removing it from Free, is explicitly labelled as pending product leadership's confirmation or cites product leadership's confirmation of that change."
+  - id: free-limits-stay
+    description: No Free limit is lowered or added without product leadership's confirmation.
+    error: Keep Free at 3 users and 5 projects with no new limits, or cite product leadership's confirmation of the change or mark it as pending that confirmation.
+    grep: '[Ff]ree|[Ll]imit|[Cc]ap\b|[Uu]sers?\b|[Ss]eats?\b|[Pp]rojects?\b|[Rr]epositor|[Tt]rial|[Qq]uota|[Rr]etention|[Hh]istory'
+    decide:
+      - "Brindle's Free tier today allows up to 3 users and 5 projects and has no other limits. The document does not propose, plan or announce a smaller Free tier: not fewer users or projects on Free, and not a new limit on something Free includes today, such as a cap on saved searches or searches, a shorter audit log history, or a time limit on using Free."
+      - "Every change in the document that gives Brindle's Free tier fewer than 3 users or 5 projects, or puts a new limit on something Free includes today, is explicitly labelled as pending product leadership's confirmation or cites product leadership's confirmation of that change."
