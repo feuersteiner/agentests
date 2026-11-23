@@ -1,0 +1,23 @@
+version: 1
+id: offer-letter-no-strike-price
+title: No strike price in offers
+description: Offer letters, offer summaries, emails to candidates and offer templates state the number of share options but no strike or exercise price, no per-share value and no money value for the options.
+select:
+  glob: ['offers/**/*.md', 'people/templates/**/*.md']
+  grep: '[Oo]ption|OPTION|[Ee]quity|EQUITY|[Ss]hares?\b|SHARE|[Ss]tock|STOCK|[Ss]trike|STRIKE|[Ee]xercise|EXERCISE|[Vv]aluation|409A|RSU|ESOP|[Gg]rant'
+assert:
+  - id: no-share-price
+    description: No strike price, exercise price or per-share price or value.
+    error: Give the number of options only, and say the board will set the exercise price at grant from an independent valuation.
+    grep: '[Ss]trike|STRIKE|[Ee]xercise|EXERCISE|[Pp]ric|PRIC|[Ss]hare|SHARE|409A|FMV|[Ff]air market|[Vv]alu|\$\d+\.\d|[Cc]ents?\b'
+    decide: 'The text gives no price per share for the share options or stock it describes: no strike price or exercise price figure, no price or value per share (such as "$0.90 a share", "a 409A value of $2.15 per share" or "the Series A price of $3.10"), and no template field or placeholder for an exercise price or a share price. Saying, without a figure, that the board will set the exercise price on the grant date from an independent valuation passes. Salaries, bonuses and other cash amounts are not share prices. A text that gives no per-share figure passes.'
+  - id: no-option-value
+    description: No money value for the options or the grant.
+    error: Do not put a money value on the options, even as an estimate or an illustration; state the number of options and how they vest.
+    grep: '\$|USD|[Dd]ollar|€|£|[Ww]orth|[Vv]alu|\{\{'
+    decide: 'The text gives no money value for the share options or equity it describes: no amount that the options or the grant are worth or could be worth, whether today, at a past valuation, or at a future valuation, funding round or sale of the company, not even as an estimate, an example or an illustration with a caveat, and no template field or placeholder for such a value. The number of options, the vesting schedule and a percentage of the company are not money values, and salaries, bonuses, benefits and other cash amounts are not the value of the options. A text that puts no money value on options or equity passes.'
+  - id: no-price-promise
+    description: No promise about what the exercise price will be.
+    error: Do not tie the exercise price to an earlier grant, a funding round or today's valuation; say the board will set it at grant from an independent valuation.
+    grep: '[Ss]trike|STRIKE|[Ee]xercise|EXERCISE|[Pp]ric|PRIC|409A|[Vv]aluation'
+    decide: 'The text makes no promise about what the exercise price (strike price) of employee share options will be. Such a promise says that the exercise price will be the same as for an earlier grant, for colleagues or other employees, for a funding round or at a past or current valuation, or that the exercise price is already fixed, locked in, capped or guaranteed. Only statements about the exercise price itself count. Explaining what an exercise price is, saying that it is not known yet, or saying that the board will set it on the grant date from an independent valuation passes. A text that says nothing about what the exercise price will be passes.'

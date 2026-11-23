@@ -1,0 +1,24 @@
+{
+  "roles": [
+    {
+      "id": "senior-engineer-platform",
+      "title": "Senior Engineer, Platform",
+      "level": "L4",
+      "team": "Platform",
+      "manager": "Tom Alvarez",
+      "recruiter": "Kim Nguyen",
+      "status": "interviewing",
+      "opened": "2026-09-01"
+    },
+    {
+      "id": "product-designer",
+      "title": "Product Designer",
+      "level": "L3",
+      "team": "Design",
+      "manager": "Aisha Bello",
+      "recruiter": "Kim Nguyen",
+      "status": "open",
+      "opened": "2026-10-12"
+    }
+  ]
+}
