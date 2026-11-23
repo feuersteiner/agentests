@@ -1,0 +1,10 @@
+{
+  "emails": [
+    {
+      "id": "welcome",
+      "file": "emails/welcome.md",
+      "audience": "new Pro subscribers",
+      "send": "on subscription"
+    }
+  ]
+}

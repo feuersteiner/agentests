@@ -1,0 +1,21 @@
+# The plan and its terms. One plan, sold in pounds to customers in the UK.
+currency: GBP
+plans:
+  - id: pro
+    name: Pro
+    price_per_month: 12
+    billing: monthly, charged upfront when the customer subscribes and on the same day each month
+    seats: 1
+    downloads: any asset in the library
+    licence: commercial, covers client work
+    cancel: any time from account settings; access runs to the end of the paid month
+    money_back_guarantee:
+      days: 30
+      terms: >-
+        A new subscriber who asks within 30 days of their first payment gets that payment back in
+        full. Requests go to billing@inkwell.example.
+free_tier: none
+free_trial: none
+account_without_plan: >-
+  Anyone can create an account. Without Pro an account can browse the library, see watermarked
+  previews and save favourites, but cannot download anything.
