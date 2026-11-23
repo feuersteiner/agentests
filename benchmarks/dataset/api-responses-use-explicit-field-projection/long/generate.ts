@@ -4,6 +4,13 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
+// The number of issues written, the one knob of the material's size. The topics below give two distinct
+// issues each, and ITEMS of them are drawn, in a fixed shuffled order; the dates and the README follow it.
+const ITEMS = 110;
+// The issues' opening dates spread over about this many days from FIRST_OPENED, whatever ITEMS is.
+const FIRST_OPENED = '2025-06-02';
+const OPENING_SPAN_DAYS = 275;
+
 const root = process.argv[2];
 if (!root) throw new Error('Usage: bun long/generate.ts <dir>');
 
@@ -48,7 +55,7 @@ interface Topic {
 	b: Option;
 	facts: string[];
 	desk: string;
-	art: 'log' | 'test' | 'curl' | 'timing';
+	art: 'log' | 'test' | 'curl' | 'timing' | 'stack';
 }
 
 const topics: Topic[] = [
@@ -493,6 +500,292 @@ const topics: Topic[] = [
 		facts: ['The migration export found 7,200 internal links.', 'About 600 of them have no matching slug.', 'The old server is scheduled to go in the spring.'],
 		desk: 'the atlas series is cited by county recorders, and its links are how they check our sources',
 		art: 'log'
+	},
+	{
+		thing: 'comments on old posts',
+		where: 'CreateComment in internal/handler/comment.go',
+		asks: [
+			['Close comments on posts after a year', 'The 2014 posts about the gull roost still collect a comment or two a week, nearly all of it junk or questions nobody at the desk can answer any more. The old site closed comments after twelve months and readers were used to it.'],
+			['A question on a 2016 post waited three months for an answer', 'Nobody watches the threads of old posts. The question was a good one, about access to a hide that has since been pulled down, and it sat there until the reader wrote to the letters page.']
+		],
+		a: { name: 'a fixed rule that refuses new comments on posts older than twelve months', pro: 'there is nothing to set per post and the rule is easy to explain on the site', con: 'the count posts that people still report to years later would close too' },
+		b: { name: 'a switch on each post that an editor can turn off', pro: 'the desk keeps the long-running count threads open and closes the rest', con: 'nobody will remember to turn it off, so in practice nothing closes' },
+		facts: ['About a fifth of new comments land on posts more than a year old.', 'The old site closed comments after twelve months with no exceptions.', 'Four long-running count posts get comments every season and should stay open.'],
+		desk: 'the old threads are where readers go when they plan a visit, and an unanswered question there looks as if nobody is home',
+		art: 'log'
+	},
+	{
+		thing: 'repeated comments',
+		where: 'CreateComment in internal/handler/comment.go',
+		asks: [
+			['The same comment arrives two or three times', 'Readers on poor signal press "post" again when nothing seems to happen, and each press becomes its own pending comment. The editor on moderation approves one and turns down the others by hand, or approves all three by mistake.'],
+			['Approved the same comment twice on the swift survey post', 'Two identical comments from one reader now sit next to each other under the post. The reader wrote in to ask why we printed it twice.']
+		],
+		a: { name: 'a request key that the site sends with each comment and the API remembers for a day', pro: 'a retry is recognised however late it arrives', con: 'it only works for clients that send the key, and the site has to change first' },
+		b: { name: 'refusing a comment whose name and body match one on the same post from the last ten minutes', pro: 'it needs no change on the site and catches the case we actually see', con: 'two readers who both write "Great photos!" on the same post within minutes would collide' },
+		facts: ['In a sample of 500 pending comments, 31 were exact repeats of another.', 'Almost all repeats arrive within two minutes of the first.', 'The site\'s form disables its button only after the request returns.'],
+		desk: 'nothing makes us look more careless than the same comment printed twice under a post',
+		art: 'log'
+	},
+	{
+		thing: 'accented letters in comments',
+		where: 'the request decoding in CreateComment',
+		asks: [
+			['Welsh place names turn into question marks in comments', 'A reader wrote about the choughs on Ynys Enlli and the circumflexes came out as question marks. It only happens for comments sent from the events microsite.'],
+			['Names with accents look wrong in the moderation queue', 'Names like Zoë and Siân appear as two odd characters each in the queue. On the published post they look right, which makes moderating confusing.']
+		],
+		a: { name: 'answering 400 to any comment that is not valid UTF-8', pro: 'bad bytes never reach the store and the sender finds out at once', con: 'the microsite would start failing loudly until its form is fixed' },
+		b: { name: 'fixing the character set the microsite sends and leaving marginalia as it is', pro: 'the mistake is on the sender\'s side and that is where it gets fixed', con: 'the next form somebody builds will make the same mistake' },
+		facts: ['The microsite\'s form declares a Latin-1 character set when it posts.', 'Go strings hold whatever bytes they are given; nothing checks them on the way in.', 'The dashboard draws names in a typeface that lacks some combining marks.'],
+		desk: 'a good share of our readers and writers are in Wales, and getting their place names wrong is noticed every time',
+		art: 'log'
+	},
+	{
+		thing: 'formatting in comments',
+		where: 'the comment bodies as stored and the site\'s comment component',
+		asks: [
+			['Readers type asterisks for emphasis and see them printed', 'Comments are shown as plain text, so "a *very* close view" keeps its asterisks. Readers assume something is broken.'],
+			['Links in comments are not clickable', 'People paste links to their sightings and photographs. Under the post they show as plain text that has to be copied by hand.']
+		],
+		a: { name: 'a small Markdown subset, emphasis and links only, drawn by the site', pro: 'readers get what they already type and nothing more', con: 'every link becomes clickable, which is exactly what the spammers want' },
+		b: { name: 'plain text with bare URLs turned into links marked `rel="nofollow ugc"`', pro: 'it covers the case readers care about and gives spam no search benefit', con: 'emphasis stays as asterisks' },
+		facts: ['About 8% of approved comments contain a URL.', 'Under 2% use asterisks or underscores for emphasis.', 'Comment bodies are stored exactly as sent.'],
+		desk: 'the links are usually to a reader\'s own photographs, and that is the best material we get in the comments',
+		art: 'test'
+	},
+	{
+		thing: 'moderation handover',
+		where: 'the admin group in internal/router/router.go',
+		asks: [
+			['Leave a note on a pending comment for the next moderator', 'Some comments need a check before approval: a claimed rarity, a photo credit. The editor who spots it has no way to say so, and the next week\'s moderator starts from nothing.'],
+			['The moderation week handover lives in a chat thread', 'At the end of each week the outgoing moderator posts a list of the comments they were unsure about. By the Wednesday it has scrolled out of sight.']
+		],
+		a: { name: 'a free-text note on each pending comment, shown in the queue', pro: 'the doubt sits right next to the comment it is about', con: 'notes pile up on comments that are long gone unless something tidies them' },
+		b: { name: 'a short fixed list of holds such as "check the record" or "check the credit"', pro: 'the queue can filter by them and the dashboard can count them', con: 'the case nobody foresaw has no box to tick' },
+		facts: ['In a normal week three to six comments are held back for a check.', 'Claimed rarities go to the county recorder before approval.', 'Editors cannot write anything at all against a pending comment today.'],
+		desk: 'the claimed rarities are the comments that matter most, and they are the ones that fall between two moderation weeks',
+		art: 'test'
+	},
+	{
+		thing: 'stale pending comments',
+		where: 'AdminListPending and the store',
+		asks: [
+			['Comments from February are still pending', 'Nobody will ever approve them now, but they sit at the top of the queue because it is oldest first, and every moderator scrolls past them.'],
+			['Readers whose comment never appeared write in to ask why', 'Two letters this month asked what happened to a comment. In both cases it was still pending, months later.']
+		],
+		a: { name: 'dropping pending comments automatically after 30 days', pro: 'the queue holds only what someone might still act on', con: 'a comment held for a recorder\'s check could disappear before the answer comes back' },
+		b: { name: 'a weekly digest for the moderator of everything older than a fortnight', pro: 'a person still makes every decision', con: 'it is one more message that whoever is on moderation learns to ignore' },
+		facts: ['The queue holds 212 comments older than 30 days.', 'Fewer than one comment in a hundred is approved after more than a week in the queue.', 'The store has no background jobs of any kind.'],
+		desk: 'a reader who waited weeks for a comment to appear does not comment again',
+		art: 'timing'
+	},
+	{
+		thing: 'the word list for comments',
+		where: 'CreateComment and the pending queue',
+		asks: [
+			['Hold back comments with slurs instead of queueing them with the rest', 'A comment with a racist slur sat in the queue between two ordinary ones, and the freelancer covering moderation had to read it. Comments like that should go somewhere separate.'],
+			['Keep a list of words that send a comment for a second look', 'The editors have a list of a few dozen words and phrases that always mean trouble. Today each moderator keeps it in their head.']
+		],
+		a: { name: 'a word list kept in the repository and checked when a comment arrives', pro: 'changes are reviewed and the list is versioned with the code', con: 'adding a word needs a release' },
+		b: { name: 'a list the editors change through a new admin route', pro: 'the desk can react the same day', con: 'it is a new admin screen to build, for a list that changes a few times a year' },
+		facts: ['The editors\' list has 46 entries.', 'Place names such as Scunthorpe have to be let through.', 'The pending queue has no notion of priority or category.'],
+		desk: 'we would rather the freelancers did not have to read the worst comments at all',
+		art: 'test'
+	},
+	{
+		thing: 'the letters page',
+		where: 'the admin group and the approved comments',
+		asks: [
+			['Mark comments for the print letters page', 'Each month the letters editor picks six or seven of the best comments for the print issue. She finds them by scrolling through every post of the month and copies them into a document.'],
+			['The letters page printed a comment the reader had asked us to take down', 'The letters editor copied a comment in the first week of the month. The reader asked for it to come down in the second week. Print went in the third, with the comment.']
+		],
+		a: { name: 'a star that editors can put on an approved comment, with a list of starred comments by month', pro: 'the letters editor picks from a short list that is always current', con: 'it adds an admin action and a list for one person\'s monthly job' },
+		b: { name: 'a monthly export script that writes the approved comments of the month to a file', pro: 'there is no new route at all, only a script', con: 'the file is out of date the moment it is written, which is how the takedown was missed' },
+		facts: ['The letters page prints six or seven comments an issue.', 'The letters editor spends about half a day choosing them.', 'Every comment taken down so far went by restarting the server.'],
+		desk: 'the letters page is one of the best-read pages of the print issue, and readers love finding their comment in it',
+		art: 'log'
+	},
+	{
+		thing: 'backups',
+		where: 'the server\'s disk, once the store is a file',
+		asks: [
+			['There is no backup plan for the new database', 'Once the comments live on disk, losing the virtual machine means losing them. Nobody has said how they are backed up or how a restore would go.'],
+			['Practise a restore before the launch', 'Operations back up the subscriptions database nightly and have never tried a restore. I would rather we found out what goes wrong on a quiet afternoon.']
+		],
+		a: { name: 'a nightly copy of the database file to the operations backup host, kept for 30 days', pro: 'it is one timer and one copy command, of the kind operations already run for other things', con: 'up to a day of comments is gone if the machine dies at the wrong moment' },
+		b: { name: 'continuous replication of every change to object storage', pro: 'at most a few seconds are lost, whatever happens', con: 'it is another process to run and watch, on a machine that runs one thing today' },
+		facts: ['The backup host keeps 30 nightly copies of everything it is sent.', 'A full copy of the expected database would take under a second.', 'Nobody has tested a restore of anything since the subscriptions system went live.'],
+		desk: 'losing a weekend of count reports would be worse than losing the server for a weekend',
+		art: 'log'
+	},
+	{
+		thing: 'vulnerability checks',
+		where: 'the build on the build machine',
+		asks: [
+			['Run govulncheck as part of the build', 'The module has no dependencies today, but the standard library has had several security releases this year and we heard about one of them by chance.'],
+			['We ran a toolchain missing a net/http fix for five weeks', 'The build machine had an old Go release pinned. Nobody noticed until operations ran their quarterly scan.']
+		],
+		a: { name: 'govulncheck on every build, failing it when a reachable vulnerability turns up', pro: 'nothing with a known hole reaches the server', con: 'a fix announced on a Friday evening blocks every deploy until someone upgrades' },
+		b: { name: 'a weekly scheduled run that opens an issue when it finds something', pro: 'urgent work is never held up by a scan', con: 'an issue opened on a Friday waits until somebody reads the tracker' },
+		facts: ['govulncheck only reports vulnerabilities in code the module actually calls.', 'Operations scan every server once a quarter.', 'The build takes about forty seconds today.'],
+		desk: 'we do not follow any of this, but we would like never to read about ourselves in the technology pages',
+		art: 'test'
+	},
+	{
+		thing: 'the staging box',
+		where: 'the staging virtual machine and its build',
+		asks: [
+			['Staging does not behave like production', 'The staging box builds from a branch with a different Go version and the full sample seed. Twice this month a change worked on staging and failed in production.'],
+			['Nobody knows what is deployed on staging', 'Three people deploy branches to the same staging box. When the site team test against it, they cannot tell whose change they are looking at.']
+		],
+		a: { name: 'building one binary per commit and deploying the same file to staging and then production', pro: 'what was tested is byte for byte what goes live', con: 'it needs somewhere to keep the built binaries and a way to pick one' },
+		b: { name: 'a version route on staging that answers with the commit and branch it was built from', pro: 'everyone can see at a glance what is running, for a handful of lines', con: 'it tells you staging is different without making it any less different' },
+		facts: ['Staging and production run different Go versions today.', 'Staging is rebuilt by hand, from whatever branch the last person chose.', 'Production is deployed from the main branch only.'],
+		desk: 'when the site team say "it works on staging" we have learnt to ask which staging they mean',
+		art: 'log'
+	},
+	{
+		thing: 'traffic on a rarity day',
+		where: 'the whole request path, proxy included',
+		asks: [
+			['Find out how much traffic marginalia can take before the launch', 'When a rarity turns up, its post gets ten times its normal traffic in an hour. Nobody knows whether marginalia keeps up, because it has never had to.'],
+			['The hoopoe post answered slowly for twenty minutes', 'On the Saturday the hoopoe was found, the post and its comments took several seconds to load. The proxy log shows the requests queueing behind each other.']
+		],
+		a: { name: 'a scripted load test against staging with a few hundred simulated readers', pro: 'it can be run again before the launch and before every big change', con: 'simulated readers never behave like real ones, and staging is not production' },
+		b: { name: 'replaying an hour of the old site\'s proxy log from the last big rarity', pro: 'it is the traffic we actually get, with its real mix of pages', con: 'the old site\'s URLs have to be translated, and some have no equivalent' },
+		facts: ['The busiest hour on record is about 41,000 requests, on the day of the 2024 bee-eaters.', 'The comment list of a busy post is the heaviest request.', 'The server has two cores and 4 GB of memory.'],
+		desk: 'a rarity is the day the most new readers ever see the site, and if it is slow that day they do not come back',
+		art: 'timing'
+	},
+	{
+		thing: 'disk space on the server',
+		where: 'the server\'s log files and the service manager',
+		asks: [
+			['The server ran out of disk on the 14th', 'The access log and the service\'s own output grew until the disk was full. marginalia kept answering, but the deploy that afternoon failed because nothing could be written.'],
+			['Rotate and expire the logs on the server', 'Logs stay on the server for ever. The log host already keeps 30 days, so the copies on disk are only there because nothing deletes them.']
+		],
+		a: { name: 'a rotation rule that compresses daily and deletes after a week', pro: 'it is the standard tool and a few lines of configuration', con: 'logs that never reached the log host are gone after a week' },
+		b: { name: 'sending the output only to the service manager\'s journal, with a size cap', pro: 'the cap holds whatever happens', con: 'a busy day can push out the very hours someone wants to read' },
+		facts: ['The disk is 20 GB, of which logs took 17.', 'The log host receives every line within a minute of it being written.', 'The service writes to standard output and to a file at the same time.'],
+		desk: 'the failed deploy held back a correction that the desk had promised a reader by the end of the day',
+		art: 'log'
+	},
+	{
+		thing: 'alerting',
+		where: 'the metrics host and the proxy',
+		asks: [
+			['Nobody heard when the API returned errors for an hour', 'On a Sunday morning every comment post failed for an hour. We found out on Monday, from the moderation queue being empty.'],
+			['Page someone when the error rate goes up', 'Operations have a pager rota, but marginalia is not on it. Nothing watches the error rate at all.']
+		],
+		a: { name: 'an alert on the proxy\'s rate of 5xx answers for /api, paging the operations rota', pro: 'it catches every kind of failure that readers see', con: 'operations do not know marginalia and would wake someone who cannot fix it' },
+		b: { name: 'an outside check that posts a test comment every five minutes and tells the developers in chat', pro: 'it exercises the path that matters most, end to end', con: 'it fills the queue with test comments that the moderator has to skip' },
+		facts: ['The Sunday failure lasted 64 minutes.', 'The operations pager rota covers nights and weekends.', 'The metrics host can alert on any series it scrapes.'],
+		desk: 'a Sunday morning in spring is when the most readers comment, straight back from the morning\'s birding',
+		art: 'timing'
+	},
+	{
+		thing: 'panics in handlers',
+		where: 'the handlers, or a middleware in internal/router/router.go',
+		asks: [
+			['A malformed request made a handler panic', 'A request with an odd path crashed the handler. The server carried on, but the reader got an empty reply and the log holds only a stack trace with no request id.'],
+			['Turn a panic into a proper error response', 'When a handler panics, net/http drops the connection. The site shows its generic network error and the reader retries, which panics again.']
+		],
+		a: { name: 'a recovering middleware that logs the stack with the request id and answers 500', pro: 'the reader gets a real error and the log line can be found', con: 'it quietens panics that should make noise, unless someone reads the log' },
+		b: { name: 'finding and fixing each panic and adding a test for its input', pro: 'it fixes the actual bug, and the default behaviour stays honest', con: 'it does nothing about the next panic, wherever it is' },
+		facts: ['net/http recovers the panic and logs it, but sends nothing to the client.', 'There have been four panics in the logs since March.', 'All four came from requests no browser would send.'],
+		desk: 'to a reader an empty reply looks like the site is down',
+		art: 'stack'
+	},
+	{
+		thing: 'checks on pull requests',
+		where: 'the repository settings and the build machine',
+		asks: [
+			['Run the tests on every pull request', 'The build machine runs only after a merge to main. Last week a change that did not compile sat on main for a day.'],
+			['Require a review before merging to main', 'Anyone with access can merge their own pull request. Two changes went in on a Friday afternoon without anyone else having seen them.']
+		],
+		a: { name: 'the build machine running `go vet` and the tests on every pull request, with merging blocked until they pass', pro: 'a broken main becomes rare', con: 'the build machine is shared with the subscriptions team and crawls at month end' },
+		b: { name: 'a pre-push hook in the repository that runs the tests locally', pro: 'there is nothing new to host, and the feedback is immediate', con: 'hooks are easy to skip and nobody can see whether they ran' },
+		facts: ['The suite runs in under a second on a laptop.', 'main was broken for three days in all last quarter.', 'Four people can merge to main.'],
+		desk: 'every day main is broken is a day our corrections wait',
+		art: 'test'
+	},
+	{
+		thing: 'the module path',
+		where: 'go.mod and every import line',
+		asks: [
+			['The module path does not resolve', 'The module is corvidfinch.example/marginalia, but nothing answers at that address, so any tool that fetches the module by its path fails. Inside the repository it works because nothing is fetched.'],
+			['go install of the server fails from outside', 'Someone at the county bird club tried to run marginalia for their own site with go install and got a 404 for the module path.']
+		],
+		a: { name: 'renaming the module to the repository\'s real path in one change', pro: 'every tool that resolves paths works from then on', con: 'every import line changes, and every open branch conflicts' },
+		b: { name: 'keeping the path and serving a redirect page for it on the main domain', pro: 'no code changes at all', con: 'it depends on the web team keeping that page alive' },
+		facts: ['Eleven import lines name the module.', 'Five branches are open at the moment.', 'The web team can add a page to the main domain in a day.'],
+		desk: 'none of this is visible to readers, so please do it when it disturbs nobody',
+		art: 'test'
+	},
+	{
+		thing: 'image descriptions',
+		where: 'the post bodies that GetPost sends',
+		asks: [
+			['Images in posts have no alternative text', 'A reader who uses a screen reader wrote to say every photograph is announced as "image". Writers paste each image as a bare link with empty brackets.'],
+			['Captions and image descriptions are muddled in half our posts', 'Some writers put the caption in the description, some put the credit there, some nothing. The site shows the description as the caption, so credits appear twice or not at all.']
+		],
+		a: { name: 'refusing to publish a post whose images have empty descriptions', pro: 'the archive stops getting worse from the day it ships', con: 'the 1,900 existing posts still need fixing by hand' },
+		b: { name: 'a report listing the images without descriptions, for the desk to work through', pro: 'it covers the archive as well as new posts', con: 'it depends on someone working through a list of thousands' },
+		facts: ['About 5,400 images in the archive have an empty description.', 'The style guide has had a rule on image descriptions since 2022.', 'Captions are written in italics on the line below the image.'],
+		desk: 'several readers with poor sight have been with us for decades, and they deserve better',
+		art: 'curl'
+	},
+	{
+		thing: 'posts in Welsh',
+		where: 'model.Post and the posts list',
+		asks: [
+			['Publish posts in Welsh alongside the English ones', 'The Welsh-language column starts in the spring. Each column appears in both languages, and the site needs to know which is which and how to link the two.'],
+			['The Welsh column appears twice in the archive', 'The trial publishes both versions as separate posts, so the archive lists each column twice, one under the other.']
+		],
+		a: { name: 'a language code on each post and a link from each version to the other', pro: 'the site can show one entry in the archive and a switch on the page', con: 'every list has to decide which language to show, and the default will annoy somebody' },
+		b: { name: 'one post holding both texts, Welsh first', pro: 'there is only one post, so the archive cannot list it twice', con: 'the page doubles in length and readers of either language scroll past the other' },
+		facts: ['The column is monthly and about 800 words in each language.', 'Slugs are ASCII today, and Welsh titles need ŵ and ŷ.', 'A two-year grant from a Welsh-language arts fund pays for the column.'],
+		desk: 'the grant asks for the Welsh text to be as easy to find as the English, and the funders will look',
+		art: 'curl'
+	},
+	{
+		thing: 'browsing the archive by date',
+		where: 'ListPosts and a new route beside it',
+		asks: [
+			['Let readers browse the archive by year and month', 'The old site had a list of months down the side of the archive, with a count for each. Readers used it to find "the post about the waxwings that winter".'],
+			['There is no way to find the posts of a given week', 'County recorders ask for everything we published around a particular record. Today someone scrolls the whole archive.']
+		],
+		a: { name: '`from` and `to` dates on the posts list', pro: 'one small change serves the recorders and the site alike', con: 'the site still needs the counts per month, and would fetch everything to work them out' },
+		b: { name: 'a route that gives the number of posts per month, alongside date filters on the list', pro: 'the list down the side becomes one small request', con: 'it is two changes instead of one, and the counts must leave drafts out exactly as the list does' },
+		facts: ['The archive spans 2011 to now, about 180 months.', 'The old site\'s list of months held its third most-clicked link.', 'Recorders ask for a range of dates about twice a month.'],
+		desk: 'readers remember a post by the winter it appeared in, never by its title',
+		art: 'timing'
+	},
+	{
+		thing: 'sound recordings',
+		where: 'outside marginalia today, linked from post bodies',
+		asks: [
+			['Embed bird song in posts', 'Writers want to include their own recordings: a nightjar churring, a call nobody could identify. Today they link to a file-sharing site that shows adverts.'],
+			['The recordings linked from older posts have gone', 'The file-sharing site deleted the files of inactive accounts. Every recording in the 2019 nocturnal migration series now leads to a not-found page.']
+		],
+		a: { name: 'keeping recordings on the image host next to the photographs', pro: 'all the media sit in one place that is already backed up', con: 'the image host was never set up for audio and serves it without range requests' },
+		b: { name: 'depositing recordings in a public sound archive and linking to them there', pro: 'the archive keeps them for good and adds them to the scientific record', con: 'writers lose control of the file, and some archives ask for a licence we may not want' },
+		facts: ['The 2019 series linked 37 recordings, all now gone.', 'A typical recording is a minute or two, under 2 MB as MP3.', 'Two of our writers already deposit their recordings in a public archive.'],
+		desk: 'a recording settles an identification argument in the comments faster than any photograph',
+		art: 'log'
+	},
+	{
+		thing: 'festival listings',
+		where: 'a new table and routes, or nowhere in marginalia',
+		asks: [
+			['Serve the events calendar from marginalia', 'The events team keep the festival dates in a spreadsheet and copy them into each microsite by hand. They would like marginalia to hold the dates and serve them.'],
+			['The microsite listed guided walks on the wrong dates', 'The autumn festival microsite listed three guided walks a week late. The spreadsheet was right; the copy was not.']
+		],
+		a: { name: 'an events table with public routes to list the events', pro: 'every microsite reads the same dates from one place', con: 'marginalia becomes the events team\'s system too, and they would need an admin screen to keep it up to date' },
+		b: { name: 'publishing the spreadsheet as a file the microsites read directly', pro: 'the events team keep the tool they know and the copying disappears', con: 'a spreadsheet makes a fragile interface, and one renamed heading breaks every microsite' },
+		facts: ['The events team run four festivals a year, with about 60 events in all.', 'Five people across two teams edit the spreadsheet.', 'marginalia has never stored anything but posts and comments.'],
+		desk: 'we promote the festivals in the print issue, so a wrong date there costs us twice',
+		art: 'log'
 	}
 ];
 
@@ -507,7 +800,12 @@ const openings = [
 	'Not urgent, but it has now happened often enough that I want it recorded.',
 	'We talked about this at the launch planning meeting and nobody owned it, so here it is.',
 	'A reader wrote in about this, and they are right.',
-	'Opening this so there is one place for the discussion instead of four chat threads.'
+	'Opening this so there is one place for the discussion instead of four chat threads.',
+	'Raising this because the same question came up three times this month.',
+	'Moving this over from the desk\'s shared notes, where it has sat since the spring.',
+	'Short version first, details below.',
+	'I promised at the planning meeting to write this up properly, so here it is.',
+	'This has caught us out twice now, so it gets an issue.'
 ];
 const closings = [
 	'Happy to give more detail or test anything.',
@@ -516,7 +814,11 @@ const closings = [
 	'No strong view on how, only that it gets looked at before the launch.',
 	'If this is already planned somewhere, point me at it and close this.',
 	'Screens and timings available on request.',
-	'Tell me if I should be filing this somewhere else.'
+	'Tell me if I should be filing this somewhere else.',
+	'I will watch this thread, but I may be slow to answer over the count weekends.',
+	'Feel free to retitle this if I have described it badly.',
+	'Whoever takes this, I am happy to pair on it.',
+	'That is everything I know for now.'
 ];
 const repro = [
 	'I can see this locally on a fresh checkout. The relevant code is {W}.',
@@ -524,7 +826,10 @@ const repro = [
 	'Looked into it this morning. Everything points at {W}, nothing surprising.',
 	'I had not hit this myself, but the paste below shows it plainly enough.',
 	'Reproduced on the staging box with yesterday\'s build. {W} is where I would start.',
-	'This matches what I saw last month and did not write up, sorry.'
+	'This matches what I saw last month and did not write up, sorry.',
+	'I can make this happen every time with the steps above. The code in question is {W}.',
+	'Same here. I spent an hour on it before I realised it was {T} and not my set-up.',
+	'Not reproduced yet, but the description fits what {W} does, as far as I can read it.'
 ];
 const propose = [
 	'My first thought is {X}: {P}.',
@@ -533,7 +838,10 @@ const propose = [
 	'I keep coming back to {X}, because {P}.',
 	'If I had a free afternoon I would try {X}; {P}, and that counts for a lot here.',
 	'The least surprising answer is probably {X}. For one thing, {P}.',
-	'Strawman so we have something to argue with: {X}. In its favour, {P}.'
+	'Strawman so we have something to argue with: {X}. In its favour, {P}.',
+	'For what it is worth, I lean towards {X}, mostly because {P}.',
+	'Simplest thing that could work: {X}, since {P}.',
+	'I would start with {X}; as far as I can tell {P}.'
 ];
 const object = [
 	'My worry with {X} is that {C}.',
@@ -542,21 +850,29 @@ const object = [
 	'{XC} sounds neat until you remember that {C}.',
 	'I tried something like {X} at my last job and regretted it, because {C}.',
 	'One thing against {X}, and it is not small: {C}.',
-	'With {X}, {C}. That may be acceptable, but we should say so out loud.'
+	'With {X}, {C}. That may be acceptable, but we should say so out loud.',
+	'I like {X} less the more I think about it, because {C}.',
+	'The catch with {X}: {C}.',
+	'We should be honest that with {X}, {C}.'
 ];
 const support = [
 	'Agreed on {X}. Besides what was said, {P}.',
 	'+1 for {X}. I had not considered that {P}.',
 	'I was sceptical of {X} but I have come round: {P}, and the objection is one we can live with.',
 	'{XC} gets my vote. The point that {P} settles it for me.',
-	'Having slept on it, {X} is right. The downside is real, though {P}, which matters more.'
+	'Having slept on it, {X} is right. The downside is real, though {P}, which matters more.',
+	'Count me in for {X}: {P}.',
+	'I have changed my mind and now prefer {X}, because {P}.',
+	'Same view as above. {XC}, because {P}.'
 ];
 const deskView = [
 	'From the desk: {D}. Whatever you choose, please keep that in mind.',
 	'I cannot judge the technical side. What I can say is that {D}.',
 	'For context from the editorial side, {D}.',
 	'Speaking for the editors, {D}. That is the whole of our interest in this.',
-	'A reminder of why this matters to us: {D}.'
+	'A reminder of why this matters to us: {D}.',
+	'Our side of it, briefly: {D}.',
+	'One thing to weigh from where we sit: {D}.'
 ];
 const factIntro = [
 	'One fact that may help: {F}',
@@ -564,7 +880,9 @@ const factIntro = [
 	'I checked. {F}',
 	'Worth knowing before anyone writes code: {F}',
 	'Small correction to the above. {F}',
-	'Adding a number to the discussion: {F}'
+	'Adding a number to the discussion: {F}',
+	'Looked it up: {F}',
+	'In case it changes anything: {F}'
 ];
 const tangents = [
 	'Unrelated, but the build printed a toolchain warning again this morning. I will file that separately.',
@@ -578,7 +896,12 @@ const tangents = [
 	'I mentioned this to the site team at lunch. They have no opinion, which is rare enough to be worth recording.',
 	'Back from leave. Catching up on forty notifications, bear with me.',
 	'For anyone reading this later: the meeting notes that mention this issue are in the shared drive under the launch folder.',
-	'A swift just flew past the office window, first of the year. Carry on.'
+	'A swift just flew past the office window, first of the year. Carry on.',
+	'Off topic: the office heating is fixed, so the Monday meeting is back in the big room.',
+	'Reminder that the wiki page on the release process is out of date. I will fix it after this.',
+	'Late reply, sorry. The print issue ate my week.',
+	'Unrelated: who has the spare key to the network cupboard? It is not on its hook.',
+	'Heads up that I am away next week, so I will be slow to answer on everything.'
 ];
 const questions = [
 	'Does anyone know how the old site handled this? It must have had the same problem.',
@@ -587,7 +910,10 @@ const questions = [
 	'Do we have any numbers, or are we arguing from memory?',
 	'Would this need a line in the README\'s endpoints table?',
 	'Has anyone asked operations what they think?',
-	'How much of this is {T} and how much is the proxy in front of it?'
+	'How much of this is {T} and how much is the proxy in front of it?',
+	'What would it take to try this on staging first?',
+	'Is anyone on the site team waiting on this?',
+	'Has this come up before? It feels as if it has.'
 ];
 const answers = [
 	'The old site ignored the problem, as far as I can tell from its code. It had ten years of nobody complaining loudly enough.',
@@ -596,19 +922,26 @@ const answers = [
 	'The site team say they can adapt in a day as long as they are told a week ahead.',
 	'Operations do not mind either way provided they do not have to learn anything new during the festival fortnight.',
 	'It is almost entirely on our side. The proxy passes everything through untouched for this path.',
-	'Yes, the README would need a line, and so would the changelog.'
+	'Yes, the README would need a line, and so would the changelog.',
+	'Staging is free this week, so yes, we could try it there first.',
+	'The site team are not blocked on it, but they would like to know which way it goes.',
+	'It came up once before, about two years ago, and was closed when the old site was frozen.'
 ];
 const scope = [
 	'While we are in there, could {T} also cover the events microsite? They have a similar need.',
 	'If we are touching {W} anyway, it might be the moment to tidy the error messages too.',
 	'Could this be made general enough to serve the print desk as well?',
-	'This might be the time to revisit how {T} is tested from top to bottom.'
+	'This might be the time to revisit how {T} is tested from top to bottom.',
+	'Should we look at how {T} behaves on the admin routes while we are here?',
+	'Would it be worth doing the comment routes at the same time?'
 ];
 const scopeNo = [
 	'Please, no. One thing per issue. Open another if it matters.',
 	'I would keep this narrow. Every time we widen an issue it stays open for a year.',
 	'Tempting, but separate. I have opened a note for it so it is not lost.',
-	'Let us finish this first. I do not want to review a change that does three things.'
+	'Let us finish this first. I do not want to review a change that does three things.',
+	'Separate issue, please. This one is long enough already.',
+	'Not in this change. I would rather ship the small thing and see.'
 ];
 const artIntro = [
 	'Pasting what I have:',
@@ -617,7 +950,9 @@ const artIntro = [
 	'This is what I see:',
 	'Evidence, such as it is:',
 	'From the staging box:',
-	'Numbers from a quick run, not a proper benchmark:'
+	'Numbers from a quick run, not a proper benchmark:',
+	'Here is what it looked like at the time:',
+	'Copied from my terminal:'
 ];
 
 // How an issue ends. Each ending is the last one to three comments; `kind` never appears in the file.
@@ -626,33 +961,40 @@ const decide = [
 	'We talked it through on the Wednesday call. Decision: {X}. {WHO} will do it. I am leaving the issue open until the change is merged.',
 	'Enough discussion. We go with {X}; {P}, and that outweighs the rest. {WHO} has picked it up.',
 	'Agreed in the planning meeting: {X}. It goes into the next milestone, with {WHO} on it. The other idea is dropped, not postponed.',
-	'Nobody has argued against {X} for two weeks, so I am calling it. {WHO}, it is yours. Shout if the estimate is more than three days.'
+	'Nobody has argued against {X} for two weeks, so I am calling it. {WHO}, it is yours. Shout if the estimate is more than three days.',
+	'Settled at Thursday\'s catch-up: {X}, because {P}. {WHO} is taking it, aiming for the next release.',
+	'Decision made, so we can stop going round in circles: {X}. {WHO} owns it from here.'
 ];
 const parked = [
 	'Decision from the planning meeting: not before the launch. We look at this again once the store has moved to a real database, since half the answer depends on that.',
 	'Parking this. Both ideas are reasonable, neither is urgent, and the launch list is full. To be picked up in the first planning round after the launch.',
-	'We agreed to wait for the site redesign in the autumn, which changes what the site needs from {T}. No work until then.'
+	'We agreed to wait for the site redesign in the autumn, which changes what the site needs from {T}. No work until then.',
+	'Putting this on hold. Nobody can work on it before the festival season is over, and it needs more than an afternoon. We come back to it in the first planning round of the new year.'
 ];
 const declined = [
 	'After talking to the desk again: we are not doing this. The workaround they have costs them a few minutes a week, and either change costs us more than that to keep alive. I will leave this open for a week for objections.',
 	'Decision: neither. The problem is real but it belongs to the proxy configuration, and operations have agreed to handle it there. Nothing to change in marginalia.',
-	'I am going to say no to this one. It would be the first thing in the service with only one user, and that user can get what it needs from the existing routes.'
+	'I am going to say no to this one. It would be the first thing in the service with only one user, and that user can get what it needs from the existing routes.',
+	'We are not going to do this. The cost is real, the benefit is small, and the desk agrees. I will close it once the week for objections has passed.'
 ];
 const stalled = [
 	'Could whoever filed this say which of the two they actually need? We cannot choose without knowing that.',
 	'This needs a number before we go further: how often does it really happen? Can the desk keep a tally for two weeks?',
-	'I am stuck until someone from the site team confirms what they can change on their side. I have asked twice.'
+	'I am stuck until someone from the site team confirms what they can change on their side. I have asked twice.',
+	'Before anyone starts, the desk needs to say which of the two problems above is the real one. Until then this waits.'
 ];
 const stalledEcho = [
 	'Any news on this?',
 	'Bumping. The question above is still open.',
 	'Still waiting for an answer here. I will raise it at the next desk meeting.',
-	'No reply in a month. I am not closing it, but nothing will happen until the question is answered.'
+	'No reply in a month. I am not closing it, but nothing will happen until the question is answered.',
+	'Friendly nudge on the question above.'
 ];
 const done = [
 	'This turned out to be covered by the change {WHO} made for another issue last week. I checked on staging and the behaviour described at the top no longer occurs. The export can drop this one.',
 	'Looking at the current code, this was fixed along the way: {WHO}\'s clean-up of {W} took care of it. I have tried the steps from the original report and cannot make it happen any more.',
-	'Good news, nothing to do. The site team changed their side last sprint and the problem went with it. Confirmed with the person who reported it.'
+	'Good news, nothing to do. The site team changed their side last sprint and the problem went with it. Confirmed with the person who reported it.',
+	'Checked again after the latest release: this no longer happens. {WHO} changed {W} for an unrelated reason and the problem went with it.'
 ];
 const split = [
 	'This issue is really two. The first half, the part the reporter cares about, is small and {WHO} will do it this week using {X}. The second half needs a design and I have moved it to a new issue.',
@@ -660,12 +1002,14 @@ const split = [
 ];
 const twist = [
 	'Reopening the discussion, sorry. I started on {X} and found that {C}. That is worse than we assumed. I now think {Y} is the better choice, and I would like a second opinion before I throw the branch away.',
-	'Update after two days of trying: {X} does not survive contact with the real archive, because {C}. Unless someone objects by Friday I am switching to {Y}.'
+	'Update after two days of trying: {X} does not survive contact with the real archive, because {C}. Unless someone objects by Friday I am switching to {Y}.',
+	'Bad news from the branch: {X} looked fine until I tried it with the real data, and {C}. I would like to switch to {Y}. Objections by Monday, please.'
 ];
 const twistAck = [
 	'Fine by me. Go with {Y}.',
 	'Agreed, switch. Better to find out now. {YC} it is.',
-	'No objection. {YC}, then, and please note the reason in the commit message.'
+	'No objection. {YC}, then, and please note the reason in the commit message.',
+	'Makes sense. {YC} then.'
 ];
 
 // Pasted output.
@@ -752,8 +1096,39 @@ const timingPaste = (r: Rand): string => {
 		}
 	return rows.join('\n');
 };
+const panics = [
+	['runtime error: index out of range [3] with length 3', 'ListComments', 'comment.go'],
+	['runtime error: invalid memory address or nil pointer dereference', 'GetPost', 'post.go'],
+	['runtime error: slice bounds out of range [:-1]', 'ListPosts', 'post.go'],
+	['assignment to entry in nil map', 'CreateComment', 'comment.go'],
+	['runtime error: invalid memory address or nil pointer dereference', 'AdminApproveComment', 'admin.go'],
+	['strings: negative Repeat count', 'AdminListPending', 'admin.go']
+] as const;
+const stackPaste = (r: Rand, date: string): string => {
+	const [message, method, file] = pick(r, panics);
+	const hex = (low: number, high: number) => `0x${int(r, low, high).toString(16)}`;
+	const lines = [
+		`${date.replace(/-/g, '/')} ${pad(int(r, 0, 23))}:${pad(int(r, 0, 59))}:${pad(int(r, 0, 59))} http: panic serving 10.0.${int(r, 0, 9)}.${int(r, 2, 250)}:${int(r, 30000, 65000)}: ${message}`,
+		`goroutine ${int(r, 40, 90000)} [running]:`,
+		'net/http.(*conn).serve.func1()',
+		`\t/usr/local/go/src/net/http/server.go:${int(r, 1890, 1950)} +${hex(0x80, 0xff)}`,
+		`panic({${hex(0x600000, 0x7fffff)}?, ${hex(0xc000010000, 0xc0003fffff)}?})`,
+		`\t/usr/local/go/src/runtime/panic.go:${int(r, 760, 790)} +${hex(0x100, 0x1ff)}`,
+		`corvidfinch.example/marginalia/internal/handler.(*Handler).${method}(${hex(0xc000080000, 0xc0000fffff)}, {${hex(0x700000, 0x7fffff)}, ${hex(0xc000200000, 0xc0002fffff)}}, ${hex(0xc000200000, 0xc0002fffff)})`,
+		`\t/srv/marginalia/internal/handler/${file}:${int(r, 18, 90)} +${hex(0x20, 0x4ff)}`,
+		'net/http.HandlerFunc.ServeHTTP(...)',
+		`\t/usr/local/go/src/net/http/server.go:${int(r, 2160, 2190)}`,
+		`net/http.(*ServeMux).ServeHTTP(${hex(0xc000100000, 0xc0001fffff)}?, {${hex(0x700000, 0x7fffff)}, ${hex(0xc000200000, 0xc0002fffff)}}, ${hex(0xc000200000, 0xc0002fffff)})`,
+		`\t/usr/local/go/src/net/http/server.go:${int(r, 2680, 2720)} +${hex(0x100, 0x2ff)}`,
+		`net/http.serverHandler.ServeHTTP({${hex(0xc000100000, 0xc0001fffff)}?}, {${hex(0x700000, 0x7fffff)}?, ${hex(0xc000200000, 0xc0002fffff)}?}, 0x6?)`,
+		`\t/usr/local/go/src/net/http/server.go:${int(r, 3130, 3160)} +${hex(0x80, 0xff)}`,
+		`created by net/http.(*Server).Serve in goroutine 1`,
+		`\t/usr/local/go/src/net/http/server.go:${int(r, 3270, 3300)} +${hex(0x400, 0x4ff)}`
+	];
+	return '```text\n' + lines.join('\n') + '\n```';
+};
 const paste = (r: Rand, kind: Topic['art'], date: string): string =>
-	kind === 'log' ? logPaste(r, date) : kind === 'test' ? testPaste(r) : kind === 'curl' ? curlPaste(r, date) : timingPaste(r);
+	kind === 'log' ? logPaste(r, date) : kind === 'test' ? testPaste(r) : kind === 'curl' ? curlPaste(r, date) : kind === 'stack' ? stackPaste(r, date) : timingPaste(r);
 
 const fill = (text: string, values: Record<string, string>): string => {
 	const out = text.replace(/\{(\w+)\}/g, (_, key: string) => values[key] ?? `{${key}}`);
@@ -842,12 +1217,16 @@ const issue = (index: number, topic: Topic, ask: [string, string], number: numbe
 const folder = join(root, 'docs', 'issues');
 mkdirSync(folder, { recursive: true });
 const order = mulberry32(20260406);
-const asks = shuffle(order, topics.flatMap((topic) => topic.asks.map((ask) => ({ topic, ask }))));
+const pool = shuffle(order, topics.flatMap((topic) => topic.asks.map((ask) => ({ topic, ask }))));
+if (ITEMS < 1 || ITEMS > pool.length) throw new Error(`ITEMS must be between 1 and ${pool.length}, the distinct issues the topics give; add topics for more`);
+const asks = pool.slice(0, ITEMS);
+// Days between two openings: from 1 to `widest`, so that ITEMS openings cover about OPENING_SPAN_DAYS.
+const widest = Math.max(1, Math.round((2 * OPENING_SPAN_DAYS) / ITEMS) - 1);
 let number = 100;
-let opened = '2025-06-02';
+let opened = FIRST_OPENED;
 asks.forEach(({ topic, ask }, index) => {
 	number += int(order, 1, 6);
-	opened = addDays(opened, int(order, 1, 7));
+	opened = addDays(opened, int(order, 1, widest));
 	const name = ask[0].toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 48).replace(/-$/, '');
 	writeFileSync(join(folder, `${number}-${name}.md`), issue(index, topic, ask, number, opened));
 });

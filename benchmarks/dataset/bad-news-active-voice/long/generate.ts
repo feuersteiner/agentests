@@ -5,6 +5,10 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
+// The number of calls written, the one knob of the material's size. They are spread evenly over the working
+// days of the period; each call draws its main subject and its other questions from the topics below.
+const ITEMS = 443;
+
 const root = process.argv[2];
 if (!root) throw new Error('Usage: bun long/generate.ts <dir>');
 
@@ -471,20 +475,282 @@ const topics: Topic[] = [
 		owe: 'send you the page in the portal that shows which code each payslip used',
 		act: 'ask HMRC to split your allowance between the two jobs',
 		team: 'payroll specialists'
+	},
+	{
+		who: 'employer',
+		open: ['Our hourly staff clock in on a rota app, and every month I type their hours into each payslip by hand.', 'Is there a way to get hours into the run without typing them? I have {n} hourly people.'],
+		turns: [
+			['Can I upload a file of hours?', 'Yes. On the draft run, select Import hours and upload a CSV with one row per employee: their payroll ID, the hours and the rate type. We match the rows and show you any we could not match.'],
+			['The rota app exports names, not payroll IDs.', 'Then add a column with the payroll ID to the app\'s export template once, if it lets you. Matching on names goes wrong as soon as two people share one.'],
+			['Some of the hours are at time and a half.', 'Put those on a separate row with the rate type Overtime 1.5. You can see the rate types your company has under Settings, Pay elements.'],
+			['What if I upload the file twice by mistake?', 'A second upload replaces the first for the same run; it does not add to it. You can check the totals on the run summary before you approve.']
+		],
+		owe: 'check your next hours file against the template before you upload it and tell you which rows will not match',
+		act: 'add the payroll IDs to the rota app\'s export and use Import hours on the draft run',
+		team: 'onboarding team'
+	},
+	{
+		who: 'employer',
+		open: ['We have taken on our first apprentice, {emp}, and someone told me the National Insurance is different for apprentices.', 'Our new apprentice is 19. Do I pay less National Insurance for her?'],
+		turns: [
+			['Is that right, about the National Insurance?', 'For an apprentice under 25 on a recognised apprenticeship you pay no employer National Insurance on earnings up to the upper threshold. She still pays her own as normal.'],
+			['How do I tell the system?', 'Open her record, Tax and NI, and set the NI category letter to H. We apply the relief from the next run.'],
+			['What happens when she turns 25?', 'We change the letter back to A on the first run after her birthday, and you see a note on the draft run when we do.'],
+			['And her minimum wage?', 'In her first year, or while she is under 19, the apprentice rate applies. After that she moves to the rate for her age, and we warn you on the run if her pay falls below it.']
+		],
+		owe: 'check her record once you have set the category letter and confirm that the relief shows on the draft run',
+		act: 'set her NI category letter to H on her record before the next run',
+		team: 'payroll specialists'
+	},
+	{
+		who: 'employer',
+		open: ['One of my staff becomes a father in the spring and wants two weeks off. What do I set up?', 'A member of staff has asked about shared parental leave and I have no idea how to pay it.'],
+		turns: [
+			['What does he get for paternity?', 'Statutory paternity pay is up to two weeks at the statutory weekly rate, or 90 percent of his average weekly earnings if that is lower. He can take it in one go or as two separate weeks.'],
+			['What do I need from him?', 'The expected week of childbirth and the dates he wants. Enter them under Absence, Paternity, and we work out whether he qualifies and what he gets.'],
+			['And shared parental leave?', 'That is when the mother ends her maternity leave early and the parents share the weeks that are left. Each of them gives their own employer notice, and you enter the weeks he takes under Absence, Shared parental.'],
+			['Do I get the money back, like maternity?', 'Yes, the same way. You reclaim 92 percent, or 103 percent with small employers\' relief, and we take it off what you pay HMRC.']
+		],
+		owe: 'send you a schedule of his pay for the weeks he has asked for once the dates are in',
+		act: 'enter the expected week and his dates under Absence on his record',
+		team: 'payroll specialists'
+	},
+	{
+		who: 'employer',
+		open: ['I have found a mistake in last tax year\'s figures for one employee, and that year is closed.', 'Our accountant says we need to correct something from before April. Can that still be done?'],
+		turns: [
+			['I paid {emp} a bonus in March and put it through as an expense, so it never went through payroll.', 'Then her pay and tax for last year need correcting with HMRC. You do that with an earlier year update, and we can send it for you.'],
+			['How do I do that?', 'Under Reports, Year end, choose last tax year and select Correct a previous year. Enter her corrected totals and we send the update and show you the amounts owed.'],
+			['Will she have to pay the tax?', 'She owes it, yes, and HMRC usually collect it through her tax code over the next year. We send her a corrected statement for the year.'],
+			['Is there a penalty?', 'For a mistake you correct yourself as soon as you find it, HMRC do not usually charge one, though they can charge interest on the employer\'s National Insurance. Your accountant can advise on that.']
+		],
+		owe: 'check the corrected totals you enter against the original submission before anything goes to HMRC',
+		act: 'enter the corrected totals under Correct a previous year',
+		team: 'payroll specialists'
+	},
+	{
+		who: 'employer',
+		open: ['We always pay early in December so that the staff have the money before Christmas. How do I do that with you?', 'Can I bring December\'s pay forward to the 19th? It is our first Christmas with you.'],
+		turns: [
+			['Do I change the pay schedule?', 'No, leave the schedule alone. Open December\'s run and change its pay date only. January goes back to your usual date by itself.'],
+			['Do I have to guess the hours?', 'For salaried staff there is nothing to guess. For hourly staff, pay the hours they have worked up to the cut-off and put the rest into January\'s run.'],
+			['When do I have to approve it?', 'By 15:00 on the working day before the new pay date. If you pay us by direct debit, we collect two working days before that date.'],
+			['Does it upset the tax?', 'No. The tax month is the same, so tax and National Insurance come out as normal. We send the submission to HMRC on the new pay date.']
+		],
+		owe: 'check December\'s run once you have changed the date and confirm the collection date to you',
+		act: 'change the pay date on December\'s run and approve it before the cut-off',
+		team: 'payroll specialists'
+	},
+	{
+		who: 'employer',
+		open: ['We are moving our workplace pension to a different provider from January. What do I need to do on your side?', 'I have signed up with a new pension provider and need payroll to send the money there instead.'],
+		turns: [
+			['Can you connect to the new provider?', 'We connect to most of the large providers directly. Under Settings, Pension, select Add scheme, choose the provider and enter the employer reference they gave you.'],
+			['Do I move everyone at once?', 'You can. Choose the date of the switch, and every member moves on the first run after it. People who opted out stay opted out.'],
+			['What happens to the money in the old scheme?', 'It stays with the old provider unless your staff transfer it. We stop sending contributions there from the switch date, and you should tell the old provider in writing.'],
+			['Do the staff need new letters?', 'Yes, the law requires them. We produce them for everyone who moves, on the first run in the new scheme, and you can check them before they go.']
+		],
+		owe: 'check the new scheme once you have added it and confirm the date of the first contribution',
+		act: 'add the new scheme under Settings, Pension and tell the old provider about the switch',
+		team: 'pensions desk'
+	},
+	{
+		who: 'employer',
+		open: ['We take on about {n} pickers every autumn for six weeks, and this year I want to set them up properly.', 'I have a lot of short-term seasonal staff starting next week. Do they all go through the full new starter process?'],
+		turns: [
+			['Do I need a starter form from every one of them?', 'Yes. Each of them chooses a statement on the starter checklist, and that decides the tax code we use. Without one we have to use the emergency basis.'],
+			['Do they go into the pension for six weeks?', 'You can postpone their assessment for up to three months, which covers a six-week season. Set the postponement on each record and we send them the notice for you.'],
+			['Some of them come back every year.', 'Then rehire them rather than adding them again. Open their old record, select Rehire and enter the new start date, so that their history stays in one place.'],
+			['Can I pay them weekly when everyone else is monthly?', 'Yes. Add a weekly pay schedule under Settings and put the seasonal staff on it. Each schedule has its own runs.']
+		],
+		owe: 'check the starter forms once you have entered them and tell you which records have no statement',
+		act: 'collect a starter checklist from each picker and set the pension postponement on their records',
+		team: 'onboarding team'
+	},
+	{
+		who: 'employer',
+		open: ['We are a restaurant, and from now on all the tips have to go to the staff. How do I put card tips through payroll?', 'I need to set up a tronc for our tips and I am not sure what the payroll side looks like.'],
+		turns: [
+			['Do tips go on the payslip?', 'Card tips that you hand out do, yes. Add a pay element of type Tips to each person\'s payslip with their share. They are taxed like any other pay.'],
+			['Is there National Insurance on them?', 'If you decide the shares, yes. If an independent troncmaster decides them and you have no say, there is no National Insurance, only tax.'],
+			['How do I set up a troncmaster?', 'You register the tronc scheme with HMRC, and they give it its own PAYE reference. We can run it as a separate payroll under your account.'],
+			['Do tips count towards minimum wage?', 'No, never. We leave tips out when we check pay against the minimum wage.']
+		],
+		owe: 'send you the steps for running the tronc as a separate payroll once HMRC have given you the reference',
+		act: 'register the tronc scheme with HMRC and agree how the shares are decided',
+		team: 'payroll specialists'
+	},
+	{
+		who: 'employer',
+		open: ['My accountant wants the payroll in our accounts software every month, and I am sending her PDFs.', 'Can the payroll figures go straight into our bookkeeping software?'],
+		turns: [
+			['Is there an export?', 'Yes. Under Reports, Accounting, choose the run and download the journal. It lists the wages, tax, National Insurance and pension against the account codes you set.'],
+			['Where do I set the codes?', 'Under Settings, Accounting. Your accountant can fill them in herself if you give her a login with the Viewer role.'],
+			['Can it go into the software directly?', 'We connect to two of the common bookkeeping packages. Select Connect on the same page and sign in to yours, and each approved run posts its journal by itself.'],
+			['What about the pension and HMRC payments?', 'Those appear as amounts owed in the journal, and they clear when you record the payments in your bookkeeping.']
+		],
+		owe: 'send you a sample journal from your last run so that your accountant can check the layout',
+		act: 'set the account codes under Settings, Accounting, or ask your accountant to',
+		team: 'account team'
+	},
+	{
+		who: 'employer',
+		open: ['A few of the staff want to give to charity straight from their pay. Can you do that?', 'Someone has asked about payroll giving. Is that something we can set up through you?'],
+		turns: [
+			['How does it work?', 'You sign up with a payroll giving agency. Each employee tells you the amount and the charity, and the donation comes off their pay before tax.'],
+			['Where do I enter it?', 'On their record, Deductions, Payroll giving, with the monthly amount. Because it comes off before tax, the donation costs them less than its value.'],
+			['Who sends the money to the charity?', 'You pay the agency each month and they pass it on. The run gives you the total, and you send it yourself.'],
+			['Can they stop whenever they like?', 'Yes. They tell you, and you end the deduction on their record from the next run.']
+		],
+		owe: 'send you the agencies our customers use most and the report that gives you the monthly total',
+		act: 'sign up with a payroll giving agency and enter each donation on the person\'s record',
+		team: 'payroll specialists'
+	},
+	{
+		who: 'employee',
+		open: ['I got married in the summer and my payslips still have my old name.', 'I have changed my surname. How do I get it changed for my pay?'],
+		turns: [
+			['Can I change it in the portal?', 'Not your name, no. Your employer changes it on your record, and it shows on your next payslip and in the portal the day they save it.'],
+			['Does HMRC need to know?', 'They do, but you tell them yourself, through your personal tax account or by phone. We send your new name with the next submission, and the two need to match.'],
+			['Will my pension provider get it?', 'We pass the new name to them with the next contribution. If you have an online account with them, update it there as well.'],
+			['Will my P60 have the new name?', 'This year\'s will, if your employer changes it before April. Earlier P60s keep the name you had then.']
+		],
+		owe: 'let your employer\'s payroll contact know that you have asked for your name to be updated',
+		act: 'ask your employer to change your name on your record, and tell HMRC yourself',
+		team: 'account team'
+	},
+	{
+		who: 'employee',
+		open: ['How do I find out how much holiday I have left? My manager says to check the app.', 'The portal says I have {n} days of holiday left and I think it is wrong.'],
+		turns: [
+			['Where is it in the portal?', 'If your employer uses our absence feature, under Time off. It shows your allowance for the leave year, what you have booked and what is left.'],
+			['It does not count the bank holidays properly.', 'Your employer sets whether bank holidays come out of the allowance. Yours takes them out, which is why the number is lower than you expected.'],
+			['Can I book holiday in the portal?', 'If your employer has switched requests on, there is a Request time off button and your manager approves it. Yours has not, so book it with them directly.'],
+			['What happens to days I do not use?', 'That depends on your contract. Your employer sets how many days carry over, and the portal shows any carried days separately at the start of the new year.']
+		],
+		owe: 'send you a breakdown of the days the portal has counted for this leave year',
+		act: 'ask your manager to check the allowance on your record',
+		team: 'account team'
+	},
+	{
+		who: 'employee',
+		open: ['My partner is due in February and I want to know what I will get for paternity leave.', 'I am taking paternity leave next month. Will my pay drop?'],
+		turns: [
+			['How much is paternity pay?', 'Statutory paternity pay is the statutory weekly rate, or 90 percent of your average weekly earnings if that is lower, for up to two weeks. Some employers pay more, so check your contract.'],
+			['Does my employer top it up?', 'I can see your record but not your contract. If they pay enhanced paternity pay, it shows as Company paternity pay on the payslip.'],
+			['Do I need to fill anything in?', 'You give your employer notice by the end of the fifteenth week before the baby is due. They enter the dates and we do the calculation.'],
+			['When will I see it?', 'On the payslip for the month you take the leave. It replaces your normal salary for those weeks, and the rest of the month is as usual.']
+		],
+		owe: 'send you the statutory rates and a worked example based on your last three payslips',
+		act: 'give your employer notice of the dates and ask about any company scheme',
+		team: 'payroll specialists'
+	},
+	{
+		who: 'employee',
+		open: ['There is a line on my payslip called salary sacrifice and I have no idea what it is.', 'My gross pay looks lower than my salary. Is something coming off before tax?'],
+		turns: [
+			['What is the sacrifice for?', 'Your payslip shows it as Cycle scheme. It is the monthly amount for the bike you got through work, and it comes off before tax and National Insurance.'],
+			['So I am paying for the bike?', 'Yes, over the length of the agreement. Because it comes off before tax, it costs you less than the same amount taken after tax would.'],
+			['How long does it go on for?', 'Your record shows {n} payments left. It stops by itself after the last one.'],
+			['Does it affect my pension?', 'It can lower your pension contributions a little, depending on how your employer has set the scheme up. They can tell you which applies to you.']
+		],
+		owe: 'send you the breakdown of the sacrifice with the number of payments left',
+		act: 'ask your employer about the agreement if the amount is not what you signed up for',
+		team: 'payroll specialists'
+	},
+	{
+		who: 'employee',
+		open: ['My tax code has changed to a K code and I am paying more tax. Nobody told me why.', 'What does a K at the front of a tax code mean? Mine is K310.'],
+		turns: [
+			['Why a K code?', 'A K code means you have benefits or other income worth more than your tax-free allowance, so HMRC add an amount to your taxable pay instead of taking one off.'],
+			['What benefits? I only have the health insurance.', 'Health insurance through work is a taxable benefit. HMRC have added its value to your code, and with something else on your tax account that has tipped it into a K code.'],
+			['Can you change it back?', 'No. Only HMRC set your code, and we apply what they send. You can see how they worked it out in your personal tax account.'],
+			['Is there a limit to how much tax it takes?', 'Yes. A K code can never take more than half of your pay in a period in tax.']
+		],
+		owe: 'send you the dates of the tax code notices we have received for you',
+		act: 'check the code with HMRC through your personal tax account',
+		team: 'payroll specialists'
+	},
+	{
+		who: 'employee',
+		open: ['I was off sick for a week and I only got sick pay for part of it.', 'Why did I get nothing for my first days off sick? My friend gets full pay.'],
+		turns: [
+			['Why nothing for the first days?', 'Statutory sick pay starts on the fourth day you would normally work. The first three are waiting days, and the law does not pay for them.'],
+			['My friend gets full pay when she is ill.', 'Some employers pay company sick pay on top, from the first day. That is in your contract, not something we decide. Your payslip shows only statutory sick pay this month.'],
+			['How much is it?', 'It is a fixed weekly amount that the government sets each April, and it does not depend on your salary.'],
+			['Did they get the days right?', 'Your employer entered {n} days of absence, with Monday to Friday as your working days. If those dates are wrong, they can correct them in the next run.']
+		],
+		owe: 'send you the calculation of the sick pay on your payslip, day by day',
+		act: 'ask your employer whether your contract gives you company sick pay',
+		team: 'payroll specialists'
+	},
+	{
+		who: 'employee',
+		open: ['I moved to the UK in the summer and I do not have a National Insurance number yet. My payslip has a blank where it should be.', 'My employer said I could start work without an NI number. Is that a problem for my pay?'],
+		turns: [
+			['Am I paying National Insurance without a number?', 'Yes. We take it as normal and report it to HMRC with your name, date of birth and address, so it all counts for you.'],
+			['Will I lose it?', 'No. Once you have your number, give it to your employer and they add it to your record. HMRC then link the payments to it.'],
+			['How do I get a number?', 'You apply to HMRC yourself, online. It can take a few weeks, and you can keep working in the meantime.'],
+			['Is my tax right?', 'Your tax code depends on the starter form, not the number. You are on the standard code, so the tax is right already.']
+		],
+		owe: 'send you the link to the government page where you apply for a number',
+		act: 'apply for a number and give it to your employer when it comes',
+		team: 'account team'
+	},
+	{
+		who: 'employee',
+		open: ['I left my job in {month} and I have not worked since. I think I paid too much tax.', 'Can I get tax back now that I have stopped working? My P45 shows a lot of tax.'],
+		turns: [
+			['Can you refund it?', 'No, we cannot, and nor can your old employer now that you have left. The tax went to HMRC, so the refund comes from them.'],
+			['How do I claim it?', 'If you are not working and not claiming benefits, you can claim it through your personal tax account. Have your P45 to hand.'],
+			['Where do I find my P45?', 'In the portal, under Documents. It stays there after you leave, so you can download it at any time.'],
+			['What if I start a new job soon?', 'Then give the new employer your P45. The tax you overpaid comes back through your pay with them, without a claim.']
+		],
+		owe: 'send you the link to HMRC\'s page for claiming a refund when you stop working',
+		act: 'claim the refund from HMRC through your personal tax account, with your P45',
+		team: 'payroll specialists'
+	},
+	{
+		who: 'employee',
+		open: ['I have a new phone and the portal keeps sending the sign-in code to my old number.', 'I cannot get past the security code on the portal. My number has changed.'],
+		turns: [
+			['Can you change the number for me?', 'Not on the phone, I am afraid, because the number is what proves it is you. Your employer can change it on your record, or you can use a backup code if you saved one.'],
+			['What backup code?', 'When you first set up the portal it offered you ten backup codes to print or save. Each one works once in place of the text message.'],
+			['I never saved them.', 'Then ask your employer to update your mobile number. You can sign in with the new number as soon as they save it.'],
+			['Can I get the code some other way?', 'Yes, once you are in. Under Profile, Sign-in, you can choose email or an authenticator app instead of text messages.']
+		],
+		owe: 'email your employer\'s payroll contact to ask them to update your mobile number',
+		act: 'ask your employer to update your mobile number on your record',
+		team: 'account team'
+	},
+	{
+		who: 'employee',
+		open: ['My Universal Credit went down this month because it says I had two wages in one month.', 'The DWP have counted two wages in one month for me. Can you explain my pay dates?'],
+		turns: [
+			['Did I get paid twice in a month?', 'Looking at your record, your employer paid {month}\'s salary a few days early, because the usual pay date fell on a weekend. That put two pay dates inside one of your assessment periods.'],
+			['Can you change the date on it?', 'No. We report the payment date to HMRC, and the DWP take it from there. Nobody can change it afterwards.'],
+			['What do I do then?', 'Tell the DWP through your journal. They can count an early payment in the next period when your employer paid early because of a weekend or a bank holiday.'],
+			['Can I have something in writing?', 'Yes. You can download a statement of earnings from the portal with each pay date and amount, and attach it to your journal message.']
+		],
+		owe: 'send you a letter confirming your usual pay date and the dates of your last two payments',
+		act: 'tell the DWP through your journal and attach the statement of earnings',
+		team: 'account team'
 	}
 ];
 
 // Generic lines.
-const greetings = ['Good {part}, Ledgerline support, {agent} speaking. How can I help?', 'Ledgerline, you are through to {agent}. What can I do for you today?', 'Thank you for calling Ledgerline. My name is {agent}. How can I help you?', 'Hello, Ledgerline support, this is {agent}.'];
-const hellos = ['Hello, yes. I hope you can help.', 'Hi {agent}. I have been on hold a while, so I will get straight to it.', 'Morning. Bear with me, I have my notes somewhere.', 'Oh, hello. I was expecting a machine.', 'Hi. I am not sure I have the right department.', 'Hello. Sorry about the noise, I am in the van.'];
+const greetings = ['Good {part}, Ledgerline support, {agent} speaking. How can I help?', 'Ledgerline, you are through to {agent}. What can I do for you today?', 'Thank you for calling Ledgerline. My name is {agent}. How can I help you?', 'Hello, Ledgerline support, this is {agent}.', 'Good {part}, you are through to Ledgerline. {agent} here.', 'Ledgerline support, good {part}. My name is {agent}. How can I help?'];
+const hellos = ['Hello, yes. I hope you can help.', 'Hi {agent}. I have been on hold a while, so I will get straight to it.', 'Morning. Bear with me, I have my notes somewhere.', 'Oh, hello. I was expecting a machine.', 'Hi. I am not sure I have the right department.', 'Hello. Sorry about the noise, I am in the van.', 'Hello. I will try to be quick, I am between appointments.', 'Hi there. I have a question I could not find the answer to online.', 'Yes, hello. Can you hear me all right? I am on the hands-free.', 'Hello {agent}. Thank you for picking up so quickly.'];
 const verifyEmployer = ['Before I open the account, can you give me the company name and the last three characters of your PAYE reference?', 'I need to take you through security first. Which company is it, and what is the postcode we hold for the business?', 'Can I take the company name, and your own name as it appears on the account?'];
 const verifyEmployee = ['For security, can you confirm your full name, your employer and your date of birth?', 'I need to check a few details first. Who is your employer, and what is the postcode on your payslip?', 'Can I take your name, your employer\'s name and the last three characters of your National Insurance number?'];
-const verified = ['Thank you, that matches. I have the record open.', 'Lovely, thank you. You are through security.', 'That is all correct, thanks. One moment while it loads.', 'Thanks. I have you on screen now.'];
+const verified = ['Thank you, that matches. I have the record open.', 'Lovely, thank you. You are through security.', 'That is all correct, thanks. One moment while it loads.', 'Thanks. I have you on screen now.', 'Thanks, that all matches. Bear with me while the record opens.'];
 const holds = [
 	['Can I put you on hold for a minute while I check that?', 'Go on.', 'Thanks for holding. I have it now.'],
 	['Bear with me, the page is slow today.', 'No rush.', 'There we are.'],
 	['I want to check that with a colleague so that I do not tell you something wrong. Two minutes?', 'That is fine.', 'Thank you for waiting. My colleague agrees with what I was about to say.'],
-	['Let me bring up the run so that we are looking at the same thing.', 'OK.', 'Right, I have it in front of me.']
+	['Let me bring up the run so that we are looking at the same thing.', 'OK.', 'Right, I have it in front of me.'],
+	['Let me look that up in our guidance so that I give you the exact wording. One moment.', 'Sure.', 'Thanks for waiting. I have it here.'],
+	['I need a second screen open for that. It takes a moment.', 'That is fine.', 'Got it now. Thank you for bearing with me.']
 ];
 const asides = [
 	['Sorry, someone has just come into the office. One second. Right, I am back.', 'No problem at all.'],
@@ -506,7 +772,13 @@ const asides = [
 	['I tried to do this in the app on my phone, by the way, and could not find it at all.', 'The phone app only shows payslips and approvals. For settings you need the website.'],
 	['Is this the sort of thing I should have emailed about instead?', 'Either is fine. On the phone we can look at it together, which is usually quicker.'],
 	['Last time I rang, the person said something different, I think.', 'I can see the note from that call. It was about another employee, which is why the answer was not the same.'],
-	['Give me a moment, the page has logged me out.', 'It does that after fifteen minutes without activity. Take your time.']
+	['Give me a moment, the page has logged me out.', 'It does that after fifteen minutes without activity. Take your time.'],
+	['Sorry, can you say that again? A lorry was going past.', 'Of course. I will go a little slower as well.'],
+	['Excuse me, the dog has just started barking at the postman.', 'Not at all. Mine does the same.'],
+	['I hope this is not a silly question.', 'It is not. I get asked it most days.'],
+	['Can I just check you are the payroll people, not the bank?', 'We are the payroll side. Your bank is separate from us.'],
+	['Sorry, I have a customer at the counter. One moment. Right, I am back.', 'No problem. Take your time.'],
+	['My accountant gave me a list of things to ask, so I may jump about a bit.', 'That is fine. Go through the list in whatever order suits you.']
 ];
 const backstories = [
 	'I should explain that I only took this over in September, and the handover was a page of notes.',
@@ -522,7 +794,12 @@ const backstories = [
 	'I do this once a month and by the next month I have forgotten how.',
 	'I am only in two days a week, so today is my one chance to sort it out.',
 	'I have it all written on the back of an envelope here, so bear with me.',
-	'This is the first time I have had to ring you in two years, which I suppose is a good sign.'
+	'This is the first time I have had to ring you in two years, which I suppose is a good sign.',
+	'We moved to you from another provider in the spring, so I am still finding my way round.',
+	'Our office manager usually does this, but she is off this week.',
+	'I tried the search on your help centre and it gave me articles about something else entirely.',
+	'I wrote my question down so that I would not forget half of it.',
+	'I run the business with my husband, and he says I worry too much about this sort of thing.'
 ];
 const listening = [
 	'That is fine. Let me look at what we hold.',
@@ -532,39 +809,48 @@ const listening = [
 	'Understood. We can go through it step by step.',
 	'Right. I get asked this a lot, so you are in good company.',
 	'Thanks for explaining. Go ahead.',
-	'Of course. What would you like to know first?'
+	'Of course. What would you like to know first?',
+	'Sure. Let me pull that up.',
+	'Happy to help. Talk me through it.',
+	'That is a common one. Let me check how yours is set up.'
 ];
-const bridges = ['While I have you, there is something else.', 'Can I ask about another thing while I am on?', 'One more, if you have a minute.', 'Actually, that reminds me of a different question.', 'Before you go, a colleague asked me to check something too.'];
-const acks = ['Right, that makes sense.', 'OK, I follow.', 'I see. I did not know that.', 'Fine. Thank you.', 'Good, that is clearer than the help page.', 'That is what I was hoping you would say.', 'Hmm. All right.', 'OK. Let me write that down.'];
+const bridges = ['While I have you, there is something else.', 'Can I ask about another thing while I am on?', 'One more, if you have a minute.', 'Actually, that reminds me of a different question.', 'Before you go, a colleague asked me to check something too.', 'Oh, and while I am through to someone.', 'I had a second thing written down here too.', 'Sorry, one more before I let you go.'];
+const acks = ['Right, that makes sense.', 'OK, I follow.', 'I see. I did not know that.', 'Fine. Thank you.', 'Good, that is clearer than the help page.', 'That is what I was hoping you would say.', 'Hmm. All right.', 'OK. Let me write that down.', 'Brilliant, thanks.', 'Ah, that explains it.', 'Right. I think I have that.', 'OK, that is less frightening than I thought.'];
 
 // How the main matter ends. The kind is never written in the file.
 type Outcome = 'resolved' | 'owed' | 'caller' | 'team' | 'dropped';
 const resolvedLines = [
 	['So that is everything for that one?', 'It is. You have done what was needed and there is nothing left for either of us to do.', 'Brilliant. That was easier than I feared.'],
 	['I have done that now, while we were talking. Does it look right at your end?', 'It does. I can see the change on the record, and the draft has updated.', 'Good. Then I am sorted.'],
-	['So I do not need to do anything else?', 'Nothing else. It is all in place.', 'Thank you. I will stop worrying about it.']
+	['So I do not need to do anything else?', 'Nothing else. It is all in place.', 'Thank you. I will stop worrying about it.'],
+	['Right, I have clicked it. Is that it?', 'That is it. Everything is in place and there is nothing more to do.', 'Lovely. Much quicker than I expected.']
 ];
 const owedLines = [
 	['Can you check that for me and get back to me? I do not want to guess.', 'Yes. I will {owe}. You will have it from me by {day}, at the address on the account.', 'By {day}. Fine. I will look out for it.'],
 	['I would rather have it in writing, to be honest.', 'Of course. I will {owe}, and I will do it today, before I finish.', 'Thank you, that would help.'],
-	['I cannot stay on much longer. Can you finish this without me?', 'I can. I will {owe}, by {day} at the latest.', 'Perfect. Email is best.']
+	['I cannot stay on much longer. Can you finish this without me?', 'I can. I will {owe}, by {day} at the latest.', 'Perfect. Email is best.'],
+	['Could you send me something to check against before I do anything?', 'Yes. I will {owe}. You will have it by {day}.', 'That is perfect, thank you.']
 ];
 const callerLines = [
 	['So the next step is mine?', 'It is. You will need to {act}. Once that is done there is nothing more for us to do.', 'Right. I will do that this afternoon.'],
 	['Can you do that part for me?', 'I am afraid that part I cannot do from here. You will need to {act}.', 'OK. I had hoped you could, but fine.'],
-	['What happens if I leave it?', 'Nothing changes until you do it. You will need to {act}, and ideally before the next run.', 'Understood. I will put it in the diary.']
+	['What happens if I leave it?', 'Nothing changes until you do it. You will need to {act}, and ideally before the next run.', 'Understood. I will put it in the diary.'],
+	['And that bit I have to do myself?', 'Yes, that part is yours. You will need to {act}. After that, everything else follows by itself.', 'OK. I will do it before the end of the week.']
 ];
 const teamLines = [
 	['This does not sound like something you can answer on the spot.', 'Not safely, no. I am passing it to our {team}, with my notes, so that you will not have to explain it again. They will ring you within two working days.', 'Two working days. All right. Same number as today.'],
-	['I think this is more complicated than the usual case.', 'I agree, and I would rather the {team} looked at it than give you half an answer. I have opened a case for them now. They contact you by {day}.', 'Fine. As long as somebody does.']
+	['I think this is more complicated than the usual case.', 'I agree, and I would rather the {team} looked at it than give you half an answer. I have opened a case for them now. They contact you by {day}.', 'Fine. As long as somebody does.'],
+	['Is there someone who deals with this kind of thing in particular?', 'There is. I am passing this to our {team} now, with everything you have told me, so that you will not need to repeat it. They ring you back within two working days.', 'Good. Thank you.']
 ];
-const droppedLines = [['Sorry, I am going into a tunnel, I might', '[line lost]'], ['Hold on, there is someone at the door, I will just', '[caller left the line and did not return; call ended after four minutes of silence]'], ['My battery is about to', '[line lost]']];
+const droppedLines = [['Sorry, I am going into a tunnel, I might', '[line lost]'], ['Hold on, there is someone at the door, I will just', '[caller left the line and did not return; call ended after four minutes of silence]'], ['My battery is about to', '[line lost]'], ['Sorry, the signal here is terrible, can you', '[line lost]']];
 const droppedNotes = ['Rang back twice on the number shown, no answer. No voicemail left, as the greeting did not give a name.', 'Rang back once and reached voicemail. Left a message asking the caller to ring us and quote this call\'s reference.', 'No number shown for this call, so no call back was possible.'];
 const closers = [
 	['Is there anything else I can help with today?', 'No, that is everything. Thanks for your help, {agent}.', 'You are welcome. Have a good {part}.'],
 	['Anything else while you are on?', 'That is all. Thank you.', 'Thanks for calling Ledgerline. Goodbye.'],
 	['Was there anything else?', 'No. You have been very patient, thank you.', 'Not at all. Take care.'],
-	['Can I help with anything else?', 'No, I had better get on. Cheers.', 'Thanks, {first}. Goodbye.']
+	['Can I help with anything else?', 'No, I had better get on. Cheers.', 'Thanks, {first}. Goodbye.'],
+	['Is that everything for today?', 'Yes, that is everything. Thank you.', 'Thank you for calling, {first}. Bye now.'],
+	['Anything else I can do for you?', 'No, you have answered everything. Thanks, {agent}.', 'My pleasure. Enjoy the rest of your {part}.']
 ];
 
 const workdays: string[] = [];
@@ -726,12 +1012,11 @@ const call = (index: number, date: string, sequence: number): { name: string; te
 	return { name: `${date}-${reference.toLowerCase()}.md`, text: `${text}\n` };
 };
 
-const total = 250;
 const folder = join(root, 'support', 'calls');
 mkdirSync(folder, { recursive: true });
 const perDay = new Map<string, number>();
-for (let index = 0; index < total; index++) {
-	const date = workdays[Math.floor((index * workdays.length) / total)]!;
+for (let index = 0; index < ITEMS; index++) {
+	const date = workdays[Math.floor((index * workdays.length) / ITEMS)]!;
 	const sequence = (perDay.get(date) ?? 0) + 1;
 	perDay.set(date, sequence);
 	const { name, text } = call(index, date, sequence);
@@ -739,5 +1024,5 @@ for (let index = 0; index < total; index++) {
 }
 writeFileSync(
 	join(folder, 'README.md'),
-	`# Call transcripts\n\nTranscripts of the ${total} calls the phone system recorded between 19 October and 13 November 2026, one file\neach, as the transcription service returned them. "On screen" is the account or record the agent had open.\nSecurity answers are left out. The phone system keeps no wrap-up codes, so a call's subject and outcome are\nonly in the transcript.\n`
+	`# Call transcripts\n\nTranscripts of the ${ITEMS} calls the phone system recorded between 19 October and 13 November 2026, one file\neach, as the transcription service returned them. "On screen" is the account or record the agent had open.\nSecurity answers are left out. The phone system keeps no wrap-up codes, so a call's subject and outcome are\nonly in the transcript.\n`
 );
