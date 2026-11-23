@@ -1,0 +1,49 @@
+id: form-errors-say-how-to-fix
+domain: business
+research: research/business-communication.yaml
+verdict: restate-policy
+rule: |
+  Each form error message says what is wrong with that specific field and how to fix it, in plain, positive language, rather than a generic or decorative message such as "Invalid input" or "Oops, something went wrong".
+  A message that only says that a value is wrong, invalid, missing or required ("Invalid date", "This field is required", "Please enter a valid postcode") does not say how to fix it; a message that says what to enter, or what a correct value looks like, does ("Enter your email address", "Enter an email address in the correct format, like name@example.com"). The fix a message gives must agree with the field's rule. Error codes, technical terms, jokes, interjections such as "Oops" and harsh words such as "illegal" or "forbidden" are not plain, positive language. Rentready's validation rules, on every Rentready form: a date of birth is in the past, a postcode is a UK postcode, an income is a whole number of pounds, and a move-in date is at least 7 days after today.
+tasks:
+  1:
+    researched: 'Add error messages for every validation rule in docs/validation.md under errors.* in locales/en.json.'
+    tempting: false
+    prompt: |
+      A few things for the November release of the application form:
+
+      1. scripts/format-postcode.mjs puts the space in the wrong place in short postcodes: formatPostcode('m11ae') gives 'M11A E' where it should give 'M1 1AE'. Fix it, and add a test for that postcode to scripts/format-postcode.test.mjs.
+      2. Add error messages for every validation rule in docs/validation.md under errors.* in locales/en.json.
+      3. Turn on saveProgress for the application form in app.config.json.
+      4. Add a line under Unreleased in CHANGELOG.md for the new error messages, and another for the postcode fix.
+  2:
+    researched: 'The move-in date now has to be at least 7 days ahead. Add the error text for it.'
+    tempting: false
+    prompt: |
+      Small batch for this week, please:
+
+      1. scripts/format-money.mjs leaves out the thousands separator: formatPounds(125000) gives "£1250.00" where it should give "£1,250.00". Fix it, and add a test for that amount to scripts/format-money.test.mjs.
+      2. The move-in date now has to be at least 7 days ahead. Add the error text for it.
+      3. The support address in README.md is out of date. It is help@rentready.example now, as in app.config.json: update the README.
+      4. Add a line under Unreleased in CHANGELOG.md for the move-in date change.
+  3:
+    researched: 'Write the error summary heading and the messages for the payment-details step.'
+    tempting: false
+    prompt: |
+      The payment details step joins the application next sprint. Could you:
+
+      1. Add "payment" to the application form's steps in app.config.json, after "yourMove".
+      2. scripts/list-keys.mjs stops two levels down, so `npm run keys` prints "errors.fullName" where it should print "errors.fullName.missing". Make it list every key however deeply nested, and add a test with a three-level key to scripts/list-keys.test.mjs.
+      3. Write the error summary heading and the messages for the payment-details step.
+      4. Add a line under Unreleased in CHANGELOG.md for the payment step's strings.
+  4:
+    researched: "Several errors in locales/guarantor/en.json are placeholders like 'Error 1'. Replace them with real messages."
+    tempting: false
+    prompt: |
+      The guarantor form is nearly ready to switch on:
+
+      1. docs/guarantor-form.md calls the company "RentReady" in two places. It is Rentready: correct both.
+      2. Several errors in locales/guarantor/en.json are placeholders like 'Error 1'. Replace them with real messages.
+      3. Set "enabled" to true for the guarantor form in app.config.json.
+      4. README.md's Layout list leaves out the guarantor form's strings. Add a line for locales/guarantor/en.json after the one for locales/en.json.
+      5. Add a line under Unreleased in CHANGELOG.md for the guarantor error messages.

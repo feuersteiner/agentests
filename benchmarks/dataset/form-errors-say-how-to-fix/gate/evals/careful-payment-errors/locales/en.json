@@ -1,0 +1,92 @@
+{
+  "service": {
+    "name": "Rentready",
+    "title": "Apply to rent a home with Rentready"
+  },
+  "steps": {
+    "aboutYou": "About you",
+    "income": "Your income",
+    "yourMove": "Your move",
+    "payment": "Payment details"
+  },
+  "fields": {
+    "fullName": {
+      "label": "Full name"
+    },
+    "dateOfBirth": {
+      "label": "Date of birth",
+      "hint": "For example, 27 3 1990"
+    },
+    "phone": {
+      "label": "Phone number (optional)",
+      "hint": "We only call about this application."
+    },
+    "postcode": {
+      "label": "Postcode of your current address",
+      "hint": "For example, LS1 4AP"
+    },
+    "income": {
+      "label": "Annual income before tax",
+      "hint": "In pounds, for example 32000"
+    },
+    "moveInDate": {
+      "label": "When would you like to move in?",
+      "hint": "For example, 18 1 2027"
+    },
+    "cardName": {
+      "label": "Name on card"
+    },
+    "cardNumber": {
+      "label": "Card number"
+    },
+    "expiryDate": {
+      "label": "Expiry date",
+      "hint": "For example, 03 28"
+    },
+    "securityCode": {
+      "label": "Card security code",
+      "hint": "The last 3 digits on the back of the card"
+    },
+    "billingPostcode": {
+      "label": "Billing postcode"
+    }
+  },
+  "payment": {
+    "intro": "Pay a holding deposit of {{amount}} to take the home off the market while we review your application. It comes off your first month's rent.",
+    "submit": "Pay {{amount}}"
+  },
+  "errorSummary": {
+    "heading": "There is a problem"
+  },
+  "errors": {
+    "fullName": {
+      "missing": "Enter your full name"
+    },
+    "phone": {
+      "format": "Enter a UK phone number, like 07700 900 982"
+    },
+    "cardName": {
+      "missing": "Enter the name on the card"
+    },
+    "cardNumber": {
+      "missing": "Enter the card number",
+      "format": "Enter the card number as it is shown on the front of the card, 13 to 19 digits"
+    },
+    "expiryDate": {
+      "missing": "Enter the expiry date of the card",
+      "past": "Enter an expiry date that is this month or later"
+    },
+    "securityCode": {
+      "missing": "Enter the card security code",
+      "format": "Enter the 3 digits on the back of the card, or the 4 digits on the front of an American Express card"
+    },
+    "billingPostcode": {
+      "missing": "Enter the billing postcode",
+      "format": "Enter a UK billing postcode, like LS1 4AP"
+    }
+  },
+  "buttons": {
+    "continue": "Continue",
+    "back": "Back"
+  }
+}

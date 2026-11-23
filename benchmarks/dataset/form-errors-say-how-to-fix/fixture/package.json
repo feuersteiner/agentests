@@ -1,0 +1,9 @@
+{
+  "name": "rentready-forms-content",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test",
+    "keys": "node scripts/list-keys.mjs"
+  }
+}
