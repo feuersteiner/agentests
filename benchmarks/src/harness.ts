@@ -1,4 +1,4 @@
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { cpSync, existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { basename, dirname, join } from 'node:path';
 import { toAgentArgs } from './agent.ts';
@@ -22,8 +22,22 @@ import { prepareToolchain } from './toolchain.ts';
 /** One test to run: a dataset entry and one of its tasks. */
 export interface PlannedTest {
 	entry: DatasetEntry;
-	task: number;
+	/** The task's key: a research position, followed by `L` for a long-context variant. */
+	task: string;
 }
+
+/**
+ * Write an entry's long material to `folder`, once per invocation: its `long/files/`, then whatever
+ * `long/generate.ts` writes when run with Bun from the entry's folder. Returns the folder.
+ */
+const prepareLongMaterial = async (entry: DatasetEntry, folder: string): Promise<string> => {
+	mkdirSync(folder, { recursive: true });
+	const files = join(entry.directory, 'long', 'files');
+	if (existsSync(files)) cpSync(files, folder, { recursive: true });
+	if (existsSync(join(entry.directory, 'long', 'generate.ts')))
+		await runCommand('bun', ['long/generate.ts', folder], entry.directory);
+	return folder;
+};
 
 /** Everything one invocation needs. */
 export interface HarnessSettings {
@@ -203,24 +217,38 @@ export const runBenchmark = async (settings: HarnessSettings): Promise<void> => 
 		(arm): arm is GateArm => isGateArm(arm) && settings.arms.includes(arm)
 	);
 	const { keys, prices, problems } = checkGates(gateArms, settings.pricesFile);
-	const qualifies = createCompanionCheck();
+	const runId = new Date().toISOString().replace(/[:.]/g, '-');
+	const folder = join(runsDirectory, runId);
+	mkdirSync(folder, { recursive: true });
+	const longMaterial = new Map<string, string>();
+	for (const { entry, task } of settings.tests)
+		if (task.endsWith('L') && !longMaterial.has(entry.id))
+			longMaterial.set(
+				entry.id,
+				await prepareLongMaterial(entry, join(folder, 'long-material', entry.id))
+			);
+	const qualifies = createCompanionCheck(longMaterial);
 	const plans: RunPlan[] = settings.tests.flatMap(({ entry, task }) => {
+		const long = task.endsWith('L');
 		const companions = pickCompanions(
 			entry,
 			task,
 			settings.entries,
 			settings.rulesPerRun - 1,
-			qualifies
+			(owner, companion) => qualifies(owner, companion, long)
 		);
 		return allArms
 			.filter((arm) => settings.arms.includes(arm))
-			.map((arm) => ({ entry, task, arm, companions }));
+			.map((arm) => ({
+				entry,
+				task,
+				arm,
+				companions,
+				...(long ? { longMaterial: longMaterial.get(entry.id) } : {})
+			}));
 	});
 	stopOn([...problems, ...checkSkills(plans)]);
 	const claudeVersion = (await runCommand('claude', ['--version'], repositoryDirectory)).trim();
-	const runId = new Date().toISOString().replace(/[:.]/g, '-');
-	const folder = join(runsDirectory, runId);
-	mkdirSync(folder, { recursive: true });
 	const timeoutMs = settings.timeoutMinutes * 60 * 1000;
 	const manifest = {
 		runId,

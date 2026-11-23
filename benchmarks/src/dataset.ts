@@ -10,6 +10,8 @@ export interface DatasetTask {
 	researched: string;
 	/** Whether the wording pushes the agent toward breaking the rule, beyond giving it the chance. */
 	tempting: boolean;
+	/** Long tasks (keyed `<n>L`) only: the peak context, in tokens, the task is built to drive the agent to. */
+	context?: number;
 }
 
 /** One dataset entry: a rule with its tasks, rubric, fixture, skill and compiled Test. */
@@ -22,8 +24,11 @@ export interface DatasetEntry {
 	verdict: Exclude<Verdict, 'drop'>;
 	/** The rule text that the skill, the Test and the rubric each contain word for word. */
 	rule: string;
-	/** The usable tasks, by the task's 1-based position in the research entry. */
-	tasks: Map<number, DatasetTask>;
+	/**
+	 * The usable tasks, by key: the task's 1-based position in the research entry, or that position and `L` for its
+	 * long-context variant, which runs with the entry's `long/` material added to the fixture.
+	 */
+	tasks: Map<string, DatasetTask>;
 	/** The judge's rubric for this rule. */
 	rubric: string;
 	/** The entry's folder. */
@@ -104,16 +109,17 @@ class Problems {
  * The usable tasks of `benchmark.yaml`'s `tasks` mapping, noting any key or task that is not usable: each task is a
  * mapping with `prompt`, `researched`, which the prompt contains word for word, and `tempting`, true or false.
  */
-const toTasks = (value: unknown, problems: Problems): Map<number, DatasetTask> => {
-	const tasks = new Map<number, DatasetTask>();
+const toTasks = (value: unknown, problems: Problems): Map<string, DatasetTask> => {
+	const tasks = new Map<string, DatasetTask>();
 	if (!isFields(value) || Object.keys(value).length === 0) {
 		problems.add('benchmark.yaml: tasks must map task positions to tasks');
 		return tasks;
 	}
 	for (const [key, task] of Object.entries(value)) {
-		const position = Number(key);
-		if (!/^[1-9]\d*$/.test(key)) {
-			problems.add(`benchmark.yaml: task key "${key}" is not a 1-based position`);
+		if (!/^[1-9]\d*L?$/.test(key)) {
+			problems.add(
+				`benchmark.yaml: task key "${key}" is not a 1-based position, or one followed by L for a long task`
+			);
 			continue;
 		}
 		if (!isFields(task)) {
@@ -122,7 +128,16 @@ const toTasks = (value: unknown, problems: Problems): Map<number, DatasetTask> =
 			);
 			continue;
 		}
-		const { prompt, researched, tempting } = task;
+		const { prompt, researched, tempting, context } = task;
+		const long = key.endsWith('L');
+		if (long && (typeof context !== 'number' || !Number.isInteger(context) || context <= 0))
+			problems.add(
+				`benchmark.yaml: long task ${key} needs context, its target peak context in tokens`
+			);
+		if (!long && context !== undefined)
+			problems.add(
+				`benchmark.yaml: task ${key} has a context target; only long tasks (keyed <n>L) do`
+			);
 		if (!isText(prompt)) problems.add(`benchmark.yaml: task ${key} has no prompt`);
 		if (!isText(researched)) problems.add(`benchmark.yaml: task ${key} has no researched prompt`);
 		if (typeof tempting !== 'boolean')
@@ -132,7 +147,12 @@ const toTasks = (value: unknown, problems: Problems): Map<number, DatasetTask> =
 				`benchmark.yaml: task ${key}'s prompt does not contain its researched prompt word for word`
 			);
 		if (isText(prompt) && isText(researched) && typeof tempting === 'boolean')
-			tasks.set(position, { prompt: prompt.trim(), researched: researched.trim(), tempting });
+			tasks.set(key, {
+				prompt: prompt.trim(),
+				researched: researched.trim(),
+				tempting,
+				...(long && typeof context === 'number' ? { context } : {})
+			});
 	}
 	return tasks;
 };
@@ -193,7 +213,7 @@ export const loadEntry = (directory: string, id: string): DatasetEntry => {
 	const problems = new Problems();
 	const meta = problems.readYaml(join(root, 'benchmark.yaml'), 'benchmark.yaml');
 	let rule: string | undefined;
-	let tasks = new Map<number, DatasetTask>();
+	let tasks = new Map<string, DatasetTask>();
 	const fields: Fields = isFields(meta) ? meta : {};
 	if (meta !== undefined && !isFields(meta)) problems.add('benchmark.yaml: expected a mapping');
 	if (isFields(meta)) {
@@ -218,6 +238,9 @@ export const loadEntry = (directory: string, id: string): DatasetEntry => {
 	problems.requireRule(testMd, rule, 'gate/TEST.md');
 	checkTest(problems.readYaml(join(root, 'gate', 'test.yaml'), 'gate/test.yaml'), id, problems);
 	checkEvals(join(root, 'gate', 'evals'), problems);
+	const longFolder = join(root, 'long');
+	if ([...tasks.keys()].some((key) => key.endsWith('L')) && !isDirectory(longFolder))
+		problems.add('long tasks need a long/ folder, with files/ or generate.ts');
 	if (problems.list.length)
 		throw new Error(
 			`Dataset entry ${id} breaks the contract:\n${problems.list.map((problem) => `  - ${problem}`).join('\n')}`

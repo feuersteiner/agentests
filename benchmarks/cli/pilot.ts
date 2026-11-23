@@ -45,7 +45,7 @@ try {
 			}
 			try {
 				const entry = loadEntry(settings.datasetDirectory, pick.rule);
-				if (entry.tasks.has(pick.task)) return [{ entry, task: pick.task }];
+				if (entry.tasks.has(String(pick.task))) return [{ entry, task: String(pick.task) }];
 				problems.push(`${name}: the entry has no task ${pick.task}`);
 			} catch (error) {
 				problems.push(`${name}: ${error instanceof Error ? error.message : String(error)}`);

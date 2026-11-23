@@ -25,11 +25,15 @@ export const toAgentArgs = (prompt: string, budgetUsd: number): string[] => [
 	'--setting-sources',
 	'project',
 	'--strict-mcp-config',
+	// No subagents, in any arm: everything the agent reads stays in its own context, which the run measures.
+	'--disallowedTools',
+	'Agent',
+	'Task',
 	'--max-budget-usd',
 	String(budgetUsd)
 ];
 
-/** The agent's tokens and cost. */
+/** The agent's tokens, cost and context. */
 export interface AgentUsage {
 	costUsd: number;
 	inputTokens: number;
@@ -37,7 +41,43 @@ export interface AgentUsage {
 	cacheReadTokens: number;
 	cacheWriteTokens: number;
 	turns: number;
+	peakContextTokens: number;
+	contextWindow: number | null;
+	contextPercent: number | null;
+	compactions: number;
 }
+
+/**
+ * The agent's context: the largest prompt of any model call (uncached input, cache reads and cache writes of one
+ * assistant message), the context window the `result` event reports for the agent's model, and how many times
+ * Claude Code compacted the conversation (`compact_boundary` system events).
+ */
+const toContext = (exit: ClaudeExit) => {
+	let peak = 0;
+	for (const event of exit.events) {
+		const message =
+			event.type === 'assistant' ? (event.message as Record<string, unknown>) : undefined;
+		const usage = message?.usage as Record<string, unknown> | undefined;
+		if (!usage) continue;
+		const prompt =
+			toNumber(usage.input_tokens) +
+			toNumber(usage.cache_read_input_tokens) +
+			toNumber(usage.cache_creation_input_tokens);
+		peak = Math.max(peak, prompt);
+	}
+	const usage = (exit.result?.modelUsage ?? {}) as Record<string, Record<string, unknown>>;
+	const window = toNumber(
+		usage[models.agent]?.contextWindow ?? Object.values(usage)[0]?.contextWindow
+	);
+	return {
+		peakContextTokens: peak,
+		contextWindow: window > 0 ? window : null,
+		contextPercent: window > 0 ? Math.round((peak / window) * 1000) / 10 : null,
+		compactions: exit.events.filter(
+			(event) => event.type === 'system' && event.subtype === 'compact_boundary'
+		).length
+	};
+};
 
 const toNumber = (value: unknown): number => (typeof value === 'number' ? value : 0);
 
@@ -87,7 +127,8 @@ export const toAgentUsage = (exit: ClaudeExit): AgentUsage => {
 		cacheWriteTokens: tokens.cacheWriteTokens,
 		turns: result
 			? toNumber(result.num_turns)
-			: events.filter((event) => event.type === 'assistant').length
+			: events.filter((event) => event.type === 'assistant').length,
+		...toContext(exit)
 	};
 };
 

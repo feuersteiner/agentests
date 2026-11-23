@@ -81,6 +81,14 @@ export interface AgentOutcome {
 	stop: string;
 	/** Whether changes were left uncommitted, tracked or untracked. */
 	uncommitted: boolean;
+	/** The largest prompt of any of the agent's model calls, in tokens: its peak context. */
+	peakContextTokens: number;
+	/** The agent model's context window, in tokens, as the `result` event gives it; null when it gives none. */
+	contextWindow: number | null;
+	/** `peakContextTokens` as a percentage of `contextWindow`; null when the window is unknown. */
+	contextPercent: number | null;
+	/** How many times Claude Code compacted the conversation during the run. */
+	compactions: number;
 	/** Skill arm only: whether the agent loaded the test's own skill, by the Skill tool or by reading its file. */
 	skillLoaded?: boolean;
 	/** Skill arm only: every skill the agent loaded, its own and companions', by id. */
@@ -132,7 +140,10 @@ export interface RunResult {
 	score: number | null;
 
 	rule: string;
-	task: number;
+	/** The task's key: its research position, followed by `L` for a long-context variant. */
+	task: string;
+	/** Long tasks only: the peak context, in tokens, the task is built to drive the agent to; null for short ones. */
+	targetContext: number | null;
 	arm: Arm;
 	domain: Domain;
 	/** Whether the task's researched prompt is worded to tempt the agent into breaking the rule. */

@@ -11,14 +11,25 @@ const help = [
 	'Runs every test of the dataset, or those --test names, in every arm, or those --arm names.',
 	'',
 	'  --test <rule-id>/<task>     one test; repeatable; default every test of the dataset',
+	'  --context <short|long>      only short tasks, or only long-context tasks (keyed <n>L); default both',
 	harnessHelp,
 	'  --help                      print this help'
 ].join('\n');
 
 /** The tests `--test` names, each `<rule-id>/<task>`, or every task of every entry. */
-const toTests = (entries: DatasetEntry[], names: string[] | undefined): PlannedTest[] => {
+const toTests = (
+	entries: DatasetEntry[],
+	names: string[] | undefined,
+	context: string | undefined
+): PlannedTest[] => {
+	if (context !== undefined && context !== 'short' && context !== 'long')
+		throw new Error(`--context takes short or long, not "${context}"`);
+	const order = (key: string) => Number.parseInt(key, 10) + (key.endsWith('L') ? 0.5 : 0);
 	const all = entries.flatMap((entry) =>
-		[...entry.tasks.keys()].sort((a, b) => a - b).map((task) => ({ entry, task }))
+		[...entry.tasks.keys()]
+			.filter((task) => context === undefined || task.endsWith('L') === (context === 'long'))
+			.sort((a, b) => order(a) - order(b))
+			.map((task) => ({ entry, task }))
 	);
 	if (!names?.length) return all;
 	return names.map((name) => {
@@ -35,6 +46,7 @@ try {
 		options: {
 			...harnessOptions,
 			test: { type: 'string', multiple: true },
+			context: { type: 'string' },
 			help: { type: 'boolean', default: false }
 		}
 	});
@@ -45,7 +57,11 @@ try {
 		if (ids.length === 0) throw new Error(`The dataset ${settings.datasetDirectory} has no entry`);
 		// Every entry is loaded, not only those --test names: each test's companions come from the whole dataset.
 		const entries = ids.map((id) => loadEntry(settings.datasetDirectory, id));
-		await runBenchmark({ ...settings, entries, tests: toTests(entries, values.test) });
+		await runBenchmark({
+			...settings,
+			entries,
+			tests: toTests(entries, values.test, values.context)
+		});
 	}
 } catch (error) {
 	console.error(`Error: ${error instanceof Error ? error.message : String(error)}`);

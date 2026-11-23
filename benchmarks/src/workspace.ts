@@ -112,10 +112,13 @@ export const createWorkspace = async (
 	arm: Arm,
 	directory: string,
 	gate?: GateSetup,
-	companions: DatasetEntry[] = []
+	companions: DatasetEntry[] = [],
+	longMaterial?: string
 ): Promise<Workspace> => {
 	mkdirSync(directory, { recursive: true });
 	cpSync(join(entry.directory, 'fixture'), directory, { recursive: true });
+	// A long task's material goes over the fixture before anything else, so it is part of the base commit.
+	if (longMaterial) cpSync(longMaterial, directory, { recursive: true });
 	const rules = [entry, ...companions];
 	if (arm === 'skill')
 		for (const rule of rules)

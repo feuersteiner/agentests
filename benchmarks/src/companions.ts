@@ -46,15 +46,25 @@ const matchesGrep = (text: string, patterns: string[]): boolean =>
 		return matcher.test(text);
 	});
 
-/** Every file of an entry's fixture, with its path relative to the fixture, as the hook would name it. */
-const readFixture = (entry: DatasetEntry): { path: string; text: string }[] => {
-	const root = join(entry.directory, 'fixture');
-	return readdirSync(root, { recursive: true, withFileTypes: true })
+/** Every file under `root`, with its path relative to it, as the hook would name it. */
+const readFolder = (root: string): { path: string; text: string }[] =>
+	readdirSync(root, { recursive: true, withFileTypes: true })
 		.filter((item) => item.isFile())
 		.map((item) => {
 			const full = join(item.parentPath, item.name);
 			return { path: relative(root, full), text: readFileSync(full, 'utf8') };
 		});
+
+/** Every file of an entry's fixture, and for a long task its long material too, as the workspace holds them. */
+const readFixture = (
+	entry: DatasetEntry,
+	longMaterial?: string
+): { path: string; text: string }[] => {
+	const files = readFolder(join(entry.directory, 'fixture'));
+	if (!longMaterial) return files;
+	const extra = readFolder(longMaterial);
+	const paths = new Set(extra.map((file) => file.path));
+	return [...files.filter((file) => !paths.has(file.path)), ...extra];
 };
 
 /** The `select` of an entry's compiled Test. */
@@ -86,16 +96,24 @@ const leavesFixtureAlone = (
 	);
 };
 
-/** Remembers each entry's fixture and each pair's verdict across the tests of an invocation. */
-export const createCompanionCheck = () => {
+/**
+ * Remembers each entry's fixture and each pair's verdict across the tests of an invocation. A long task's fixture
+ * includes its entry's long material, from `longMaterial`.
+ */
+export const createCompanionCheck = (longMaterial: Map<string, string> = new Map()) => {
 	const fixtures = new Map<string, { path: string; text: string }[]>();
 	const verdicts = new Map<string, boolean>();
-	return (entry: DatasetEntry, companion: DatasetEntry): boolean => {
-		const key = `${entry.id} ${companion.id}`;
+	return (entry: DatasetEntry, companion: DatasetEntry, long = false): boolean => {
+		const key = `${entry.id}${long ? ' long' : ''} ${companion.id}`;
 		let verdict = verdicts.get(key);
 		if (verdict === undefined) {
-			let fixture = fixtures.get(entry.id);
-			if (!fixture) fixtures.set(entry.id, (fixture = readFixture(entry)));
+			const fixtureKey = `${entry.id}${long ? ' long' : ''}`;
+			let fixture = fixtures.get(fixtureKey);
+			if (!fixture)
+				fixtures.set(
+					fixtureKey,
+					(fixture = readFixture(entry, long ? longMaterial.get(entry.id) : undefined))
+				);
 			verdict = leavesFixtureAlone(companion, fixture);
 			verdicts.set(key, verdict);
 		}
@@ -111,7 +129,7 @@ export const createCompanionCheck = () => {
  */
 export const pickCompanions = (
 	entry: DatasetEntry,
-	task: number,
+	task: string,
 	entries: DatasetEntry[],
 	count: number,
 	qualifies: (entry: DatasetEntry, companion: DatasetEntry) => boolean = () => true

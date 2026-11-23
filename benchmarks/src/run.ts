@@ -42,9 +42,11 @@ import type { Workspace } from './workspace.ts';
 /** One run to make: a dataset entry's task in one arm, with the companions its skill and gate arms hold. */
 export interface RunPlan {
 	entry: DatasetEntry;
-	task: number;
+	task: string;
 	arm: Arm;
 	companions: DatasetEntry[];
+	/** Long tasks only: the folder of the entry's long material, copied over the fixture. */
+	longMaterial?: string;
 }
 
 /** What every run of an invocation shares. */
@@ -162,7 +164,7 @@ const saveDiffs = (directory: string, observed: GitObservation): void => {
 export const runOne = async (plan: RunPlan, context: RunContext): Promise<RunResult> => {
 	const { entry, task, arm } = plan;
 	const key = toKey(plan);
-	const { prompt, tempting } = entry.tasks.get(task)!;
+	const { prompt, tempting, context: targetContext } = entry.tasks.get(task)!;
 	const companions = arm === 'baseline' ? [] : plan.companions;
 	const runDirectory = join(context.folder, 'runs', `${entry.id}--${task}--${arm}`);
 	// A neutral path: the agent sees its working directory, which must name neither the rule nor the arm.
@@ -177,6 +179,7 @@ export const runOne = async (plan: RunPlan, context: RunContext): Promise<RunRes
 		arm,
 		domain: entry.domain,
 		tempting,
+		targetContext: targetContext ?? null,
 		companions: companions.map((companion) => companion.id),
 		folder: relative(context.folder, runDirectory),
 		workspace: relative(context.folder, workspaceDirectory)
@@ -189,7 +192,8 @@ export const runOne = async (plan: RunPlan, context: RunContext): Promise<RunRes
 			arm,
 			workspaceDirectory,
 			gateArm ? { url: `${context.proxy!.url}/${token}/v1`, modules: context.modules! } : undefined,
-			companions
+			companions,
+			plan.longMaterial
 		);
 		const exit = await runClaude({
 			args: toAgentArgs(toAgentPrompt(prompt), context.agentBudgetUsd),
@@ -289,6 +293,10 @@ export const runOne = async (plan: RunPlan, context: RunContext): Promise<RunRes
 				cacheReadTokens: 0,
 				cacheWriteTokens: 0,
 				turns: 0,
+				peakContextTokens: 0,
+				contextWindow: null,
+				contextPercent: null,
+				compactions: 0,
 				commits: 0,
 				stop: 'none',
 				uncommitted: false
