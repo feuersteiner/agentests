@@ -16,4 +16,5 @@ Status: only `research/` exists, with the `benchmark` script as a placeholder th
 - A `quote` is verbatim from its `url`. Never edit a quote, and never add a rule without opening its source and checking the quote against it.
 - Never start a paid run as a check; only the owner starts the full run.
 - Never write a measured number (a score, a time, tokens, a cost or a count of blocked commits) into a document unless it came from a committed results folder. When a research file changes, recount the README's figures from the files.
+- A benchmark Test uses only the `glob`, `grep` and `decide` stages; the README's rules of the comparison say why.
 - Change nothing in `core/` for the benchmark's sake: the benchmark measures the package as it ships.
