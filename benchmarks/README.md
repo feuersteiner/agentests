@@ -115,7 +115,9 @@ a few tests. The full run uses keys the owner supplies, and only the owner start
 
 Only the research catalogue exists. Three parts are not built: the dataset (fixture repositories,
 skills, compiled Tests and rubrics); the **harness**, the code that will run each test in each arm
-and record the measures; and the results. No numbers exist yet.
+and record the measures; and the results. `bun run benchmark`, run from the repository root,
+exists but runs nothing: it reports that the harness is not built yet and exits with code 1. No
+numbers exist yet.
 
 ## Folder structure
 
@@ -123,6 +125,8 @@ and record the measures; and the results. No numbers exist yet.
 benchmarks/
   AGENTS.md                        rules for coding agents working in this folder
   README.md                        this file: the method and the structure
+  cli/
+    index.ts                       entry of bun run benchmark; says the harness is not built
   package.json                     the private workspace package agentests-benchmarks
   research/                        the research catalogue
     dev-conventions.yaml           software-development rules from written conventions
@@ -132,8 +136,10 @@ benchmarks/
     skills.yaml                    a survey of skills, for arm 2
 ```
 
-`package.json` makes this folder a Bun workspace of the repository. The dataset, the harness and
-the results will be added to this folder; their layout is not decided.
+`package.json` makes this folder a Bun workspace of the repository. Its `benchmark` script runs
+`cli/index.ts` with Bun, which for now only reports that the harness is not built and exits with
+code 1. The dataset, the harness and the results will be added to this folder; their layout is not
+decided.
 
 ## The research catalogue
 

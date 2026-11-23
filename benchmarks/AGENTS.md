@@ -3,10 +3,11 @@
 ## Layout
 
 - `README.md`: the method and the folder's structure, for people; read it before any change here.
-- `package.json`: the private workspace package `agentests-benchmarks`.
+- `cli/index.ts`: the entry `bun run benchmark` runs; for now it prints that the harness is not built, points to `README.md`, and exits with code 1. It runs nothing and calls no model.
+- `package.json`: the private workspace package `agentests-benchmarks`; `benchmark` runs `cli/index.ts` with Bun.
 - `research/`: the research catalogue the dataset will be cut from: four rule files (`dev-conventions.yaml`, `dev-incidents.yaml`, `business-communication.yaml`, `business-policy.yaml`) and `skills.yaml`, a survey of skills; the README lists their fields and counts.
 
-Status: only `research/` exists; the dataset, the harness and the results are not built.
+Status: only `research/` exists, with the `benchmark` script as a placeholder that reports the harness is not built and exits with code 1; the dataset, the harness and the results are not built.
 
 ## Rules
 

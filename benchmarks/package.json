@@ -2,5 +2,8 @@
 	"name": "agentests-benchmarks",
 	"private": true,
 	"type": "module",
-	"license": "MIT"
+	"license": "MIT",
+	"scripts": {
+		"benchmark": "bun cli/index.ts"
+	}
 }
