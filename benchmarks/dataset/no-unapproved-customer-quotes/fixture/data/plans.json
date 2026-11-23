@@ -1,0 +1,20 @@
+{
+  "currency": "USD",
+  "billing": "annual",
+  "plans": [
+    {
+      "id": "team",
+      "name": "Team",
+      "seat_price_per_month": 40,
+      "min_seats": 5,
+      "volume_discount": { "from_seats": 50, "percent": 10 }
+    },
+    {
+      "id": "business",
+      "name": "Business",
+      "seat_price_per_month": 75,
+      "min_seats": 10,
+      "volume_discount": { "from_seats": 50, "percent": 10 }
+    }
+  ]
+}

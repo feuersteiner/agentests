@@ -1,0 +1,14 @@
+{
+  "name": "Larkspur Data",
+  "url": "https://larkspurdata.example",
+  "nav": [
+    { "label": "Product", "path": "/" },
+    { "label": "Pricing", "path": "/pricing" },
+    { "label": "Blog", "path": "/blog" }
+  ],
+  "contact": {
+    "sales": "sales@larkspurdata.example",
+    "support": "help@larkspurdata.example"
+  },
+  "blog": { "posts_per_page": 10 }
+}
