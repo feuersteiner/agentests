@@ -1,0 +1,28 @@
+{
+  "accounts": [
+    {
+      "name": "Harrowgate Books",
+      "owner": "Mira Halloran",
+      "billing": "annual",
+      "annual_credit": 30000,
+      "term_start": "2026-04-01",
+      "finance_contact": "accounts@harrowgatebooks.example"
+    },
+    {
+      "name": "Ostrava Labs",
+      "owner": "Joel Ashby",
+      "billing": "monthly",
+      "annual_credit": null,
+      "term_start": null,
+      "finance_contact": "tomas.dvorak@ostravalabs.example"
+    },
+    {
+      "name": "Wexcombe Retail",
+      "owner": "Mira Halloran",
+      "billing": "annual",
+      "annual_credit": 45000,
+      "term_start": "2026-01-01",
+      "finance_contact": "sam.okafor@wexcombe.example"
+    }
+  ]
+}
