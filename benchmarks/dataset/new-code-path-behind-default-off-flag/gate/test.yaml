@@ -1,0 +1,23 @@
+version: 1
+id: new-code-path-behind-default-off-flag
+title: New request-path code ships behind a default-off flag and fails open
+description: Every check on a project's policy other than the daily quota count runs only behind a feature flag that defaults to off, and a missing or blank optional policy field skips the check instead of crashing or rejecting.
+select:
+  glob: ['src/app.ts', 'src/flags.ts', 'src/middleware/*.ts', 'src/quota/*.ts', 'src/policies/*.ts']
+  grep: 'isEnabled|[Pp]olic(y|ies)|[Qq]uota'
+assert:
+  - id: new-checks-behind-flag
+    description: Every check on a project's policy other than the daily quota count runs only while its flag is on.
+    error: "Wrap the new check in if (isEnabled('<flag>')) { ... } where the check is made, register the flag as false in src/flags.ts, and keep the old path for while the flag is off."
+    grep: 'reject\(|Response|\b4\d\d\b'
+    decide: 'No check in this file that rejects a request because of the project''s policy runs outside a block entered only when isEnabled(...) returns true, such as if (isEnabled(...)) { ... }, alone or joined with && to other conditions, or the code after if (!isEnabled(...)) return next(req). The one exception is the daily quota count: the check that counts the project''s requests for the current UTC day and rejects when that count passes policy.dailyLimit needs no flag. A check that runs when isEnabled(...) returns false, or that is gated by reading an environment variable directly, is not behind a flag. Code that only mounts or composes middleware is not a check. A file with no such check other than the daily quota count passes.'
+  - id: missing-fields-skip-the-check
+    description: A missing or blank optional policy field skips the check that reads it.
+    error: 'When burstLimit, region, maxPerMinute or suspended is missing, null or an empty string, skip the check and let the request go on: no non-null assertion, no throw and no rejection because of it.'
+    grep: '\b(burstLimit|region|maxPerMinute|suspended)\s*!(?!=)|\bas\s+(number|string|boolean)\b|[!=]==?\s*(undefined|null|false)\b|\b(undefined|null|false)\s*[!=]==?|\b(burstLimit|region|maxPerMinute|suspended)\s*(\?\?|\|\|)|\b(Number|parseInt|parseFloat|String)\(\s*(policy\.)?(burstLimit|region|maxPerMinute|suspended)|(''''|""|\bnull\b|\bundefined\b|typeof\b[^\n]*!==|!\s*(policy\.)?(burstLimit|region|maxPerMinute|suspended)\b)[^\n]*\)\s*\{?\s*\n?\s*return\s+reject\(|\bthrow\b'
+    decide: 'Wherever this file reads burstLimit, region, maxPerMinute or suspended from a policy, a value that is missing, null or an empty string makes the code skip that check and go on, never reject the request or throw. A check passes when it can only reject while the field holds a real value: for example one that first tests that the value is a number, one guarded by a truthiness test of the field, one that tests the region for a non-empty string, or one that rejects only when suspended is strictly true. One single use that a missing or blank value could turn into a throw or a rejection breaks this condition: a non-null assertion (such as policy.burstLimit!), a cast (such as as number), a method call on the value without a guard, a rejection because the field is missing, treating a missing suspended as suspended, or comparing a count with the value after a guard that rules out only undefined and null, since JavaScript compares an empty string as 0.'
+  - id: flags-default-off
+    description: Every feature flag defaults to off.
+    error: Register the flag with the default false, and turn it on in an environment through FLAGS.
+    grep: '\btrue\b|env'
+    decide: 'Nothing in this file turns a feature flag on by default: every entry of a flag registry (an object that maps flag names to their default values, read by isEnabled) has the default false, and isEnabled has no fallback value for FLAGS, or other default, that turns a flag on. Turning a flag on at run time through the FLAGS environment variable is not a default. A file with no flag registry and no isEnabled function passes.'

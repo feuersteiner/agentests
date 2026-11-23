@@ -1,0 +1,26 @@
+[
+	{
+		"projectId": "harbour-taxis",
+		"dailyLimit": 250000,
+		"burstLimit": 40,
+		"region": "eu-west",
+		"maxPerMinute": 900,
+		"suspended": false
+	},
+	{
+		"projectId": "fieldnote",
+		"dailyLimit": 20000,
+		"burstLimit": 10,
+		"region": "us-east",
+		"maxPerMinute": 120,
+		"suspended": false
+	},
+	{
+		"projectId": "loop-cycling",
+		"dailyLimit": 60000,
+		"burstLimit": 15,
+		"region": "eu-west",
+		"maxPerMinute": 300,
+		"suspended": false
+	}
+]
