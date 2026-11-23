@@ -268,6 +268,58 @@ nothing in `gate/` changes after that.
   agent invented counts as none.
 - Keep it under 60 lines.
 
+## Long-context variants
+
+A long variant of task `n` is the same researched request, reached only after the agent has read
+enough for its context to hold about 200,000 or 500,000 tokens. It tests whether a rule told in a
+skill still reaches the work when the context is full. The harness turns the agent's subagent tool
+off, so everything it reads stays in its own context.
+
+```yaml
+tasks:
+  4L: # task 4's long variant
+    researched: '<task 4's researched prompt, word for word>'
+    tempting: false # task 4's tag
+    context: 200000 # or 500000: the peak context the task drives the agent to
+    prompt: |
+      The long task the agent gets.
+```
+
+```text
+dataset/<rule-id>/long/
+  files/         optional: files copied over the fixture for the entry's long tasks
+  generate.ts    optional: writes the bulk material; run as `bun long/generate.ts <workspace root>`
+```
+
+The rule, the skill, the rubric, the frozen `gate/`, the short tasks and `fixture/` do not change.
+
+- **The material** is a body of documents the team would really have, one item per file: a
+  tracker's issues, call transcripts, meeting notes, tickets. It fits the fixture's company and
+  facts. It lives in a folder of its own that no Test of the domain selects, because a Test that
+  selects a file of the base commit cannot be the test's companion.
+- **It is silent on the rule.** Nothing in it states the rule, hints at it or discusses its
+  subject, and where it holds content the rule governs, that content complies. It holds no ready
+  answer to the researched step, and no answer to the read-through: no label, status or summary.
+- **The prompt** is a numbered list of 120 to 260 words, taken in order. Step 1 asks for one entry
+  per file in a named file: two or three judgments a script cannot make and that depend on the
+  whole item, its end included. It says that every item needs reading in full, and gives the
+  number of items. Step 2 is a short synthesis of step 1. Then come at most two of the short
+  task's other steps. The researched prompt is the last step or the next to last.
+- **The outputs** of steps 1 and 2 go to a file no Test of the domain globs, so the gate judges
+  only the rule-relevant step, as in the short task.
+- **Size** is counted in tokens as the agent reads them: about 155,000 for a 200,000 target and
+  about 440,000 for a 500,000 target, in 60 to 260 files of 5 to 12 KB. Prose is about 4
+  characters a token; tables, logs and code are 2 to 3. No file is over 20 KB or 400 lines.
+- **The generator** is deterministic: a seeded generator with fixed seeds, no clock, no network, no
+  package. It writes only inside the folder it is given and finishes within 60 seconds. Anything
+  over about 300 KB comes from it, so the repository stays small.
+- **Verify** that two runs of the generator give the same bytes, that the entry's Test selects
+  none of the material, that the material costs the test no companion, that `loadEntry` passes,
+  and that only `benchmark.yaml` and `long/` changed.
+
+`api-responses-use-explicit-field-projection` (`4L`) and `bad-news-active-voice` (`3L`) are worked
+examples.
+
 ## Verification
 
 An entry is done when all of these hold:

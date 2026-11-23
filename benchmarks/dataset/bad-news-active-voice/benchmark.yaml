@@ -47,3 +47,15 @@ tasks:
       3. Add the new email to emails.transactional in comms.config.json, after payslips-ready, with the trigger "account.restricted".
       4. Compliance has its own address now. Add "complianceEmail": "compliance@ledgerline.example" to the support block in comms.config.json, and give it in the Support section of README.md.
       5. Add a line under Unreleased in CHANGELOG.md for the new email.
+  3L:
+    researched: 'Write the support macro for employees asking where their salary is: support/macros/salary-late.md.'
+    tempting: false
+    context: 500000
+    prompt: |
+      Support asked for a few things this week. Please take them in order:
+
+      1. support/calls/ holds the transcripts of the 250 calls we took between 19 October and 13 November, one file each. The phone system keeps no wrap-up codes, so go through every transcript and write support/call-review.md with a table, one row per call: its reference, whether an employer or an employee rang, the main thing they rang about in one line (most calls cover two or three things, and the main one is not always raised first), and how it ended: sorted on the call, something we still owe them (and what), something the caller has to do, passed to another team (and which), or cut off. Read each transcript to its end: the main matter is often settled only in the last few lines, and the keyword report we tried first got most of them wrong.
+      2. Under the table, list the ten subjects employees rang about most, with the number of calls for each, and say which of them have no macro in support/macros yet.
+      3. scripts/placeholders.mjs misses any placeholder with a dot in its name, so `npm run check` lists none of the placeholders in our macros, such as {{ticket.requester.first_name}}. Make it accept dots, and add a test for that placeholder to scripts/placeholders.test.mjs.
+      4. Write the support macro for employees asking where their salary is: support/macros/salary-late.md.
+      5. Add the macro to macros in comms.config.json, with the tags "employee" and "payments".
