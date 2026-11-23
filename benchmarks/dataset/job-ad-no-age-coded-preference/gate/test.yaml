@@ -1,0 +1,20 @@
+version: 1
+id: job-ad-no-age-coded-preference
+title: No age-coded or other protected-group preference in job adverts
+description: Job adverts, job posts and shared advert sections show no preference for, and do not discourage, applicants by age or another protected characteristic, and do not cap years of experience.
+select:
+  glob: ['hiring/adverts/**/*.md', 'hiring/roles/**/*.md', 'hiring/social/**/*.md']
+assert:
+  - id: no-age-preference
+    description: No wording that prefers or discourages applicants by age, or describes the team by its age.
+    error: Drop wording about age, graduation or generation, and describe the team by its work and ways of working; ask for the skills the job needs instead.
+    decide: 'This question is only about age. The text shows no preference for applicants of a particular age and has no wording that would put off older or younger people from applying. It breaks this if it asks for, prefers or especially welcomes recent or new graduates, school leavers, people fresh out of university or a "digital native"; describes the person wanted, or the team, as young, youthful or "not set in their ways"; names a generation such as Gen Z or millennials, or an age or age range; says the team is young, in its twenties, or mostly joined straight from university; or calls applicants overqualified. These are allowed and do not break it: a job level in a title, such as "Junior Product Designer" or "Senior Engineer"; a minimum number of years of experience; skills with TikTok, social media or any other tool; and describing the work, its pace, the team''s size, its habits or that it is international. A text that says nothing about the age of applicants or of the team meets this condition.'
+  - id: no-experience-cap
+    description: No upper limit on years of experience.
+    error: State experience as a minimum or as skills, never as a maximum or a range with an upper end.
+    grep: '[Yy]ear|YEAR|[Yy]rs\b|YRS|[Dd]ecade|[Mm]onth'
+    decide: 'The text puts no upper limit on how many years of experience an applicant may have. It breaks this if it asks for or prefers a maximum, such as "no more than 5 years", "up to 3 years of experience" or "2-4 years max", or a range of years with an upper end, such as "2 to 4 years of experience" or "3-5 years in marketing", or asks that applicants graduated no more than a certain number of years ago. These do not break it: a minimum, such as "3+ years" or "at least two years"; asking for skills, results or a portfolio without a number of years; and numbers of years that are not the applicant''s experience, such as the company''s age, a contract''s length, a date or a salary per year. A text that never limits an applicant''s years of experience meets this condition.'
+  - id: no-other-protected-preference
+    description: No wording that prefers or discourages applicants by sex, origin, religion, disability or another protected characteristic.
+    error: Refer to the candidate as "you" or "they", ask for language skills as a level of fluency, and state only the abilities the work needs.
+    decide: 'This question is not about age. The text shows no preference for, and has no wording that would put off, applicants because of their sex, gender identity, sexual orientation, pregnancy or family plans, race, colour, national origin, religion, disability or genetic information. It breaks this if, for example, it refers to the wanted candidate only as "he" or only as "she", or with a gendered word such as "salesman", "guy", "girl" or "one of the lads"; asks for a native speaker, a nationality or a place of birth; asks that applicants have no young children or no plans to start a family; or asks for physical abilities or health that the work it describes does not need. These do not break it: addressing applicants as "you" or "they"; a language skill stated as a level of fluency; saying the team is international or diverse; and a statement that the company welcomes applicants of every background or offers adjustments. A text that says nothing about these characteristics meets this condition.'

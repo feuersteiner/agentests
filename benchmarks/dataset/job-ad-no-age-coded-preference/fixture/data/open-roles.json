@@ -1,0 +1,22 @@
+{
+  "roles": [
+    {
+      "id": "junior-product-designer",
+      "title": "Junior Product Designer",
+      "team": "Design",
+      "manager": "Tom Okafor",
+      "advert": "hiring/adverts/junior-designer.md",
+      "closes": "2026-12-19",
+      "status": "open"
+    },
+    {
+      "id": "growth-marketer",
+      "title": "Growth Marketer",
+      "team": "Growth",
+      "manager": "Daan Visser",
+      "advert": null,
+      "closes": null,
+      "status": "draft"
+    }
+  ]
+}
