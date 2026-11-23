@@ -1,0 +1,9 @@
+{
+  "name": "mapleform-content",
+  "version": "4.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test"
+  }
+}

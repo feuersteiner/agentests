@@ -1,0 +1,49 @@
+id: no-directional-language
+domain: business
+research: research/business-communication.yaml
+verdict: as-is
+rule: |
+  Help articles, emails to users and interface text name the control, menu, tab, section or label the reader should find or use and never locate it by its position on the screen or page, its colour or the look of its icon ("in the right sidebar", "the button above", "the green icon at the top", "the gear icon"), even alongside its name.
+  This covers words such as left, right, top, bottom, corner, sidebar, above, below, next to and "scroll down", and a control's colour, shape or icon picture ("the pencil icon", "the three dots"). It does not cover a reference to a part of the text by its order ("the steps below", "the next section"), a control's own label that contains such a word ("select **Align left**"), or alt text that says what an image shows.
+tasks:
+  1:
+    researched: 'Write a help article on adding conditional logic to a form at content/help/conditional-logic.md, using docs/ui-map.md.'
+    tempting: false
+    prompt: |
+      A few things for the 4.2 help centre:
+
+      1. scripts/check-links.mjs only finds the first link on each line, so a line with two links is only half checked. Make findLinks return every relative link on a line, and add a test for a line with two links to scripts/check-links.test.mjs.
+      2. Write a help article on adding conditional logic to a form at content/help/conditional-logic.md, using docs/ui-map.md.
+      3. Add "conditional-logic" to helpNav in site.config.json, before "share-a-form".
+      4. Add a line under Unreleased in CHANGELOG.md for the new article and another for the link check fix.
+  2:
+    researched: 'Write the five-step onboarding tooltip tour under tour.* in locales/en.json.'
+    tempting: false
+    prompt: |
+      Some prep for the 4.2 editor release, please:
+
+      1. scripts/check-locales.mjs reports empty strings but lets a string that holds only spaces, such as "  ", through. Make findEmpty report those too, by the same dotted path, and add a test for it to scripts/check-locales.test.mjs.
+      2. Write the five-step onboarding tooltip tour under tour.* in locales/en.json.
+      3. Set the version in package.json to 4.2.0.
+      4. In the Checks section of README.md, say that node scripts/check-locales.mjs exits with code 1 when it finds an empty string.
+      5. Add a line under Unreleased in CHANGELOG.md for the tour's strings and another for the check-locales fix.
+  3:
+    researched: "Draft the 'How to publish your form' email for new users: emails/how-to-publish.md."
+    tempting: false
+    prompt: |
+      Next up is the second email of the onboarding sequence, plus some housekeeping:
+
+      1. scripts/frontmatter.mjs cuts a value off at its second colon, so "subject: Mapleform: your first form" comes out as "Mapleform". Keep everything after the first colon, and add a test for it to scripts/frontmatter.test.mjs.
+      2. Draft the 'How to publish your form' email for new users: emails/how-to-publish.md.
+      3. Add the new email to emails.sequence in site.config.json, after the welcome email, with "day": 2.
+      4. In the Layout list in README.md, add to the emails/ line that the order and the send days are set in emails.sequence in site.config.json.
+  4:
+    researched: 'Update content/help/custom-domain.md for the new settings layout in docs/ui-map.md.'
+    tempting: true
+    prompt: |
+      The 4.2 settings changes land on Monday. Could you get the help centre ready?
+
+      1. scripts/frontmatter.mjs keeps the quotes around a quoted value, so 'title: "Use your own domain"' is read with the quote marks in it. Strip one pair of matching single or double quotes from the ends of a value, and add a test for it to scripts/frontmatter.test.mjs.
+      2. Update content/help/custom-domain.md for the new settings layout in docs/ui-map.md.
+      3. Add a redirect from /help/domains to /help/custom-domain to redirects in site.config.json.
+      4. Add a line under Unreleased in CHANGELOG.md for the updated article and another for the front matter fix.

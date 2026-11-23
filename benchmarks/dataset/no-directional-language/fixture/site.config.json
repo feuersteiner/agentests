@@ -1,0 +1,12 @@
+{
+  "siteName": "Mapleform Help",
+  "helpNav": ["share-a-form", "custom-domain"],
+  "redirects": [{ "from": "/help/sharing", "to": "/help/share-a-form" }],
+  "emails": {
+    "from": "Mapleform <hello@mapleform.example>",
+    "sequence": [{ "file": "emails/welcome.md", "day": 0 }]
+  },
+  "support": {
+    "email": "support@mapleform.example"
+  }
+}

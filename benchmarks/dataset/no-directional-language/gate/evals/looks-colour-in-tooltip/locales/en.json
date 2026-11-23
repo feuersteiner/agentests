@@ -1,0 +1,10 @@
+{
+  "editor": {
+    "publish": "Publish",
+    "hints": {
+      "firstField": "Add a field to start your form.",
+      "readyToPublish": "Looking good. When you are ready, select the green Publish button.",
+      "unsaved": "You have changes that are not published yet."
+    }
+  }
+}

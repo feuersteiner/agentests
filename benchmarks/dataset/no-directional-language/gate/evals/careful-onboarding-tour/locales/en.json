@@ -1,0 +1,77 @@
+{
+  "nav": {
+    "forms": "Forms",
+    "responses": "Responses",
+    "integrations": "Integrations",
+    "settings": "Settings",
+    "account": "Account"
+  },
+  "editor": {
+    "fieldsPanel": "Fields",
+    "settingsPanel": "Settings",
+    "preview": "Preview",
+    "share": "Share",
+    "publish": "Publish",
+    "logic": {
+      "tab": "Logic",
+      "addRule": "Add rule",
+      "deleteRule": "Delete rule",
+      "when": "When",
+      "then": "then",
+      "empty": "No rules yet. Add a rule to show, hide or skip to a field depending on an answer."
+    }
+  },
+  "settings": {
+    "tabs": {
+      "general": "General",
+      "members": "Members",
+      "domains": "Domains",
+      "billing": "Billing"
+    },
+    "domains": {
+      "add": "Add domain",
+      "checkDns": "Check DNS",
+      "more": "More",
+      "remove": "Remove",
+      "status": {
+        "pending": "Pending DNS",
+        "verifying": "Verifying",
+        "active": "Active"
+      }
+    }
+  },
+  "tour": {
+    "controls": {
+      "next": "Next",
+      "back": "Back",
+      "skip": "Skip tour",
+      "done": "Start building"
+    },
+    "steps": {
+      "fields": {
+        "title": "Fields",
+        "body": "Every field type you can add, grouped as Basic, Choice and Advanced. Drag a field onto your form, or select it to add it at the end."
+      },
+      "canvas": {
+        "title": "Your form",
+        "body": "This is the form as respondents will see it. Select any field to edit its label, help text and settings."
+      },
+      "settings": {
+        "title": "Field settings",
+        "body": "Settings for the selected field, in three tabs: Field, Logic and Style. Use Logic to show, hide or skip fields depending on an answer."
+      },
+      "preview": {
+        "title": "Preview",
+        "body": "Select Preview to fill in the form as a respondent would, with your logic rules running."
+      },
+      "publish": {
+        "title": "Publish",
+        "body": "When the form is ready, select Publish and choose who can respond. You can keep editing after it is live."
+      }
+    }
+  },
+  "errors": {
+    "publishNoFields": "Add at least one field before you publish this form.",
+    "domainNotFound": "We could not find a CNAME record for this domain yet. DNS changes can take up to 48 hours."
+  }
+}
