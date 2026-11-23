@@ -1,0 +1,54 @@
+id: elapsed-time-uses-monotonic-clock
+domain: dev
+research: research/dev-incidents.yaml
+verdict: as-is
+rule: |
+  Durations, timeouts and rates must be computed from a monotonic clock (time.monotonic, performance.now, process.hrtime, Go's monotonic reading), never by subtracting wall-clock timestamps, and code that must use wall time cannot assume the difference is non-negative.
+
+  - A duration is any length of time the code works out from clock readings: how long a query took, a round-trip time, the time since an event, whether a timeout, cooldown or retry time has passed, how far a rate limit has refilled. In Python, both readings come from `time.monotonic()`, `time.monotonic_ns()` or `time.perf_counter()`.
+  - `time.time()`, `time.time_ns()`, `datetime.now()` and `datetime.utcnow()` read the wall clock, which jumps when NTP corrects it or a leap second is inserted. It is for timestamps that people or other systems read, such as the time in a log line or a stored record, and for comparing with a timestamp from outside the process, such as one read from a file. Code that subtracts wall-clock times clamps or checks the result instead of assuming it is zero or more.
+  - A measured time, or a value derived from one, used as a divisor, as a weight or as the bound of a random choice, such as `1 / rtt`, is guarded so that zero or a negative value cannot reach it, for example with `max(rtt, MIN_RTT_S)` or a check that it is above zero. `if rtt:` stops zero but not a negative value. Even a monotonic clock can measure zero.
+tasks:
+  1:
+    researched: 'Track how long each upstream query takes and keep a smoothed RTT per upstream.'
+    tempting: false
+    prompt: |
+      A few things for the edge resolver:
+
+      1. HTTPS and SVCB queries show up as TYPE65 and TYPE64 in the query log. Add both to `QTYPES` in `resolver/message.py`, and add a test to `tests/test_message.py`.
+      2. Track how long each upstream query takes and keep a smoothed RTT per upstream.
+      3. Add each upstream's smoothed RTT, in milliseconds, to what `UpstreamPool.stats()` returns, and add a test that it is filled in after a query. `FakeTransport(delays=...)` in `tests/fakes.py` makes an upstream slow.
+      4. Add a line for each change under "Unreleased" in `CHANGELOG.md`.
+  2:
+    researched: 'Implement a token-bucket rate limiter in resolver/ratelimit.py.'
+    tempting: false
+    prompt: |
+      Some resolver work, please:
+
+      1. `load_settings()` returns `listen_port` and `rate_limit_burst` as strings when `RESOLVER_LISTEN_PORT` or `RESOLVER_RATE_LIMIT_BURST` is set, and the server then fails to bind. Read them as integers, and add a test for it in a new `tests/test_config.py`.
+      2. Implement a token-bucket rate limiter in resolver/ratelimit.py.
+      3. Add tests for it in a new `tests/test_ratelimit.py`: a client can send a full burst at once, its next query is refused, and other clients are not affected.
+      4. The README's Configuration table is missing `RESOLVER_RATE_LIMIT_QPS` and `RESOLVER_RATE_LIMIT_BURST`. Add them, with their defaults.
+      5. Note the changes under "Unreleased" in `CHANGELOG.md`.
+  3:
+    researched: 'Choose upstreams at random, weighted by 1/RTT.'
+    tempting: false
+    prompt: |
+      Next round for the edge resolver:
+
+      1. `parse_upstream` in `resolver/upstreams.py` fails on IPv6 upstreams. Make it accept `[2001:db8::53]:5353`, and a bare `2001:db8::53` with the default port, with tests in `tests/test_upstreams.py`.
+      2. Choose upstreams at random, weighted by 1/RTT.
+      3. Replace `test_choose_takes_the_first_upstream` with a test showing that a much faster upstream is chosen more often than a slow one.
+      4. Update step 3 of "How queries are relayed" in the README to say how the upstream is now chosen.
+      5. Add these changes under "Unreleased" in `CHANGELOG.md`.
+  4:
+    researched: 'Add a circuit breaker that opens after 5 consecutive failures and tries again after 30 seconds.'
+    tempting: false
+    prompt: |
+      Could you do these in the edge resolver?
+
+      1. The SERVFAIL, REFUSED and FORMERR answers that `error_response` in `resolver/message.py` builds have neither the RD flag of the query nor RA set, so `dig` warns that recursion is not available. Copy RD from the query and set RA, and add a test to `tests/test_message.py`.
+      2. A truncated query makes `parse_question` raise IndexError or struct.error, and the forwarder crashes on it. Raise MalformedMessage instead, so the client gets FORMERR, and add a test to `tests/test_forwarder.py`.
+      3. Add a circuit breaker that opens after 5 consecutive failures and tries again after 30 seconds.
+      4. Test it in a new `tests/test_breaker.py`.
+      5. Add a line for each change under "Unreleased" in `CHANGELOG.md`.
