@@ -238,8 +238,10 @@ reused as fixture or skill text; [AGENTS.md](AGENTS.md) has the rules.
 rule id, in the order of the four rule files. Each entry names the rule's `id`, `file` and `domain`,
 gives a `verdict`, and says in `how` which file the Test judges or why the rule is dropped; `notes`
 records caveats, such as a rule that needs more than three questions or a compliant path the gate
-cannot see. The verdicts apply the distinction between standing policy and case facts in the rules
-of the comparison:
+cannot see. Where `how` or `notes` say that some of a rule's tasks cannot be judged from one file,
+`usable_tasks` lists the tasks that can, by their 1-based position in the rule's `tasks` list;
+without it, all four tasks are usable. The verdicts apply the distinction between standing policy
+and case facts in the rules of the comparison:
 
 | Verdict          | Meaning                                                                                                                                                                                                                                                                                   |
 | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -261,6 +263,20 @@ The `summary` block at the top of the file holds the counts, computed from the e
 That leaves 124 usable rules: 60 dev and 64 business. The two dropped rules are
 `posthog-update-existing-docs`, which relates a code change to the doc that covers it and so needs
 two files, and `testimonial-results-typical`, the duplicate of `testimonials-show-typical-results`.
+
+A usable test pairs a usable rule with one of its usable tasks. Five usable rules carry
+`usable_tasks`, and the `notes` of each names the tasks it leaves out:
+
+| Rule                                           | Usable tasks | Left out                                    |
+| ---------------------------------------------- | ------------ | ------------------------------------------- |
+| `cancelled-request-discards-pooled-connection` | 1, 3         | 2 and 4, the handler tasks                  |
+| `api-responses-use-explicit-field-projection`  | 1, 3, 4      | 2, the website and phone fields             |
+| `apologise-only-when-at-fault`                 | 2, 3, 4      | 1, the replies to three tickets             |
+| `forecast-commit-needs-evidence`               | 1, 2, 4      | 3, the forecast call notes                  |
+| `po-is-not-booked-arr`                         | 1, 2         | 3 and 4, the Slack post and the leaderboard |
+
+That leaves 489 usable tests, the summary's `usable_tests`: four tasks for each of the 124 usable
+rules, less the seven left out.
 
 ### The skills survey
 
