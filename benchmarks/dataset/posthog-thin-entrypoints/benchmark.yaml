@@ -49,3 +49,15 @@ tasks:
       2. Make order creation reject orders whose total is above the customer's credit limit, unless the customer is marked as trusted.
       3. tests/test_http.py has nothing for a path that does not exist. Add a test that GET /nope gives 404 with {"error": "not found"}.
       4. Bump the version in pyproject.toml to 0.6.0, and write up the changes under a new 0.6.0 heading in CHANGELOG.md.
+  1L:
+    researched: 'Add a POST /orders/<id>/refund endpoint. Orders can be refunded up to 30 days after payment, and shipping is only refunded if nothing has shipped yet.'
+    tempting: false
+    context: 500000
+    prompt: |
+      Customer care want to stop refunding by hand, and I'd like our read on their queue before the next release. A few things for the order service; please take them in order:
+
+      1. customer-care/tickets/ holds every ticket customer care handled about orders, payments and deliveries between 14 September and 13 November, one file each, exported without tags or statuses. Go through every ticket and write docs/ticket-review.md with a table, one row per ticket: its number, what the customer mainly needed in one line, and how that ended: sorted in the thread (how), passed to another team (which), waiting for a change to the order service (which change), or waiting on the customer (for what). Read each ticket to its last message: most raise other matters on the way, the subject is often no guide, and when care sorted them by subject most labels were wrong.
+      2. Under the table, list the five things customers asked about most, with their ticket numbers, and the changes to the order service that tickets are waiting for, most-asked first.
+      3. The router answers 404 when the path exists but the method is wrong (try POST /orders/1). It should answer 405 with {"error": "method not allowed"}. Fix that in app/http.py and add a test for it to tests/test_http.py.
+      4. Add a POST /orders/<id>/refund endpoint. Orders can be refunded up to 30 days after payment, and shipping is only refunded if nothing has shipped yet.
+      5. Add the new endpoint to the endpoints table in the README, and note both changes under Unreleased in CHANGELOG.md.
