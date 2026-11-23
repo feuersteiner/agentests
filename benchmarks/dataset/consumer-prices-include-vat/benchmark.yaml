@@ -54,3 +54,15 @@ tasks:
       2. Write three Instagram ad captions with prices in content/ads/instagram.md.
       3. Add the new file to the Layout list in README.md, and add a line for it to CHANGELOG.md under 2026-11.
       4. Our Instagram handle changed from @snapframe to @snapframe.uk. Update docs/campaigns.md.
+  1L:
+    researched: 'Write the pricing page content/pricing.md from data/prices.yaml.'
+    tempting: false
+    context: 500000
+    prompt: |
+      A few things before the pricing page goes live. Support also asked for our read on their queue. Please take them in order:
+
+      1. support/tickets/ holds every ticket customers opened with support between 5 October and 13 November, one file each; the help desk export lost the tags. Go through every ticket and write support/ticket-review.md with a table, one row per ticket: its number, what it is mainly about (classic prints, framed prints, canvas, photo books, mugs, delivery, or the website and account), what the customer mainly wanted in one line, and how that ended: sorted in the thread (how), something we still owe them (what), something they have to do (what), passed to the lab or another team (which), or they stopped replying. Read each ticket to its end: most raise several things, the subject line is often no guide, and the outcome is usually in the last messages. The keyword tagger we tried got most of them wrong.
+      2. Under the table, list the five things customers wrote in about most, with their ticket numbers, and every ticket where we still owe the customer something.
+      3. scripts/check_content.py crashes with an IndexError on a page that has no front matter at all. Make it report "no front matter" for that page instead, and add a test for it in tests/test_check_content.py.
+      4. Write the pricing page content/pricing.md from data/prices.yaml.
+      5. Add the new page to the Layout list in README.md, and add a line for it to CHANGELOG.md under 2026-11.
