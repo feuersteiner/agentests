@@ -1,0 +1,22 @@
+version: 1
+id: outbound-timeout-within-caller-deadline
+title: Outbound calls stay within the caller's deadline
+description: Every call a route or client makes to another service, retries included, has a timeout taken from the time left before the request's deadline, never a fixed number of its own.
+select:
+  glob: ['src/routes/**/!(*.test|*.spec).ts', 'src/clients/**/!(*.test|*.spec).ts']
+  grep: 'fetch\(|[Dd]eadline|[Tt]imeout|AbortSignal|[Rr]etr|axios|undici|\bgot\(|https?\.(request|get)\('
+assert:
+  - id: call-timeout-from-deadline
+    description: Every network request the file makes has a timeout taken from the request's deadline.
+    error: Give the call a signal built from the time left, AbortSignal.timeout(remainingMs(deadline)), capped lower with Math.min if this service should fail sooner; take the deadline as a parameter instead of a fixed number or a deadline of your own.
+    grep: 'fetch\(|axios|undici|\bgot\(|https?\.(request|get)\('
+    decide: 'Every network request to another service that this file makes itself, such as a call to fetch, is given an abort signal or timeout whose length comes from the request deadline. That is the case when the length is computed from a deadline the function receives, as remainingMs(deadline) (which returns deadline minus Date.now(), never below zero) or deadline - Date.now(), optionally capped lower with Math.min or combined with a shorter AbortSignal.timeout through AbortSignal.any; and also when the length or the signal is a parameter the function receives from its caller, whatever its name (such as timeoutMs or signal), because the caller then bounds it. It fails when such a request has no signal or timeout at all, when its only timeout is a fixed number of milliseconds or a constant defined in the code (however small), when Math.max lets the timeout exceed the time left, or when the file makes up its own deadline from Date.now() plus a fixed number. A file that makes no network request itself passes.'
+  - id: retries-within-deadline
+    description: Retries take each attempt's timeout from the time left and stop at the deadline.
+    error: Compute remainingMs(deadline) again for every attempt, and before each backoff wait check that the wait and another attempt still fit in the time left; otherwise stop and throw.
+    grep: '[Rr]etr|[Aa]ttempt|[Tt]ries\b|\bwhile\b|\bfor\s*\('
+    decide: 'Every retry in this file (a loop, recursion or helper that sends a network request again after a failed attempt) stays inside the request deadline. That holds when both are true: (1) each attempt''s timeout is the time left at that attempt, because remainingMs(deadline) or deadline - Date.now() is evaluated anew for every attempt, or because all attempts share one abort signal created from the time left, which fires when the deadline passes; and (2) before each wait between attempts, the code compares the time left with the wait, or checks whether the deadline has passed, and stops retrying when the time is up. It fails when attempts get a fixed timeout, when a number of milliseconds is computed once before the loop and each attempt gets a new timeout of that full length, or when the code waits and tries again without looking at the time left. A file with no retries passes.'
+  - id: deadline-passed-to-clients
+    description: Code that calls a client hands it the request's deadline, not a number of its own.
+    error: Pass req.deadline, or the time left computed from it, to the client instead of a fixed timeout or a new deadline.
+    decide: 'Every call this file makes to one of the service''s own functions that takes a deadline, a timeout or an abort signal for the outbound work it does, such as a route calling a client function, passes the request''s own deadline (req.deadline, or a deadline parameter the calling function received) or a time left or abort signal computed from it, possibly capped lower with Math.min. It never passes a fixed number of milliseconds, a constant, or a new deadline made from Date.now() plus a fixed number. Only the arguments of such calls are judged: built-in calls such as fetch, AbortSignal.timeout, AbortSignal.any and setTimeout, and the parameters that this file''s own functions declare, are not. A file that makes no such call passes.'
