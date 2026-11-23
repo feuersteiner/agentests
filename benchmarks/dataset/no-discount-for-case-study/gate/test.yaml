@@ -1,0 +1,22 @@
+version: 1
+id: no-discount-for-case-study
+title: No discount for a case study
+description: Proposals, deal notes, customer emails and programme pages never trade a price concession for a case study, testimonial, logo use or reference call, openly or by implication.
+select:
+  glob: ['proposals/**/*.md', 'notes/**/*.md', 'outbox/**/*.md', 'sales/**/*.md']
+assert:
+  - id: no-concession-for-publicity
+    description: No price concession is offered, proposed or hinted at in return for publicity.
+    error: 'Keep publicity apart from price: ask for a case study, logo or reference, if at all, with the price unchanged either way.'
+    grep: '[Cc]ase[- ]?stud|CASE[- ]?STUD|[Tt]estimonial|TESTIMONIAL|[Ll]ogo|LOGO|[Rr]eferen|REFEREN|[Ss]tor(y|ies)|STOR(Y|IES)|[Qq]uote|[Rr]eview|[Ee]ndors|[Aa]dvoca|[Cc]hampion|[Pp]ublic|PUBLIC|[Pp]ress|\bPR\b|[Ww]ebinar|[Ss]peak|[Tt]alk|[Pp]anel|[Pp]odcast|[Cc]o-?market|[Cc]o-?brand|[Ss]howcase|[Ss]potlight|[Ff]eatur|[Ww]ebsite|[Mm]arketing|[Aa]nnounce|[Nn]ame|[Vv]ouch|[Rr]ecommend|[Ss]hare|[Ss]ocial|[Ll]inked[Ii]n|[Bb]log|[Vv]ideo'
+    decide: 'The text does not offer, propose or hint at a price concession that a customer would get for agreeing to publicity. Publicity means a case study or customer story, a testimonial or quote, use of the customer''s name or logo, or reference calls with prospects. A price concession means a lower price or extra discount, a credit, free months or seats, a paid service at no charge, or a waived or smaller price increase. It counts when the concession is offered in return for publicity, on condition of it or as a thank-you for it, and when the text suggests that agreeing to publicity could improve the price. A text that asks for publicity while keeping the price the same, or that never connects publicity with price, passes.'
+  - id: no-publicity-in-trade-lists
+    description: No give-get list or trade table pairs publicity with a price concession.
+    error: Take the case study, logo or reference out of the give-get list and ask for it separately, with the price unaffected.
+    grep: '[Cc]ase[- ]?stud|CASE[- ]?STUD|[Tt]estimonial|TESTIMONIAL|[Ll]ogo|LOGO|[Rr]eferen|REFEREN|[Ss]tor(y|ies)|STOR(Y|IES)|[Qq]uote|[Rr]eview|[Ee]ndors|[Aa]dvoca|[Cc]hampion|[Pp]ublic|PUBLIC|[Pp]ress|\bPR\b|[Ww]ebinar|[Ss]peak|[Tt]alk|[Pp]anel|[Pp]odcast|[Cc]o-?market|[Cc]o-?brand|[Ss]howcase|[Ss]potlight|[Ff]eatur|[Ww]ebsite|[Mm]arketing|[Aa]nnounce|[Nn]ame|[Vv]ouch|[Rr]ecommend|[Ss]hare|[Ss]ocial|[Ll]inked[Ii]n|[Bb]log|[Vv]ideo'
+    decide: 'The text has no give-get list, trade table or negotiation plan that lists a case study, customer story, testimonial, logo use or reference call as something to get in return for a price concession (a discount, a credit, free months or seats, a paid service at no charge, or a waived or smaller price increase). That includes pairing the two on one line or row, and listing publicity among the gets of a list whose gives include a price concession. Publicity listed only as a separate request that does not affect the price passes, and so does a text with no such list.'
+  - id: programme-price-not-for-publicity
+    description: A programme that lowers the price does not expect publicity from its members.
+    error: Drop the publicity commitment from the programme, or say that taking part in publicity is optional and does not change the price.
+    grep: '[Cc]ase[- ]?stud|CASE[- ]?STUD|[Tt]estimonial|TESTIMONIAL|[Ll]ogo|LOGO|[Rr]eferen|REFEREN|[Ss]tor(y|ies)|STOR(Y|IES)|[Qq]uote|[Rr]eview|[Ee]ndors|[Aa]dvoca|[Cc]hampion|[Pp]ublic|PUBLIC|[Pp]ress|\bPR\b|[Ww]ebinar|[Ss]peak|[Tt]alk|[Pp]anel|[Pp]odcast|[Cc]o-?market|[Cc]o-?brand|[Ss]howcase|[Ss]potlight|[Ff]eatur|[Ww]ebsite|[Mm]arketing|[Aa]nnounce|[Nn]ame|[Vv]ouch|[Rr]ecommend|[Ss]hare|[Ss]ocial|[Ll]inked[Ii]n|[Bb]log|[Vv]ideo'
+    decide: 'The text does not describe a customer programme, such as a design partner, early adopter, founding customer or pilot programme, whose members get a lower price, discount, credit or free period and are required or expected to give a case study, testimonial, logo use or reference calls. A programme that says such publicity is optional and does not change the price passes, and so does a text that describes no programme, or a programme that gives no price concession.'
