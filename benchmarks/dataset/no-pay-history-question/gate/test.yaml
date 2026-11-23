@@ -1,0 +1,22 @@
+version: 1
+id: no-pay-history-question
+title: No pay-history questions
+description: Hiring documents never ask candidates about their current or previous pay, directly or indirectly; questions about pay expectations are allowed.
+select:
+  glob: 'hiring/**/*.md'
+assert:
+  - id: no-current-pay-question
+    description: No question about what the candidate is or was paid.
+    error: Ask what pay the candidate expects in this role instead, and share the band.
+    grep: '[Ss]alar|SALAR|[Pp]ay|PAY|[Pp]aid|[Ee]arn|[Cc]ompensat|COMPENSAT|[Cc]omp\b|\bTC\b|CTC|[Pp]ackage|[Rr]emunerat|[Ww]age|[Ii]ncome|[Bb]onus|OTE|[Cc]ommission|[Ee]quity|[Ss]tock|RSU|[Bb]enefit|[Aa]llowance|[Gg]ross|€|EUR|\$|[Bb]ase\b|[Rr]ate\b|[Mm]ak(e|ing)|[Vv]erdien|[Ll]oon|[Cc]urrent|[Pp]revious|[Ll]ast\b|[Pp]rior|[Ff]ormer|[Mm]oment|\b[Nn]ow\b'
+    decide: 'No question, form field, checklist item or instruction in the text asks the candidate, or tells a recruiter or interviewer to ask or find out, how much the candidate is paid in their current job or was paid in a previous job (base salary, bonus, commission, equity, allowances or benefits), even as an optional question.'
+  - id: no-pay-evidence
+    description: No request for proof of the candidate's pay.
+    error: Do not seek payslips, pay statements or employer confirmation of pay; use the band and the candidate's expectations.
+    grep: '[Pp]ay ?slip|[Pp]ay ?stub|[Ss]lip|[Ss]tatement|[Tt]ax|P60|W-?2|[Jj]aaropgaaf|[Ll]oonstro|[Pp]roof|[Ee]vidence|[Dd]ocument|[Vv]erif|[Rr]eferee|[Rr]eference|[Ee]mployer|[Cc]ontract'
+    decide: 'The text does not seek evidence of what the candidate is paid now or was paid before, such as a payslip, salary statement, tax document or employment contract, or confirmation of that pay from a current or previous employer or a referee.'
+  - id: no-pay-comparison
+    description: No expectations framed against current pay or what the candidate would give up.
+    error: Ask for the pay the candidate expects as a figure or range on its own.
+    grep: '[Rr]aise|[Ii]ncrease|[Bb]ump|[Uu]plift|[Jj]ump|[Ss]tep up|[Mm]ore than|[Oo]n top of|[Aa]bove|[Cc]ompar|[Rr]elative|[Pp]ercent|%|[Ww]alk(ing)? away|[Bb]ehind|[Gg]iv(e|ing) up|[Ff]orfeit|[Vv]est|[Bb]uy[- ]?out|[Mm]atch|[Bb]eat|[Cc]ounter|[Cc]urrent|[Ll]eav(e|ing)|[Ss]witch'
+    decide: 'The text does not ask about the candidate''s current pay indirectly: it does not ask what salary, bonus, equity or benefits they would give up by leaving their current job, and does not ask for their pay expectations as a raise, percentage or other step up from what they earn now.'

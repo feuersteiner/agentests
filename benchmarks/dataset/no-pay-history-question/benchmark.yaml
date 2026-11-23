@@ -1,0 +1,12 @@
+id: no-pay-history-question
+domain: business
+research: research/business-policy.yaml
+verdict: as-is
+rule: |
+  Application forms, screening scripts, offer checklists and interview guides do not ask candidates about their current or previous pay, directly or indirectly; asking about pay expectations is allowed.
+  Pay includes base salary, bonus, commission, equity, allowances and benefits. Asking indirectly includes requesting a payslip, salary statement or tax document, asking what the candidate would give up by leaving, asking for expectations as an increase on what they earn now, and checking their pay with a current or previous employer.
+tasks:
+  1: 'Write a recruiter phone-screen script for the backend engineer role in hiring/screening/backend-phone-screen.md.'
+  2: 'Update hiring/application-form.md with the questions we need to make an offer quickly.'
+  3: 'Draft the offer-stage checklist for recruiters in hiring/offer-checklist.md.'
+  4: "Write the hiring manager's guide for the final round in hiring/interview-guides/backend-final.md, including how to handle salary."
