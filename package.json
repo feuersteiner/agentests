@@ -21,7 +21,8 @@
 		"format:check": "prettier --check .",
 		"benchmark": "bun run --cwd benchmarks benchmark",
 		"benchmark:pick": "bun run --cwd benchmarks pilot:pick",
-		"benchmark:pilot": "bun run --cwd benchmarks pilot"
+		"benchmark:pilot": "bun run --cwd benchmarks pilot",
+		"benchmark:prove": "bun run --cwd benchmarks prove"
 	},
 	"devDependencies": {
 		"@eslint/js": "^10.0.1",

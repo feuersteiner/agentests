@@ -8,6 +8,7 @@
 		"check": "tsc --noEmit",
 		"pilot": "bun cli/pilot.ts",
 		"pilot:pick": "bun cli/pick.ts",
+		"prove": "bun cli/prove.ts",
 		"test": "bun test ./tests"
 	},
 	"devDependencies": {

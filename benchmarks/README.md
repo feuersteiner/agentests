@@ -316,6 +316,41 @@ nothing.
 It prints a line when each run starts and finishes, a table of the results at the end, and the
 paths of `results.json` and the archive.
 
+## Proving the Tests
+
+```sh
+bun run benchmark:prove
+```
+
+runs every dataset entry's evals on both decision models, through the same proxy and the same
+packed `core/` as a run, with the real keys. It makes decision calls only: no agent and no judge.
+Each eval runs on its own, in a folder holding the entry's Test with only that eval, with
+`npx agentests eval <rule-id>`, because `agentests eval` stops at the first error and a refusal on
+one eval would otherwise hide the rest. The evals of one entry run a few at a time.
+
+An eval's actual outcome is the Test's, `pass`, `fail` or `skip`, or `refused` when the decision
+model refused a decision, the special answer worth 0 and counted as a miss, or `error` for any
+other failure, with its message. For each entry and model it prints a table of the evals, with the
+expected and actual outcome and whether they match, under a line with the match count, the decision
+calls, tokens and cost.
+
+| Option                    | Meaning                                                   | Default                      |
+| ------------------------- | --------------------------------------------------------- | ---------------------------- |
+| `--entry <rule-id>`       | prove this entry; repeatable                              | every entry of the dataset   |
+| `--arm <arm>`             | prove on `luna` or `jev`; repeatable                      | both                         |
+| `--concurrency <n>`       | evals of one entry run side by side                       | 4                            |
+| `--dataset <folder>`      | the dataset folder, absolute or relative to `benchmarks/` | `benchmarks/dataset`         |
+| `--prices <file>`         | the prices file, absolute or relative to `benchmarks/`    | `benchmarks/prices.yaml`     |
+| `--openai-upstream <url>` | where the proxy sends Luna's decisions                    | `https://api.openai.com/v1`  |
+| `--jev-upstream <url>`    | where the proxy sends Jev's decisions                     | `https://api.typesafe.ai/v1` |
+| `--help`                  | print the options                                         |                              |
+
+It writes `<temp dir>/agentests-benchmark/prove-<time>/`, never inside the repository:
+`proof.json`, rewritten after each eval, with the repository's commit, the prices and, for each
+entry and model, the totals and each eval's `eval`, `expected`, `actual`, `matches`, `error`,
+`decisions`, `refusals`, tokens, cost and seconds; a folder per entry, model and eval with the
+eval's copy of the Test, its `output.log` and its `proxy.jsonl`; and the toolchain.
+
 ## Run artifacts
 
 This folder holds only the tests. Each invocation writes a run folder outside the repository,
@@ -396,7 +431,7 @@ supplies, and only the owner starts it.
 
 ## Status
 
-The research catalogue, `bun run benchmark:pick` and the harness exist.
+The research catalogue, `bun run benchmark:pick`, the harness and `bun run benchmark:prove` exist.
 The dataset's first entries exist and a pilot has run; the rest of the dataset is being built. No
 benchmark result is published here.
 
@@ -410,6 +445,7 @@ benchmarks/
     index.ts                       entry of bun run benchmark; runs the dataset's tests
     pick.ts                        entry of bun run benchmark:pick; picks a pilot's 3 tests
     pilot.ts                       entry of bun run benchmark:pilot; picks a pilot's 3 tests and runs them
+    prove.ts                       entry of bun run benchmark:prove; proves the Tests on their evals
   dataset/                         one folder per rule, as The dataset describes
   package.json                     the private workspace package agentests-benchmarks
   prices.yaml                      the decision models' list prices
@@ -430,9 +466,10 @@ benchmarks/
     harness.ts                     one invocation: checks, run folder, proxy, runs, results, archive
     judge.ts                       the judge's prompt, schema and command
     observe.ts                     what Git, the hook log and the transcript show after the agent
-    options.ts                     the options of the run commands
+    options.ts                     the options of the run commands and of the prove command
     pick.ts                        picks tests of different rules with a seeded random source
     prices.ts                      loads prices.yaml and prices decision usage
+    prove.ts                       runs each eval on its own on each decision model and writes proof.json
     proxy.ts                       the local decision proxy
     run.ts                         one run, from workspace to judge
     toolchain.ts                   packs and installs core/ once per invocation
@@ -444,8 +481,8 @@ benchmarks/
 
 `package.json` makes this folder a Bun workspace of the repository. Its `benchmark` script runs
 `cli/index.ts` and its `pilot` script runs `cli/pilot.ts`, both with Bun; the root
-`bun run benchmark` and `bun run benchmark:pilot` run them.
-Its `pilot:pick` script runs `cli/pick.ts`, and the
+`bun run benchmark` and `bun run benchmark:pilot` run them. Its `prove` script runs `cli/prove.ts`,
+and the root `bun run benchmark:prove` runs it. Its `pilot:pick` script runs `cli/pick.ts`, and the
 root `bun run benchmark:pick` runs that script. Its `check` script runs `tsc --noEmit`, so the root
 `bun run check` covers this folder. Its `test` script runs the suite in `tests/` with `bun test`, so
 the root `bun run test` covers it too; the suite reads the real research files and calls no model

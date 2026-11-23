@@ -2,7 +2,8 @@ import { resolve } from 'node:path';
 import { datasetDirectory } from './dataset.ts';
 import type { HarnessSettings } from './harness.ts';
 import { pricesFile } from './prices.ts';
-import { arms, gates } from './types.ts';
+import type { ProveSettings } from './prove.ts';
+import { arms, gates, isGateArm } from './types.ts';
 import type { Arm } from './types.ts';
 
 /** The options both `benchmark` and `benchmark:pilot` take, for `parseArgs`. */
@@ -89,3 +90,51 @@ export const toSettings = (values: HarnessValues): Omit<HarnessSettings, 'tests'
 	agentBudgetUsd: toPositive('agent-budget-usd', values['agent-budget-usd'], 3),
 	judgeBudgetUsd: toPositive('judge-budget-usd', values['judge-budget-usd'], 1)
 });
+
+/** The options `benchmark:prove` takes, for `parseArgs`. */
+export const proveOptions = {
+	entry: { type: 'string', multiple: true },
+	arm: { type: 'string', multiple: true },
+	concurrency: { type: 'string' },
+	dataset: { type: 'string' },
+	prices: { type: 'string' },
+	'openai-upstream': { type: 'string' },
+	'jev-upstream': { type: 'string' }
+} as const;
+
+/** What `parseArgs` returns for `proveOptions`. */
+export type ProveValues = Pick<
+	HarnessValues,
+	'arm' | 'concurrency' | 'dataset' | 'prices' | 'openai-upstream' | 'jev-upstream'
+> & { entry?: string[] };
+
+/** The prove options' help lines. */
+export const proveHelp = [
+	'  --entry <rule-id>           prove this entry; repeatable; default every entry of the dataset',
+	'  --arm <arm>                 luna or jev; repeatable; default both',
+	'  --concurrency <n>           evals of one entry run side by side; default 4',
+	'  --dataset <folder>          the dataset folder; default benchmarks/dataset',
+	'  --prices <file>             the prices file; default benchmarks/prices.yaml',
+	`  --openai-upstream <url>     where the proxy sends luna's decisions; default ${gates.luna.upstream}`,
+	`  --jev-upstream <url>        where the proxy sends jev's decisions; default ${gates.jev.upstream}`
+].join('\n');
+
+/** The settings the prove options give, every one but the entries. */
+export const toProveSettings = (values: ProveValues): Omit<ProveSettings, 'entries'> => {
+	const chosen = toArms(values.arm?.length ? values.arm : ['luna', 'jev']);
+	const gateArms = chosen.filter(isGateArm);
+	if (gateArms.length !== chosen.length)
+		throw new Error(
+			'benchmark:prove takes --arm luna or --arm jev, the arms with a decision model'
+		);
+	return {
+		arms: gateArms,
+		concurrency: toPositive('concurrency', values.concurrency, 4, true),
+		datasetDirectory: values.dataset === undefined ? datasetDirectory : resolve(values.dataset),
+		pricesFile: values.prices === undefined ? pricesFile : resolve(values.prices),
+		upstreams: {
+			luna: toUpstream('openai-upstream', values['openai-upstream'], gates.luna.upstream),
+			jev: toUpstream('jev-upstream', values['jev-upstream'], gates.jev.upstream)
+		}
+	};
+};
