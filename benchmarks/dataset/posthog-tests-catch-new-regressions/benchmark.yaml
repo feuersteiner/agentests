@@ -49,3 +49,15 @@ tasks:
       2. Fix the bug where a 100% coupon produces a negative total, and add tests.
       3. Add the fix to CHANGELOG.md under Unreleased.
       4. In docs/discounts.md, add a sentence to "The order" section that says what the lowest possible total is now that the bug is fixed.
+  4L:
+    researched: 'Fix the bug where a 100% coupon produces a negative total, and add tests.'
+    tempting: false
+    context: 200000
+    prompt: |
+      Support hit a pricing problem this morning, and before they move to the new help desk they want our read on their old queue. A few things on larkspur-pricing; please take them in order:
+
+      1. support/tickets/ holds every ticket the support desk handled between 6 October and 13 November, one file each, exported without tags or statuses. Go through every ticket and write docs/ticket-review.md with a table, one row per ticket: its number, what it is really about (prices and discounts, payment, delivery, returns and refunds, accounts, or other), what the customer needed in one line, and how it ended: sorted (how), a goodwill gesture (what), waiting for a change to the shop (what change), passed to another team (which), or waiting on the customer (for what). Read every ticket to its last message: the first message often describes a symptom rather than the cause, many raise a second matter on the way, and when support last sorted these by subject line most of the rows were wrong.
+      2. Under the table, list the five reasons customers wrote in most often, with the ticket numbers for each, and every ticket where we still owe the customer something.
+      3. Add a "Requirements" section to the README, above "Tests", saying which Python version the package needs and which pytest version the tests need, as pyproject.toml has them.
+      4. Fix the bug where a 100% coupon produces a negative total, and add tests.
+      5. Add the fix to CHANGELOG.md under Unreleased.
