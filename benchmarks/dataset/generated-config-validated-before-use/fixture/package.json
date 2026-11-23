@@ -1,0 +1,12 @@
+{
+	"name": "edge-scorer",
+	"version": "1.4.0",
+	"private": true,
+	"type": "module",
+	"description": "Scores the requests the edge proxy forwards, from a generated list of request features.",
+	"scripts": {
+		"start": "bun src/server.ts",
+		"build:features": "bun scripts/build-features.ts",
+		"test": "bun test"
+	}
+}
