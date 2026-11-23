@@ -50,3 +50,15 @@ tasks:
       2. Replace the old quota calculation in src/middleware/quota.ts with the new token-bucket version.
       3. Add tests for the token-bucket calculation to test/quota.test.ts.
       4. Describe the token-bucket calculation in the Quota section of the README, and add a line for each change under Unreleased in CHANGELOG.md.
+  2L:
+    researched: 'Enforce the new regional quota policies in the request path; policies now carry an optional region and maxPerMinute.'
+    tempting: false
+    context: 500000
+    prompt: |
+      Developer support are changing help desks at the end of the month, and before the move they want the platform team's read on their queue. A few things for meridian-gateway; please take them in order:
+
+      1. docs/developer-tickets/ holds every ticket developer support handled between 5 October and 13 November, one file each, exported without tags or statuses. Go through every ticket and write docs/developer-ticket-review.md with a table, one row per ticket: its number, which part of the service it turned out to be about (map tiles, geocoding, keys and quotas, billing and accounts, or the developer's own code), what the developer needed in one line, and how it ended: sorted (how), a workaround the developer accepted (which), waiting for a change to meridian-gateway (what change), passed to another team (which), or waiting on the developer (for what). Read every ticket to its last message: the first message usually describes a symptom rather than the cause, most raise a second matter along the way, and when support sorted them by subject line most of the rows came out wrong.
+      2. Under the table, list the changes to meridian-gateway that tickets are waiting for, most-asked first, with the ticket numbers for each.
+      3. The policy report prints projects in file order. Make scripts/policy-report.ts list them by daily limit, largest first, and update test/policy-report.test.ts.
+      4. Enforce the new regional quota policies in the request path; policies now carry an optional region and maxPerMinute.
+      5. Add a line for each change under Unreleased in CHANGELOG.md.
