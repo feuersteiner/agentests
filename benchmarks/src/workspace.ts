@@ -103,26 +103,31 @@ export const hashTest = (directory: string): Record<string, string> =>
 	);
 
 /**
- * Copy the fixture to `directory`, add the arm's overlay, commit it all as the base commit and, for a gate arm,
- * install the hook and link the toolchain.
+ * Copy the fixture to `directory`, add the arm's overlay for the entry and its companions (their skills in the
+ * skill arm, their Tests in a gate arm), commit it all as the base commit and, for a gate arm, install the hook and
+ * link the toolchain.
  */
 export const createWorkspace = async (
 	entry: DatasetEntry,
 	arm: Arm,
 	directory: string,
-	gate?: GateSetup
+	gate?: GateSetup,
+	companions: DatasetEntry[] = []
 ): Promise<Workspace> => {
 	mkdirSync(directory, { recursive: true });
 	cpSync(join(entry.directory, 'fixture'), directory, { recursive: true });
+	const rules = [entry, ...companions];
 	if (arm === 'skill')
-		cpSync(join(entry.directory, 'skill'), join(directory, '.claude', 'skills', entry.id), {
-			recursive: true
-		});
+		for (const rule of rules)
+			cpSync(join(rule.directory, 'skill'), join(directory, '.claude', 'skills', rule.id), {
+				recursive: true
+			});
 	if (isGateArm(arm)) {
 		if (!gate) throw new Error(`The ${arm} arm needs the proxy and the toolchain`);
-		cpSync(join(entry.directory, 'gate'), join(directory, '.agents', 'tests', entry.id), {
-			recursive: true
-		});
+		for (const rule of rules)
+			cpSync(join(rule.directory, 'gate'), join(directory, '.agents', 'tests', rule.id), {
+				recursive: true
+			});
 		writeFileSync(join(directory, 'agentests.config.yaml'), toConfig(arm, gate.url));
 	}
 	await git(directory, 'init', '--quiet', '--initial-branch=main');

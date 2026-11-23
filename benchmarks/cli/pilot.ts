@@ -2,7 +2,7 @@ import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { parseArgs } from 'node:util';
 import { loadTests } from '../src/catalogue.ts';
-import { loadEntry } from '../src/dataset.ts';
+import { listEntryIds, loadEntry } from '../src/dataset.ts';
 import { runBenchmark } from '../src/harness.ts';
 import type { PlannedTest } from '../src/harness.ts';
 import { harnessHelp, harnessOptions, toSettings } from '../src/options.ts';
@@ -59,7 +59,11 @@ try {
 			throw new Error(
 				`The pilot of seed ${seed} cannot run; nothing was run:\n${problems.map((problem) => `  - ${problem}`).join('\n')}`
 			);
-		await runBenchmark({ ...settings, tests, seed });
+		// Each test's companions come from the whole dataset, so every entry must load.
+		const entries = listEntryIds(settings.datasetDirectory).map((id) =>
+			loadEntry(settings.datasetDirectory, id)
+		);
+		await runBenchmark({ ...settings, entries, tests, seed });
 	}
 } catch (error) {
 	console.error(`Error: ${error instanceof Error ? error.message : String(error)}`);

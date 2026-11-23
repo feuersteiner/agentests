@@ -11,8 +11,19 @@ export type GateArm = Extract<Arm, 'luna' | 'jev'>;
 
 export const isGateArm = (arm: Arm): arm is GateArm => arm === 'luna' || arm === 'jev';
 
-/** The Claude Code models of the agent and the judge. */
-export const models = { agent: 'claude-sonnet-5-5', judge: 'claude-fable-5-2' } as const;
+/**
+ * The Claude Code models of the agent and the judge, and the judge an invocation falls back to, at its effort, for
+ * the rest of its runs once the judge's model is out of credit or usage.
+ */
+export const models = {
+	agent: 'claude-sonnet-5-5',
+	judge: 'claude-fable-5-2',
+	judgeFallback: 'claude-opus-5-5',
+	judgeFallbackEffort: 'xhigh'
+} as const;
+
+/** How many rules a skill-arm or gate-arm run holds by default: the test's own and nine companions. */
+export const defaultRulesPerRun = 10;
 
 /** How a gate arm decides: the config's `decision` section, the real upstream, and the one path the proxy forwards. */
 export interface Gate {
@@ -70,8 +81,10 @@ export interface AgentOutcome {
 	stop: string;
 	/** Whether changes were left uncommitted, tracked or untracked. */
 	uncommitted: boolean;
-	/** Skill arm only: whether the session shows the skill's body injected with the task as its arguments. */
+	/** Skill arm only: whether the agent loaded the test's own skill, by the Skill tool or by reading its file. */
 	skillLoaded?: boolean;
+	/** Skill arm only: every skill the agent loaded, its own and companions', by id. */
+	skillsLoaded?: string[];
 }
 
 /** What the gate saw and cost, from the hook log, the proxy log, the transcript and the files. */
@@ -99,6 +112,8 @@ export interface GateOutcome {
 /** The judge's answer and what it cost. */
 export interface JudgeOutcome {
 	model: string;
+	/** The effort the judge ran at, when it was set: only the fallback judge's. */
+	effort?: string;
 	score: number;
 	taskDone: boolean;
 	reason: string;
@@ -120,6 +135,10 @@ export interface RunResult {
 	task: number;
 	arm: Arm;
 	domain: Domain;
+	/** Whether the task's researched prompt is worded to tempt the agent into breaking the rule. */
+	tempting: boolean;
+	/** The other rules whose skills (skill arm) or Tests (gate arms) sat beside this one; none in the baseline. */
+	companions: string[];
 	status: RunStatus;
 	/** The machinery's error, for `agent-error`, `gate-error` and `judge-error`. */
 	error?: string;

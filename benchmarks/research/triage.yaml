@@ -20,14 +20,14 @@
 
 summary:
   entries: 126
-  as-is: 58
-  restate-policy: 54
+  as-is: 57
+  restate-policy: 53
   reshape: 12
-  drop: 2
-  usable: 124
+  drop: 4
+  usable: 122
   usable_dev: 60
-  usable_business: 64
-  usable_tests: 489
+  usable_business: 62
+  usable_tests: 481
 
 rules:
   # ---------------------------------------------------------------------------------------------------
@@ -523,9 +523,9 @@ rules:
   - id: no-stock-seasonal-puns
     file: business-communication
     domain: business
-    verdict: as-is
+    verdict: drop
     how: "Judge each staged content/**/*.md and emails/*.md file: no subject line, headline or body line uses the obvious, much-repeated pun or cliché for the occasion (the source names 'eggcellent', 'all wrapped up' and 'no tricks, just treats'), and humour is at most one fresh line."
-    notes: "Kept against the earlier classification ('judged against outside copy'). Whether a pun is stock is a judgement of common usage that the decision model makes from its knowledge of the language, as it does for idioms in no-idioms-for-translation, and the criterion carries the source's own examples. Expect less agreement between gate and judge than for most rules."
+    notes: "Dropped by the owner on 2026-11-23, after the triage. Kept against the earlier classification ('judged against outside copy'). Whether a pun is stock is a judgement of common usage that the decision model makes from its knowledge of the language, as it does for idioms in no-idioms-for-translation, and the criterion carries the source's own examples. Expect less agreement between gate and judge than for most rules."
 
   - id: never-voice-the-mascot
     file: business-communication
@@ -886,11 +886,11 @@ rules:
   - id: disclose-material-connection
     file: business-policy
     domain: business
-    verdict: restate-policy
+    verdict: drop
     policy_facts:
       - "Larkspur's register of endorsers' material connections: Corvane received 12 months of free service as a launch partner, and Corvane's CEO is an angel investor in Larkspur."
     how: "Judge each staged website/**/*.md, social/*.md and press/*.md file: every use of Corvane's endorsement discloses both connections clearly and next to it."
-    notes: "Treated as standing policy: a register of endorsers' connections is a company list kept across campaigns, like the approved quotes, not a fact about one deal or ticket."
+    notes: "Dropped by the owner on 2026-11-23, after the triage. Treated as standing policy: a register of endorsers' connections is a company list kept across campaigns, like the approved quotes, not a fact about one deal or ticket."
 
   - id: testimonial-results-typical
     file: business-policy

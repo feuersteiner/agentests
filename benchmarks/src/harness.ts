@@ -6,6 +6,7 @@ import { killAll } from './claude.ts';
 import { runCommand } from './command.ts';
 import { findSkillPlaceholders } from './dataset.ts';
 import type { DatasetEntry } from './dataset.ts';
+import { pickCompanions } from './companions.ts';
 import { readKeys } from './environment.ts';
 import { toJudgeArgs } from './judge.ts';
 import { loadPrices } from './prices.ts';
@@ -27,6 +28,10 @@ export interface PlannedTest {
 /** Everything one invocation needs. */
 export interface HarnessSettings {
 	tests: PlannedTest[];
+	/** The whole dataset, which each test's companions are drawn from. */
+	entries: DatasetEntry[];
+	/** How many rules a skill-arm or gate-arm run holds: the test's own and its companions. */
+	rulesPerRun: number;
 	arms: Arm[];
 	concurrency: number;
 	datasetDirectory: string;
@@ -94,9 +99,15 @@ export const checkGates = (gateArms: GateArm[], pricesFile: string): GateCheck =
  * A problem for each argument placeholder in a skill the skill arm would load: Claude Code replaces it with a
  * word of the prompt, so the agent would get other text than the dataset's.
  */
-const checkSkills = (tests: PlannedTest[], arms: Arm[]): string[] =>
-	arms.includes('skill')
-		? [...new Set(tests.map(({ entry }) => entry))].flatMap((entry) =>
+const checkSkills = (plans: RunPlan[]): string[] =>
+	plans.some((plan) => plan.arm === 'skill')
+		? [
+				...new Set(
+					plans
+						.filter((plan) => plan.arm === 'skill')
+						.flatMap((plan) => [plan.entry, ...plan.companions])
+				)
+			].flatMap((entry) =>
 				findSkillPlaceholders(entry).map(
 					(found) =>
 						`${entry.id}: skill/SKILL.md ${found} is an argument placeholder to Claude Code, which would replace it with a word of the prompt; escape it as \\$ so the skill arm gets the text as written`
@@ -175,6 +186,9 @@ const toDoneLine = (result: RunResult): string =>
 		`score ${result.score ?? '-'}`,
 		`${result.durationSeconds.toFixed(0)} s`,
 		`${formatUsd(result.costUsd)} USD`,
+		...(result.agent.skillLoaded === undefined
+			? []
+			: [result.agent.skillLoaded ? 'skill loaded' : 'skill not loaded']),
 		...(result.gate ? [`${result.gate.blocked} of ${result.gate.attempts} commit(s) blocked`] : []),
 		...(result.gate?.refusals ? [`${result.gate.refusals} decision(s) refused`] : []),
 		...(result.error ? [`error: ${result.error.split('\n')[0]}`] : [])
@@ -189,11 +203,14 @@ export const runBenchmark = async (settings: HarnessSettings): Promise<void> => 
 		(arm): arm is GateArm => isGateArm(arm) && settings.arms.includes(arm)
 	);
 	const { keys, prices, problems } = checkGates(gateArms, settings.pricesFile);
-	stopOn([...problems, ...checkSkills(settings.tests, settings.arms)]);
+	const plans: RunPlan[] = settings.tests.flatMap(({ entry, task }) => {
+		const companions = pickCompanions(entry, task, settings.entries, settings.rulesPerRun - 1);
+		return allArms
+			.filter((arm) => settings.arms.includes(arm))
+			.map((arm) => ({ entry, task, arm, companions }));
+	});
+	stopOn([...problems, ...checkSkills(plans)]);
 	const claudeVersion = (await runCommand('claude', ['--version'], repositoryDirectory)).trim();
-	const plans: RunPlan[] = settings.tests.flatMap(({ entry, task }) =>
-		allArms.filter((arm) => settings.arms.includes(arm)).map((arm) => ({ entry, task, arm }))
-	);
 	const runId = new Date().toISOString().replace(/[:.]/g, '-');
 	const folder = join(runsDirectory, runId);
 	mkdirSync(folder, { recursive: true });
@@ -206,6 +223,7 @@ export const runBenchmark = async (settings: HarnessSettings): Promise<void> => 
 		models: {
 			agent: models.agent,
 			judge: models.judge,
+			judgeFallback: `${models.judgeFallback} at ${models.judgeFallbackEffort} effort`,
 			...Object.fromEntries(gateArms.map((arm) => [arm, gates[arm].model]))
 		},
 		seed: settings.seed ?? null,
@@ -219,13 +237,22 @@ export const runBenchmark = async (settings: HarnessSettings): Promise<void> => 
 		timeoutMinutes: settings.timeoutMinutes,
 		agentBudgetUsd: settings.agentBudgetUsd,
 		judgeBudgetUsd: settings.judgeBudgetUsd,
+		rulesPerRun: settings.rulesPerRun,
 		dataset: settings.datasetDirectory,
 		upstreams: Object.fromEntries(gateArms.map((arm) => [arm, settings.upstreams[arm]])),
 		commands: {
 			agent: ['claude', ...toAgentArgs('<prompt>', settings.agentBudgetUsd)],
 			judge: ['claude', ...toJudgeArgs(settings.judgeBudgetUsd), '< judge-prompt.md']
 		},
-		runs: plans.map(toKey)
+		runs: plans.map(toKey),
+		companions: Object.fromEntries(
+			settings.tests.map(({ entry, task }) => [
+				`${entry.id}/${task}`,
+				plans
+					.find((plan) => plan.entry === entry && plan.task === task)
+					?.companions.map((c) => c.id) ?? []
+			])
+		)
 	};
 	const writeManifest = (extra: Record<string, unknown> = {}) =>
 		writeFileSync(
@@ -260,7 +287,8 @@ export const runBenchmark = async (settings: HarnessSettings): Promise<void> => 
 			judgeBudgetUsd: settings.judgeBudgetUsd,
 			proxy,
 			modules,
-			prices
+			prices,
+			judge: { model: models.judge }
 		};
 		const results = new Map<string, RunResult>();
 		const writeResults = () =>
@@ -286,7 +314,10 @@ export const runBenchmark = async (settings: HarnessSettings): Promise<void> => 
 			writeResults();
 			console.log(`${counter} ${toDoneLine(result)}`);
 		});
-		writeManifest({ finishedAt: new Date().toISOString() });
+		writeManifest({
+			finishedAt: new Date().toISOString(),
+			judgeFellBackAt: context.judge.fellBackAt ?? null
+		});
 		console.log('');
 		console.log(toTable(plans.map((plan) => results.get(toKey(plan))!)));
 	} finally {

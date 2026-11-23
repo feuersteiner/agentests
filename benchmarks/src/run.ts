@@ -2,17 +2,18 @@ import { randomBytes } from 'node:crypto';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import {
-	isSkillLoaded,
 	keepSession,
 	toAgentArgs,
 	toAgentError,
 	toAgentPrompt,
-	toAgentUsage
+	toAgentUsage,
+	toLoadedSkills
 } from './agent.ts';
 import { removeProjectFolder, runClaude } from './claude.ts';
 import type { DatasetEntry } from './dataset.ts';
 import { toChildEnv } from './environment.ts';
-import { runJudge } from './judge.ts';
+import { isOutOfCredit, runJudge } from './judge.ts';
+import type { JudgeChoice } from './judge.ts';
 import {
 	bypassedHook,
 	changedTest,
@@ -38,11 +39,12 @@ import type {
 import { createWorkspace } from './workspace.ts';
 import type { Workspace } from './workspace.ts';
 
-/** One run to make: a dataset entry's task in one arm. */
+/** One run to make: a dataset entry's task in one arm, with the companions its skill and gate arms hold. */
 export interface RunPlan {
 	entry: DatasetEntry;
 	task: number;
 	arm: Arm;
+	companions: DatasetEntry[];
 }
 
 /** What every run of an invocation shares. */
@@ -56,12 +58,49 @@ export interface RunContext {
 	proxy?: DecisionProxy;
 	modules?: string;
 	prices: Partial<Record<GateArm, ModelPrice>>;
+	/** The judge every run uses, shared so that a fallback holds for the rest of the invocation. */
+	judge: JudgeChoice & { fellBackAt?: string };
 }
+
+/** Switch the invocation's judge to the fallback, once, after the judge's model ran out of credit or usage. */
+const fallBack = (context: RunContext, reason: string): void => {
+	if (context.judge.fellBackAt) return;
+	context.judge.model = models.judgeFallback;
+	context.judge.effort = models.judgeFallbackEffort;
+	context.judge.fellBackAt = new Date().toISOString();
+	console.log(
+		`The judge falls back to ${models.judgeFallback} at ${models.judgeFallbackEffort} effort for the rest of the runs: ${reason.split('\n')[0]}`
+	);
+};
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/**
+ * Judge with the invocation's judge. When the judge's model is out of credit or usage, fall back for the rest of
+ * the invocation and judge again; any other failure is tried again after a pause, up to three attempts in all.
+ */
+const judgeRun = async (
+	context: RunContext,
+	judging: (judge: JudgeChoice) => Promise<JudgeOutcome>
+): Promise<JudgeOutcome> => {
+	for (let attempt = 1; ; attempt++) {
+		const judge = { model: context.judge.model, effort: context.judge.effort };
+		try {
+			return await judging(judge);
+		} catch (error) {
+			const message = error instanceof Error ? error.message : String(error);
+			if (!context.judge.fellBackAt && isOutOfCredit(message)) fallBack(context, message);
+			else if (attempt >= 3) throw error;
+			else await sleep(attempt * 30_000);
+		}
+	}
+};
 
 /** How long the judge may take. */
 const judgeTimeoutMs = 10 * 60 * 1000;
 
-export const toKey = ({ entry, task, arm }: RunPlan): string => `${entry.id}/${task}/${arm}`;
+export const toKey = ({ entry, task, arm }: Pick<RunPlan, 'entry' | 'task' | 'arm'>): string =>
+	`${entry.id}/${task}/${arm}`;
 
 /** The decision side of a gate run, from the proxy's records and the hook log. */
 const toGate = (
@@ -123,7 +162,8 @@ const saveDiffs = (directory: string, observed: GitObservation): void => {
 export const runOne = async (plan: RunPlan, context: RunContext): Promise<RunResult> => {
 	const { entry, task, arm } = plan;
 	const key = toKey(plan);
-	const { prompt } = entry.tasks.get(task)!;
+	const { prompt, tempting } = entry.tasks.get(task)!;
+	const companions = arm === 'baseline' ? [] : plan.companions;
 	const runDirectory = join(context.folder, 'runs', `${entry.id}--${task}--${arm}`);
 	// A neutral path: the agent sees its working directory, which must name neither the rule nor the arm.
 	const token = randomBytes(8).toString('hex');
@@ -136,6 +176,8 @@ export const runOne = async (plan: RunPlan, context: RunContext): Promise<RunRes
 		task,
 		arm,
 		domain: entry.domain,
+		tempting,
+		companions: companions.map((companion) => companion.id),
 		folder: relative(context.folder, runDirectory),
 		workspace: relative(context.folder, workspaceDirectory)
 	};
@@ -146,10 +188,11 @@ export const runOne = async (plan: RunPlan, context: RunContext): Promise<RunRes
 			entry,
 			arm,
 			workspaceDirectory,
-			gateArm ? { url: `${context.proxy!.url}/${token}/v1`, modules: context.modules! } : undefined
+			gateArm ? { url: `${context.proxy!.url}/${token}/v1`, modules: context.modules! } : undefined,
+			companions
 		);
 		const exit = await runClaude({
-			args: toAgentArgs(toAgentPrompt(entry.id, prompt, arm), context.agentBudgetUsd),
+			args: toAgentArgs(toAgentPrompt(prompt), context.agentBudgetUsd),
 			cwd: workspaceDirectory,
 			env: toChildEnv(hookLog),
 			stdoutPath: join(runDirectory, 'transcript.jsonl'),
@@ -160,16 +203,12 @@ export const runOne = async (plan: RunPlan, context: RunContext): Promise<RunRes
 		const session = keepSession(exit.events, runDirectory);
 		removeProjectFolder(workspaceDirectory);
 		const usage = toAgentUsage(exit);
-		const skillLoaded = arm === 'skill' ? isSkillLoaded(session, entry.id, prompt) : undefined;
-		// A skill-arm run whose skill was not loaded is not a valid run of that arm.
-		const error =
-			(exit.timedOut ? undefined : toAgentError(exit)) ??
-			(skillLoaded === false
-				? `The skill arm's skill was not loaded: session.jsonl shows no skill message for .claude/skills/${entry.id} with the task as its arguments`
-				: undefined);
+		const uses = toToolUses(exit.events);
+		// The agent chooses whether to load a skill: a skill-arm run that loads none is a real outcome.
+		const skillsLoaded = arm === 'skill' ? toLoadedSkills(session, uses) : undefined;
+		const error = exit.timedOut ? undefined : toAgentError(exit);
 		const observed = await observeGit(workspace);
 		saveDiffs(runDirectory, observed);
-		const uses = toToolUses(exit.events);
 		const gate = gateArm
 			? toGate(
 					gateArm,
@@ -187,7 +226,9 @@ export const runOne = async (plan: RunPlan, context: RunContext): Promise<RunRes
 			commits: observed.commits,
 			stop: exit.timedOut ? 'timeout' : String(exit.result?.subtype ?? 'none'),
 			uncommitted: observed.uncommittedDiff.length > 0,
-			...(skillLoaded === undefined ? {} : { skillLoaded })
+			...(skillsLoaded === undefined
+				? {}
+				: { skillLoaded: skillsLoaded.includes(entry.id), skillsLoaded })
 		};
 		const shared = {
 			...base,
@@ -210,13 +251,16 @@ export const runOne = async (plan: RunPlan, context: RunContext): Promise<RunRes
 		if (status !== undefined) return { ...shared, score: 0, status, judge: null };
 		let judge: JudgeOutcome;
 		try {
-			judge = await runJudge(
-				{ task: prompt, rule: entry.rule, rubric: entry.rubric, diff: observed.judgeDiff },
-				runDirectory,
-				// Empty and neutral: the judge sees its working directory, which must not name the arm.
-				join(context.folder, 'judges', token),
-				context.judgeBudgetUsd,
-				judgeTimeoutMs
+			judge = await judgeRun(context, (choice) =>
+				runJudge(
+					{ task: prompt, rule: entry.rule, rubric: entry.rubric, diff: observed.judgeDiff },
+					runDirectory,
+					// Empty and neutral: the judge sees its working directory, which must not name the arm.
+					join(context.folder, 'judges', token),
+					context.judgeBudgetUsd,
+					judgeTimeoutMs,
+					choice
+				)
 			);
 		} catch (error) {
 			return {

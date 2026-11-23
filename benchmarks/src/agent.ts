@@ -2,15 +2,14 @@ import { copyFileSync, cpSync, existsSync, readdirSync, readFileSync, rmSync } f
 import { join } from 'node:path';
 import type { ClaudeEvent, ClaudeExit } from './claude.ts';
 import { projectsDirectory, toEvents } from './claude.ts';
+import type { ToolUse } from './observe.ts';
 import { models } from './types.ts';
-import type { Arm } from './types.ts';
 
 /** The line after every task prompt. */
 export const commitLine = 'When you are done, commit your work.';
 
-/** The agent's prompt: the task and the commit line, behind `/<rule-id>` in the skill arm so the skill is force-invoked. */
-export const toAgentPrompt = (rule: string, task: string, arm: Arm): string =>
-	`${arm === 'skill' ? `/${rule} ` : ''}${task}\n\n${commitLine}`;
+/** The agent's prompt in every arm: the task and the commit line. No skill is invoked; the agent chooses. */
+export const toAgentPrompt = (task: string): string => `${task}\n\n${commitLine}`;
 
 /** The agent's arguments after `claude`: headless, streamed, unattended, project settings only, capped in cost. */
 export const toAgentArgs = (prompt: string, budgetUsd: number): string[] => [
@@ -142,33 +141,33 @@ const toText = (content: unknown): string =>
 			? (content as { text?: unknown }[]).map((block) => String(block.text ?? '')).join('\n')
 			: '';
 
+/** The skill id in a path under `.claude/skills/`. */
+const skillInPath = /\.claude\/skills\/([\w.-]+)/;
+
 /**
- * Whether the session shows the force-invoked skill with the task: Claude Code's meta message holding the body of
- * `.claude/skills/<rule>`, and the task as the command's arguments. Claude Code always records the arguments in the
- * `/<rule>` command message, and appends `ARGUMENTS: <arguments>` to the skill's body only when the body has no
- * argument placeholder such as `$ARGUMENTS` or `$1`, so the task is looked for in either.
+ * Every skill the agent loaded, by id, sorted: from Claude Code's meta message that begins
+ * `Base directory for this skill:` in the session log, from the Skill tool's calls in the stream, and from any tool
+ * call that reads a `.claude/skills/<id>/SKILL.md` file directly.
  */
-export const isSkillLoaded = (
-	sessionPath: string | undefined,
-	rule: string,
-	task: string
-): boolean => {
-	if (!sessionPath) return false;
-	const texts = toEvents(readFileSync(sessionPath, 'utf8'))
-		.filter((event) => event.type === 'user')
-		.map((event) => ({
-			meta: event.isMeta === true,
-			text: toText((event.message as { content?: unknown } | undefined)?.content)
-		}));
-	const skill = texts.find(
-		({ meta, text }) =>
-			meta &&
-			text.startsWith('Base directory for this skill:') &&
-			text.includes(`/.claude/skills/${rule}`)
-	);
-	const command = texts.find(
-		({ meta, text }) => !meta && text.includes(`<command-name>/${rule}</command-name>`)
-	);
-	const args = /<command-args>([\s\S]*)<\/command-args>/.exec(command?.text ?? '')?.[1] ?? '';
-	return skill !== undefined && (args.includes(task) || skill.text.includes(`ARGUMENTS: ${task}`));
+export const toLoadedSkills = (sessionPath: string | undefined, uses: ToolUse[]): string[] => {
+	const loaded = new Set<string>();
+	if (sessionPath)
+		for (const event of toEvents(readFileSync(sessionPath, 'utf8'))) {
+			if (event.type !== 'user' || event.isMeta !== true) continue;
+			const text = toText((event.message as { content?: unknown } | undefined)?.content);
+			const id = text.startsWith('Base directory for this skill:')
+				? skillInPath.exec(text)?.[1]
+				: undefined;
+			if (id) loaded.add(id);
+		}
+	for (const use of uses) {
+		const named = use.input.skill ?? use.input.command ?? use.input.name;
+		if (use.name === 'Skill' && typeof named === 'string')
+			loaded.add(named.replace(/^\//, '').trim().split(/\s/)[0]!);
+		for (const match of JSON.stringify(use.input).matchAll(
+			/\.claude\/skills\/([\w.-]+)\/SKILL\.md/g
+		))
+			loaded.add(match[1]!);
+	}
+	return [...loaded].filter(Boolean).sort();
 };

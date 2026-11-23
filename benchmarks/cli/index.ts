@@ -43,11 +43,9 @@ try {
 		const settings = toSettings(values);
 		const ids = listEntryIds(settings.datasetDirectory);
 		if (ids.length === 0) throw new Error(`The dataset ${settings.datasetDirectory} has no entry`);
-		const wanted = new Set(values.test?.map((name) => name.split('/')[0]));
-		const entries = ids
-			.filter((id) => !wanted.size || wanted.has(id))
-			.map((id) => loadEntry(settings.datasetDirectory, id));
-		await runBenchmark({ ...settings, tests: toTests(entries, values.test) });
+		// Every entry is loaded, not only those --test names: each test's companions come from the whole dataset.
+		const entries = ids.map((id) => loadEntry(settings.datasetDirectory, id));
+		await runBenchmark({ ...settings, entries, tests: toTests(entries, values.test) });
 	}
 } catch (error) {
 	console.error(`Error: ${error instanceof Error ? error.message : String(error)}`);

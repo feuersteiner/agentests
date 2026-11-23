@@ -77,11 +77,21 @@ export const toJudgePrompt = ({ task, rule, rubric, diff }: JudgeInput): string 
 	].join('\n');
 };
 
+/** The judge an invocation uses: its model, and its effort when one is set. */
+export interface JudgeChoice {
+	model: string;
+	effort?: string;
+}
+
 /** The judge's arguments after `claude`: no tools, project settings only, answer held to the schema, capped in cost. */
-export const toJudgeArgs = (budgetUsd: number): string[] => [
+export const toJudgeArgs = (
+	budgetUsd: number,
+	judge: JudgeChoice = { model: models.judge }
+): string[] => [
 	'-p',
 	'--model',
-	models.judge,
+	judge.model,
+	...(judge.effort ? ['--effort', judge.effort] : []),
 	'--tools',
 	'',
 	'--setting-sources',
@@ -118,13 +128,14 @@ export const runJudge = async (
 	runDirectory: string,
 	cwd: string,
 	budgetUsd: number,
-	timeoutMs: number
+	timeoutMs: number,
+	judge: JudgeChoice = { model: models.judge }
 ): Promise<JudgeOutcome> => {
 	const prompt = toJudgePrompt(input);
 	writeFileSync(join(runDirectory, 'judge-prompt.md'), prompt);
 	mkdirSync(cwd, { recursive: true });
 	const exit = await runClaude({
-		args: toJudgeArgs(budgetUsd),
+		args: toJudgeArgs(budgetUsd, judge),
 		cwd,
 		env: toChildEnv(),
 		input: prompt,
@@ -142,8 +153,15 @@ export const runJudge = async (
 	const answer = toAnswer(result.structured_output);
 	writeFileSync(join(runDirectory, 'judge.json'), `${JSON.stringify(answer, null, '\t')}\n`);
 	return {
-		model: models.judge,
+		model: judge.model,
+		...(judge.effort ? { effort: judge.effort } : {}),
 		...answer,
 		costUsd: typeof result.total_cost_usd === 'number' ? result.total_cost_usd : 0
 	};
 };
+
+/** Whether a judge's error says its model is out of credit or usage, rather than failing once. */
+export const isOutOfCredit = (message: string): boolean =>
+	/credit balance|out of credits?|insufficient|quota|billing|usage limit|limit reached|spend(ing)? limit|monthly limit/i.test(
+		message
+	);

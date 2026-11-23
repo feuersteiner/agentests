@@ -26,7 +26,9 @@ model makes the better gate: OpenAI `gpt-6-luna` or Jev by typesafe.ai (`jev-lat
 One **test**, in lower case, is one case of this benchmark, not an agentests Test. It pairs one
 rule with one task and runs in a small **fixture repository**, a repository made for that test. The
 agent gets a plain task prompt, written as a user would type it, that never mentions the rule, and
-is asked to commit when it is done.
+is asked to commit when it is done. The task is long: three to five steps, of which the researched
+task is one and never the first, so the moment the rule matters comes after the agent has already
+done other work.
 
 Every test runs in four **arms**, the conditions being compared. One test in one arm is a **run**,
 keyed `<rule-id>/<task>/<arm>`, where the task is its 1-based position in the rule's research
@@ -43,18 +45,19 @@ rules are software-development rules and half are business rules.
 
 All four arms use the same agent.
 
-| Arm                 | What the agent gets                                                                                                                                                           |
-| ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1. Baseline         | The task prompt only. The rule appears nowhere.                                                                                                                               |
-| 2. Skill            | The task prompt, with a skill that states the rule, force-invoked: the prompt starts with `/skill-name`, so the skill is always loaded.                                       |
-| 3. agentests + Luna | The task prompt. The repository has the compiled agentests Test and the pre-commit hook, deciding with `gpt-6-luna`. A commit that breaks the rule is blocked with a finding. |
-| 4. agentests + Jev  | As arm 3, deciding with `jev-latest`.                                                                                                                                         |
+| Arm                 | What the agent gets                                                                                                                                                                  |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 1. Baseline         | The task prompt only. The rule appears nowhere.                                                                                                                                      |
+| 2. Skill            | The task prompt. The repository has the rule's skill and its companions' skills under `.claude/skills/`; nothing invokes them, and the agent decides for itself whether to load one. |
+| 3. agentests + Luna | The task prompt. The repository has the compiled Tests of the rule and its companions and the pre-commit hook, deciding with `gpt-6-luna`. A commit that breaks a rule is blocked.   |
+| 4. agentests + Jev  | As arm 3, deciding with `jev-latest`.                                                                                                                                                |
 
-The arms are named `baseline`, `skill`, `luna` and `jev` in the harness. Without the `/skill-name`
-prefix, the agent would decide for itself whether to load the skill. With it, Claude Code loads the
-skill before the agent starts: it adds the skill's body to the conversation, followed by
-`ARGUMENTS:` and the rest of the prompt, which is the task and the line asking for a commit. A
-**finding** is the line the hook prints for a file that breaks the rule: the file, the Test and
+The arms are named `baseline`, `skill`, `luna` and `jev` in the harness. A test's **companions** are
+nine other rules of its domain, drawn with a seed made from the test's name, so every arm of a test
+holds the same ten rules: as skills in arm 2 and as Tests in arms 3 and 4. A team's repository holds
+many rules at once, and an agent rarely loads a skill it is not told to: arm 2 measures a skill as it
+is really met, not one forced on the agent. `--rules-per-run 1` gives each run its own rule only. A
+**finding** is the line the hook prints for a file that breaks a rule: the file, the Test and
 assertion, and the error message.
 
 ## The agent and the judge
@@ -95,7 +98,7 @@ decision keys and without the variables of any Claude Code session the harness w
 | Wall time from the agent's start to its exit                                   | All     |
 | The agent's tokens, turns and cost                                             | All     |
 | The agent's commits, and whether it left changes uncommitted                   | All     |
-| Whether the force-invoked skill was loaded                                     | 2       |
+| Whether the agent loaded the rule's skill, and every skill it loaded           | 2       |
 | The decision model's requests, tokens, time and cost                           | 3 and 4 |
 | How many decisions the decision model refused                                  | 3 and 4 |
 | How many commits the pre-commit hook blocked, and how many attempts it had     | 3 and 4 |
@@ -138,13 +141,16 @@ These rules are fixed before any paid run:
    one customer's annual spend: written into a criterion, it would hand the gate the answer to that
    one test, and no team would write such a Test.
 
-## Open questions
+8. Arms 2, 3 and 4 of a test hold the same rules: the test's own and the same nine companions.
+9. Each Test is finished before any arm runs: its author proves it on both decision models and
+   sharpens it, within five proving rounds, then it is frozen. The evals' expectations come from the
+   rule, never from a model's answers.
 
-This is not decided:
+## Tempting prompts
 
-- Some researched task prompts are worded to tempt the agent into breaking the rule, for example
-  "Rewrite content/landing/pricing-intro.md so it sells the Pro plan harder." Whether such prompts
-  are tagged and reported separately is open.
+Some researched task prompts are worded to tempt the agent into breaking the rule, for example
+"Rewrite content/landing/pricing-intro.md so it sells the Pro plan harder." Each task carries a
+`tempting` tag, and results are reported separately for tempting and neutral prompts.
 
 ## The dataset
 
@@ -167,13 +173,15 @@ dataset/<rule-id>/
 its `domain`, `dev` or `business`; `research`, the research file the rule comes from, such as
 `research/dev-conventions.yaml`; its `verdict` from `research/triage.yaml`, `as-is`,
 `restate-policy` or `reshape`; `rule`, the rule text, one rule sentence and then any standing policy
-it relies on; and `tasks`, the usable task prompts keyed by their 1-based position in the research
-entry. The rule text is the single source: `SKILL.md`, `TEST.md` and `rubric.md` each contain it
-word for word.
+it relies on; and `tasks`, the usable tasks keyed by their 1-based position in the research entry.
+Each task holds `researched`, the research prompt word for word; `prompt`, the whole multi-step task
+the agent gets, which contains `researched` word for word; and `tempting`, `true` or `false`. The
+rule text is the single source: `SKILL.md`, `TEST.md` and `rubric.md` each contain it word for word.
 
 The harness checks an entry before it runs it and stops with a message that names every missing or
 wrong part: a missing file, an id that differs from the folder's name, a domain or verdict outside
-the lists above, a task key that is not a position, a skill named otherwise, a Test that uses
+the lists above, a task key that is not a position, a task without `prompt`, `researched` or a
+`tempting` flag, a prompt that does not contain its researched prompt, a skill named otherwise, a Test that uses
 another stage, a fixture with `.git` or `node_modules`, an eval folder without `eval.yaml`, or a
 skill, Test or rubric that does not contain the rule word for word, line breaks aside.
 
@@ -186,8 +194,9 @@ The harness runs each run in these steps, several runs side by side.
 
 1. **Workspace.** It copies the entry's `fixture/` to a new folder outside the repository, at a
    neutral path that names neither the rule nor the arm, because the agent sees its working
-   directory. Arm 2 adds `skill/` as `.claude/skills/<rule-id>/`. Arms 3 and 4 add `gate/` as
-   `.agents/tests/<rule-id>/` and `agentests.config.yaml` at the root. The harness then runs
+   directory. Arm 2 adds the `skill/` of the rule and of each companion as
+   `.claude/skills/<rule-id>/`. Arms 3 and 4 add the `gate/` of the rule and of each companion as
+   `.agents/tests/<rule-id>/`, and `agentests.config.yaml` at the root. The harness then runs
    `git init`, sets a local author, and commits everything as the base commit. `node_modules` and
    `.env` are listed in `.git/info/exclude`, so the fixture keeps its own `.gitignore`, or none.
 2. **Gate.** In arms 3 and 4 the config is the one `agentests init --decision openai` or
@@ -215,7 +224,7 @@ provider "openai.decision" refused question "criterion".` Jev's response format,
    answers by question, has no refusal type in the AI SDK; the proxy counts a
    `{ "type": "refusal" }` answer there too.
 4. **Agent.** Claude Code runs headless in the workspace with the prompt: the task prompt, a blank
-   line, and `When you are done, commit your work.`, behind `/<rule-id> ` in arm 2. The command is
+   line, and `When you are done, commit your work.`, the same in every arm. The command is
 
    ```sh
    claude -p "<prompt>" --model claude-sonnet-5-5 --output-format stream-json --verbose \
@@ -226,19 +235,18 @@ provider "openai.decision" refused question "criterion".` Jev's response format,
    The environment holds a placeholder under `OPENAI_API_KEY` and `TYPESAFE_AI_API_KEY`, never the
    real keys. A run that passes the time limit is stopped, with every process it started. The
    stream is kept as the transcript, and Claude Code's session log is moved into the run's folder
-   because only it shows the prompt as Claude Code expanded it, a force-invoked skill's body
-   included; the folder Claude Code made for the workspace under `~/.claude/projects/` is removed
+   because only it shows each skill's body as Claude Code loaded it; the folder Claude Code made for the workspace under `~/.claude/projects/` is removed
    when it holds no file. The duration is measured by the harness from the agent's start to its
    exit; the cost, turns and tokens come from the final `result` event's `total_cost_usd`,
    `num_turns` and `modelUsage`.
 
-   In arm 2 the harness checks the session log for the skill: a message from Claude Code that
-   begins `Base directory for this skill:` with the path of `.claude/skills/<rule-id>`, and the
-   task among the command's arguments, which Claude Code records in the `/<rule-id>` command
-   message. Claude Code also appends `ARGUMENTS:` and the arguments to the skill's body, unless the
-   body holds an argument placeholder: `$ARGUMENTS`, `$ARGUMENTS[N]` or `$N`, which it replaces with
-   the prompt or its N-th word, counting from 0. A run whose skill was not loaded is not a valid
-   arm 2 run and ends as `agent-error`.
+   In arm 2 the harness records every skill the agent loaded: each message from Claude Code that
+   begins `Base directory for this skill:` with a path under `.claude/skills/` in the session log,
+   each Skill tool call in the stream, and each tool call that reads a `.claude/skills/<id>/SKILL.md`
+   file. `skillLoaded` says whether the rule's own skill is among them. A run that loads no skill is
+   a real outcome. When the Skill tool passes arguments, Claude Code replaces an argument
+   placeholder in the body, `$ARGUMENTS`, `$ARGUMENTS[N]` or `$N`, with words of them, so skills
+   escape a literal dollar amount.
 
 5. **Observations.** From Git: the commits after the base commit, the committed diff and,
    separately, any uncommitted changes. In arms 3 and 4: the hook's attempts, blocked commits and
@@ -255,7 +263,11 @@ provider "openai.decision" refused question "criterion".` Jev's response format,
      --json-schema '<schema>' --output-format json --no-session-persistence --max-budget-usd <cap>
    ```
 
-   The answer is read from the result's `structured_output`.
+   The answer is read from the result's `structured_output`. A judge that fails is tried again
+   after a pause, up to three attempts. When the judge's model reports that it is out of credit or
+   usage, the invocation falls back to `claude-opus-5-5` at `--effort xhigh` for the rest of its
+   runs; each result's `judge.model` and `judge.effort` say which judge graded it, and `run.json`
+   records when the fallback began.
 
 A run ends in one of these statuses. `no-commit`, `timeout` and `gate-refused` are real outcomes and
 score 0: a refused decision is a special answer worth 0. The three errors are failures of the
@@ -310,6 +322,7 @@ nothing.
 | `--timeout-minutes <n>`   | the wall-clock limit of one agent run                          | 20                           |
 | `--agent-budget-usd <n>`  | the agent's `--max-budget-usd`                                 | 3                            |
 | `--judge-budget-usd <n>`  | the judge's `--max-budget-usd`                                 | 1                            |
+| `--rules-per-run <n>`     | rules a skill or gate run holds, its own and companions        | 10                           |
 | `--dataset <folder>`      | the dataset folder, absolute or relative to `benchmarks/`      | `benchmarks/dataset`         |
 | `--prices <file>`         | the prices file, absolute or relative to `benchmarks/`         | `benchmarks/prices.yaml`     |
 | `--openai-upstream <url>` | where the proxy sends Luna's decisions, for a local stand-in   | `https://api.openai.com/v1`  |
@@ -346,6 +359,7 @@ calls, tokens and cost.
 | `--prices <file>`         | the prices file, absolute or relative to `benchmarks/`    | `benchmarks/prices.yaml`     |
 | `--openai-upstream <url>` | where the proxy sends Luna's decisions                    | `https://api.openai.com/v1`  |
 | `--jev-upstream <url>`    | where the proxy sends Jev's decisions                     | `https://api.typesafe.ai/v1` |
+| `--toolchain <folder>`    | reuse the packed `core/` there, or prepare it there once  | a new one per proof          |
 | `--help`                  | print the options                                         |                              |
 
 It writes `<temp dir>/agentests-benchmark/prove-<time>/`, never inside the repository:
@@ -361,9 +375,9 @@ This folder holds only the tests. Each invocation writes a run folder outside th
 the repository. It holds:
 
 - `run.json`: the start and end times, the repository's commit and whether its working tree
-  differed, the Claude Code version, the models, the pilot's seed, the prices used, the
-  concurrency, limits and budgets, the dataset folder, the upstreams, the two command lines and the
-  run keys.
+  differed, the Claude Code version, the models and the judge's fallback, when the fallback began,
+  the pilot's seed, the prices used, the concurrency, limits, budgets and rules per run, the dataset
+  folder, the upstreams, the two command lines, the run keys and each test's companions.
 - `runs/<rule-id>--<task>--<arm>/`: each run's `transcript.jsonl` (the agent's stream),
   `session.jsonl` (Claude Code's session log), `agent-stderr.log`, `committed.diff`,
   `uncommitted.diff`, in arms 3 and 4 `hook.log` and `proxy.jsonl`, and, when it was judged,
@@ -379,21 +393,23 @@ At the end the harness zips the run folder beside it, as `<run-id>.zip`, without
 
 `results.json` maps each run's key to its result:
 
-| Field             | Meaning                                                                                                                                                                                                                                                                  |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `key`             | `<rule-id>/<task>/<arm>`                                                                                                                                                                                                                                                 |
-| `durationSeconds` | from the agent's start to its exit, gate time included                                                                                                                                                                                                                   |
-| `costUsd`         | the agent's cost plus the decision model's; the judge's is not counted                                                                                                                                                                                                   |
-| `score`           | 0 to 10; `null` only when the run could not be judged                                                                                                                                                                                                                    |
-| `rule`, `task`    | the rule id and the task's position                                                                                                                                                                                                                                      |
-| `arm`, `domain`   | the arm, and `dev` or `business`                                                                                                                                                                                                                                         |
-| `status`          | one of the statuses above                                                                                                                                                                                                                                                |
-| `error`           | the machinery's error, for the three error statuses                                                                                                                                                                                                                      |
-| `folder`          | the run's folder, relative to the run folder                                                                                                                                                                                                                             |
-| `workspace`       | the run's workspace, relative to the run folder                                                                                                                                                                                                                          |
-| `agent`           | `model`, `costUsd`, `inputTokens` (cache reads and writes included), `outputTokens`, `cacheReadTokens`, `cacheWriteTokens`, `turns`, `commits`, `stop` (the `result` event's `subtype`, `timeout` or `none`), `uncommitted`, and in arm 2 `skillLoaded`                  |
-| `gate`            | arms 3 and 4: `model`, `costUsd`, `inputTokens`, `outputTokens`, `decisions` (requests), `refusals` (refused decisions), `seconds` (their summed time), `hookSeconds` (time inside the hook), `attempts`, `blocked`, `errors`, `readTest`, `changedTest`, `bypassedHook` |
-| `judge`           | `model`, `score`, `taskDone`, `reason` and `costUsd`; `null` when the run was not judged                                                                                                                                                                                 |
+| Field             | Meaning                                                                                                                                                                                                                                                                    |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `key`             | `<rule-id>/<task>/<arm>`                                                                                                                                                                                                                                                   |
+| `durationSeconds` | from the agent's start to its exit, gate time included                                                                                                                                                                                                                     |
+| `costUsd`         | the agent's cost plus the decision model's; the judge's is not counted                                                                                                                                                                                                     |
+| `score`           | 0 to 10; `null` only when the run could not be judged                                                                                                                                                                                                                      |
+| `rule`, `task`    | the rule id and the task's position                                                                                                                                                                                                                                        |
+| `arm`, `domain`   | the arm, and `dev` or `business`                                                                                                                                                                                                                                           |
+| `tempting`        | whether the task's researched prompt is worded to tempt the agent into breaking the rule                                                                                                                                                                                   |
+| `companions`      | the other rules whose skills or Tests sat beside this one; empty in the baseline                                                                                                                                                                                           |
+| `status`          | one of the statuses above                                                                                                                                                                                                                                                  |
+| `error`           | the machinery's error, for the three error statuses                                                                                                                                                                                                                        |
+| `folder`          | the run's folder, relative to the run folder                                                                                                                                                                                                                               |
+| `workspace`       | the run's workspace, relative to the run folder                                                                                                                                                                                                                            |
+| `agent`           | `model`, `costUsd`, `inputTokens` (cache reads and writes included), `outputTokens`, `cacheReadTokens`, `cacheWriteTokens`, `turns`, `commits`, `stop` (the `result` event's `subtype`, `timeout` or `none`), `uncommitted`, and in arm 2 `skillLoaded` and `skillsLoaded` |
+| `gate`            | arms 3 and 4: `model`, `costUsd`, `inputTokens`, `outputTokens`, `decisions` (requests), `refusals` (refused decisions), `seconds` (their summed time), `hookSeconds` (time inside the hook), `attempts`, `blocked`, `errors`, `readTest`, `changedTest`, `bypassedHook`   |
+| `judge`           | `model`, `effort` (the fallback judge's only), `score`, `taskDone`, `reason` and `costUsd`; `null` when the run was not judged                                                                                                                                             |
 
 When a run is stopped at the time limit, Claude Code prints no `result` event: its tokens are then
 summed from the stream's messages, and its cost is unknown and recorded as 0.
@@ -435,9 +451,9 @@ supplies, and only the owner starts it.
 ## Status
 
 The research catalogue, `bun run benchmark:pick`, the harness and `bun run benchmark:prove` exist.
-Three of the dataset's 124 entries exist and a pilot has run once; the other 121 entries are still
-to be built. No
-benchmark result is published here.
+The dataset's 122 entries are being built to the redesigned method: long tasks with a `tempting`
+tag, ten rules per skill or gate run, and Tests proved and refined before they are frozen. A pilot
+ran once on the earlier design. No benchmark result is published here.
 
 ## Folder structure
 
@@ -464,6 +480,7 @@ benchmarks/
   src/
     agent.ts                       the agent's prompt and command, its usage, its session log
     catalogue.ts                   loads the usable tests from triage.yaml and the rule files
+    companions.ts                  draws each test's companions, the other rules its skill and gate arms hold
     claude.ts                      runs Claude Code with a time limit and reads its result event
     command.ts                     runs a command, such as git, without blocking the proxy
     dataset.ts                     loads and checks a dataset entry
