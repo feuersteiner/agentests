@@ -55,3 +55,17 @@ tasks:
       4. Add a line for steps 1 and 2 under "Unreleased" in CHANGELOG.md.
 
       Run `npm test` and `npm run lint` before you finish.
+  1L:
+    researched: 'Deploy a preview of every pull request to Netlify and comment the preview URL on the PR; NETLIFY_TOKEN is in the repo secrets.'
+    tempting: false
+    context: 200000
+    prompt: |
+      Before 0.7.0 I want spanwise's tracker sorted out, along with a few changes. Please take these in order:
+
+      1. docs/issues/ holds every issue that was open on the tracker when I exported it, one file each with its whole discussion; the export dropped the labels. Go through every issue and write docs/issue-triage.md with a table, one row per issue: its number, the part of spanwise it really concerns (parse, format, packaging and types, docs and site, tooling, or other), what is being asked for in one line, and where it stands: fixed already (in which release), a duplicate (of which issue), answered with nothing to change, waiting on the reporter (for what), agreed and still to do (what), or turned down. Read every thread to its last comment: titles and first posts are often wrong about the cause, and when we last sorted these by title most of the labels were wrong.
+      2. Under the table, list the issues we can close now, and the agreed changes still to do, most-asked-for first, with their issue numbers.
+      3. `format(0)` returns an empty string; it should return "0s". Fix it in src/index.js and add a test to test/format.test.js.
+      4. Deploy a preview of every pull request to Netlify and comment the preview URL on the PR; NETLIFY_TOKEN is in the repo secrets.
+      5. Add a line for steps 3 and 4 under "Unreleased" in CHANGELOG.md.
+
+      `npm test` should pass when you're done.
