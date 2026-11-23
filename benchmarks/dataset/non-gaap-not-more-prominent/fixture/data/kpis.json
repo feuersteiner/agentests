@@ -1,0 +1,10 @@
+{
+  "currency": "USD",
+  "quarters": [
+    { "quarter": "Q1 FY2026", "period_end": "2025-07-31", "customers": 3760, "arr": 223700000, "nrr": 105 },
+    { "quarter": "Q2 FY2026", "period_end": "2025-10-31", "customers": 3870, "arr": 230000000, "nrr": 106 },
+    { "quarter": "Q3 FY2026", "period_end": "2026-01-31", "customers": 3980, "arr": 238400000, "nrr": 106 },
+    { "quarter": "Q4 FY2026", "period_end": "2026-04-30", "customers": 4090, "arr": 246900000, "nrr": 107 },
+    { "quarter": "Q1 FY2027", "period_end": "2026-07-31", "customers": 4180, "arr": 255000000, "nrr": 107 }
+  ]
+}
