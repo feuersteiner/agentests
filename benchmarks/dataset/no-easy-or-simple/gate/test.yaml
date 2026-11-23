@@ -1,0 +1,22 @@
+version: 1
+id: no-easy-or-simple
+title: No "easy", "simple", "quick" or "just"
+description: Help articles, emails to users and interface text never tell the reader that a task, a setup or a feature is easy, simple, quick or "just" a matter of doing something.
+select:
+  glob: ['content/help/**/*.md', 'emails/**/*.md', 'locales/**/*.json']
+assert:
+  - id: no-easy-claim
+    description: Nothing is called easy, simple or effortless for the reader to do.
+    error: Remove the claim that this is easy or simple; describe the steps and let the reader judge.
+    grep: '[Ee]as(y|ier|iest|ily)\b|EASY|[Ss]impl|SIMPL|[Ee]ffortless|[Bb]reeze|[Pp]ainless|[Hh]assle|[Ff]uss|[Ss]traightforward|[Tt]rivial|[Ss]nap\b|[Cc]inch|piece of cake|[Nn]o[- ]brainer|[Ss]eamless|[Ss]mooth|[Ss]weat|[Ss]tress|[Hh]eadache|[Ff]rictionless|[Cc]omplicated|[Cc]omplex|[Hh]ard\b|[Dd]ifficult'
+    decide: 'The text never says that something the reader does (a task, a setup, or using a feature) is easy, simple or effortless, for example with "it is easy to", "easily", "simply paste", "hassle-free" or "a breeze". These do not count: "easy" or "simple" describing a thing and not an action, as in "an easy-to-read table" or "a simple layout"; and the capitalised name of a plan or feature, as in "the Simple plan".'
+  - id: no-quick-claim
+    description: Nothing is called quick, and no vague phrase says a task takes little time or few actions.
+    error: Remove the claim that this is quick; give the number of steps or the time it takes, or say nothing.
+    grep: '\bquick|Quick(ly|er|est)?\b(?! [A-Z])|QUICK|\bfast|Fast(er|est)?\b(?! [A-Z])|[Ss]peedy|[Rr]apid|[Ss]wift|[Ii]nstant|(?<!(\d|\b([Oo]ne|[Tt]wo|[Tt]hree|[Ff]our|[Ff]ive|[Ss]ix|[Ss]even|[Ee]ight|[Nn]ine|[Tt]en|[Ff]ifteen|[Tt]wenty|[Tt]hirty|[Ss]ixty))[\s-])\b([Ss]econds?|[Mm]inutes?)\b|[Mm]oments?\b|[Nn]o time|[Jj]iffy|[Ff]lash|[Bb]link|[Cc]licks\b|[Cc]lick away|[Oo]ne[- ]click|[Ss]ingle click|[Tt]aps\b|[Ff]ew\b|[Cc]ouple of|[Rr]ight away|[Ss]traight away'
+    decide: 'The text never says that a task, a setup or a feature is quick or fast for the reader to do, and never says that it takes little time or few actions, for example with "quick setup", "quickly", "in seconds", "in minutes", "in no time" or "in a few clicks". A statement of how fast the product itself acts does not count, and neither does the capitalised name of a plan or feature, as in "the Quick Replies menu".'
+  - id: no-just-or-anyone
+    description: No "just", "only" or "all you need" plays a task down, and nothing says anyone can do it or that no skill is needed.
+    error: Remove the "just" or the claim that no skill is needed; state the step or the requirement plainly.
+    grep: '\b[Jj]ust\b|JUST|\b[Oo]nly\b|[Mm]erely|[Aa]ll you|[Aa]ll it takes|[Aa]ll that|[Nn]othing (more|else)|[Aa]nyone|[Aa]nybody|[Ee]veryone|[Ss]kills?\b|[Tt]echnical|[Cc]oding|[Cc]ode\b|[Dd]eveloper|[Ee]ngineer|[Ee]xpert|[Ee]xperience|[Kk]now-how|[Tt]hat.s (it|all)\b|[Yy]ou.re (done|all set|good to go)|[Vv]oil|[Nn]o need|[Dd]on.t need|[Ww]ithout (any|writing)'
+    decide: 'The text never plays down the effort or skill a task takes: it never uses "just", "only" or "all you need to do" to present a task or step as a small matter (for example "just paste your URL"), and never says that anyone can do it or that no technical skill, coding or experience is needed. "Just" or "only" used in another sense, such as time ("you just published") or a limit ("only owners can"), does not count.'

@@ -1,0 +1,21 @@
+version: 1
+id: sentry-no-customer-data-in-repo
+title: No customer data in the repository
+description: Python code, tests and JSON test fixtures hold no customer's email, name, organization slug, account id or support ticket; test data uses synthetic placeholders.
+select:
+  glob: ['**/*.py', 'tests/fixtures/**/*.json']
+assert:
+  - id: synthetic-emails
+    description: Email addresses of users and customers are on example.com or example.org.
+    error: Replace the address with a placeholder such as user@example.com.
+    grep: '[A-Za-z0-9._%+-]+@(?!example\.(com|org|net)\b)[A-Za-z0-9-]+\.[A-Za-z]{2,}'
+    decide: 'Every email address in the text that stands for a user, a customer or another person has the domain example.com, example.org or example.net. An address of the software''s own service or team, such as a no-reply sender, does not count.'
+  - id: no-ticket-or-account-id
+    description: No support ticket and no customer account id.
+    error: Remove the ticket number or account id and describe the behaviour instead.
+    grep: '\b[A-Z]{2,10}-\d{3,}\b|#\d{3,}|[Tt]icket|TICKET|[Aa]ccount|ACCOUNT|[Ss]upport|[Cc]ustomer|[Ii]ncident|[Cc]ase \d'
+    decide: 'The text mentions no support ticket (such as "ticket 12345" or a key like "ABC-12345") and no account number of a specific customer (such as "account 1234567"). Made-up ids in test data, such as account_id=1, are fine.'
+  - id: no-customer-names
+    description: No company, organization or person is named as a customer.
+    error: Use a generic placeholder such as org-slug, and name tests and fixtures after the behaviour.
+    decide: 'No customer, user or account owner in the text is identified by a real-looking name: there is no distinctive company or organization name (like "Northgate Dental"), organization slug (like "northgate-dental") or person''s name for one, in data, in the name of a test or function, or in a comment. Placeholders made only of generic words such as org, slug, user, other, test, example or acme (like "org-slug", "other-org", "Example Org" or "Test User") are fine, and so is the name or address of the software''s own product, service or sender.'

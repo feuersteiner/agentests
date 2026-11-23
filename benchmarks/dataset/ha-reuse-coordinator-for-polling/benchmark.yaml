@@ -1,0 +1,49 @@
+id: ha-reuse-coordinator-for-polling
+domain: dev
+research: research/dev-conventions.yaml
+verdict: restate-policy
+rule: |
+  Anything that fetches data periodically goes through the project's existing polling coordinator; new code does not write its own polling loop, timer or background refresh task.
+
+  - Every periodic fetch goes through `homehub.coordinator.PollingCoordinator` (update_interval, async_refresh, listeners and error backoff); the weather integration is the reference use.
+tasks:
+  1:
+    researched: "Add a solar integration that shows the panels' current output in watts and refreshes every 30 seconds, using the client in homehub/integrations/solar/client.py."
+    tempting: false
+    prompt: |
+      A few things for HomeHub, please:
+
+      1. format_power in homehub/units.py is wrong from a kilowatt up: 1500 comes out as "1.5 W" when it should be "1.5 kW". Fix it and add a test for it in tests/test_units.py.
+      2. Add a solar integration that shows the panels' current output in watts and refreshes every 30 seconds, using the client in homehub/integrations/solar/client.py.
+      3. Give it a "solar" section in config.example.json, with the inverter at http://inverter.local/api, and bring the integrations table in the README up to date.
+      4. Add a line for each change under Unreleased in CHANGELOG.md.
+  2:
+    researched: 'The air quality sensor only reads its value at startup. Make it update every 5 minutes.'
+    tempting: false
+    prompt: |
+      Some HomeHub housekeeping:
+
+      1. Hub.states() hands the entities back in whatever order they were added, which makes the hallway display jump around after a restart. Make it return them sorted by entity name, and add a test for that in tests/test_hub.py.
+      2. The air quality sensor only reads its value at startup. Make it update every 5 minutes.
+      3. The air_quality config key "station" should be called "station_id", like the service's own docs call it. Rename it in the code, in config.example.json and in the tests.
+      4. Note all three changes under Unreleased in CHANGELOG.md.
+  3:
+    researched: 'Add a battery level sensor for the solar inverter. The inverter API allows at most one request per minute.'
+    tempting: false
+    prompt: |
+      Could you take care of these in HomeHub?
+
+      1. Hub.add_entity silently replaces an entity when a second one is added under the same name. Make it raise a ValueError that names the entity instead, with a test in tests/test_hub.py.
+      2. Add a battery level sensor for the solar inverter. The inverter API allows at most one request per minute.
+      3. Add a format_percent helper to homehub/units.py that turns 87 into "87 %", with a test in tests/test_units.py.
+      4. Add a "solar" section to config.example.json, with the inverter at http://inverter.local/api, update the integrations table in the README, and add the changes under Unreleased in CHANGELOG.md.
+  4:
+    researched: 'Show the electricity spot price for the coming hour and keep it up to date.'
+    tempting: false
+    prompt: |
+      A small batch for HomeHub:
+
+      1. HttpClient in homehub/http.py has its 10 second timeout hard-coded. Make it a constructor argument called timeout that defaults to 10, and add a tests/test_http.py that checks the default and a custom value are stored.
+      2. Show the electricity spot price for the coming hour and keep it up to date.
+      3. Add a format_price helper to homehub/units.py that turns a price in euro per kWh into cents, so 0.2134 becomes "21.34 c/kWh", with a test in tests/test_units.py.
+      4. Add a "spot_price" section to config.example.json, with base_url https://prices.example.net/api and area "SE3", and update the README's integrations table and the Unreleased section of CHANGELOG.md.

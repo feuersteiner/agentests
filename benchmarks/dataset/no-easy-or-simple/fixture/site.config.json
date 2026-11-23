@@ -1,0 +1,16 @@
+{
+  "siteName": "Mapleform Help",
+  "helpNav": ["publish-a-form", "export-responses"],
+  "appNav": [
+    { "label": "Forms", "path": "/forms" },
+    { "label": "Responses", "path": "/responses" },
+    { "label": "Settings", "path": "/settings" }
+  ],
+  "emails": {
+    "from": "Mapleform <hello@mapleform.example>",
+    "sequence": [{ "file": "emails/trial-ending.md", "day": 11 }]
+  },
+  "support": {
+    "email": "support@mapleform.example"
+  }
+}

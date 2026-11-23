@@ -1,0 +1,23 @@
+version: 1
+id: posthog-guard-double-submit
+title: Guard network-triggering controls against double submission
+description: A button or form that sends a request is disabled and shows loading while the request runs, and is reset whether it succeeds or fails.
+select:
+  glob: 'src/**/*.tsx'
+  grep: '\bapi\.\w+|\bfetch\('
+assert:
+  - id: disabled-while-in-flight
+    description: The control is disabled while its request is in flight.
+    error: Disable the button or form while its request runs, for example with loading on Button or busy on ConfirmDialog.
+    grep: 'onClick|onSubmit|onConfirm'
+    decide: 'Every button, form or dialog whose click, submit or confirm handler calls `api` or `fetch` has a `disabled`, `loading` or `busy` prop bound to a pending flag, so that it cannot be clicked or submitted again while that request is pending. Whether the flag is cleared afterwards does not matter here. A request made when the component mounts, such as inside `useEffect`, does not count as a handler. If no click, submit or confirm handler calls `api` or `fetch`, this is true.'
+  - id: shows-loading
+    description: The control shows a loading state while its request is in flight.
+    error: Show that the request is running, for example with loading on Button or busy on ConfirmDialog.
+    grep: 'onClick|onSubmit|onConfirm'
+    decide: 'Every button, form or dialog whose click, submit or confirm handler calls `api` or `fetch` has a visible loading indicator bound to a pending flag: a `loading` prop on a `Button`, a `busy` prop on a `ConfirmDialog`, a spinner element, or label text that changes while pending. A button that has only a `disabled` prop, and none of these, has no loading indicator. Whether the flag is cleared afterwards does not matter here. If no click, submit or confirm handler calls `api` or `fetch`, this is true.'
+  - id: reset-on-success-and-error
+    description: The pending state is cleared when the request succeeds and when it fails.
+    error: Clear the pending flag in a finally block, or in both the success and the error path.
+    grep: 'onClick|onSubmit|onConfirm'
+    decide: 'Every pending or loading flag that a click, submit or confirm handler sets to true before calling `api` or `fetch` is set back to false both when the request succeeds and when it throws or rejects: in a `finally` block, or in both the success path and the error path. A flag reset only on the line after an `await`, outside any `try`, is not reset when the request throws. If no handler sets such a flag, this is true.'

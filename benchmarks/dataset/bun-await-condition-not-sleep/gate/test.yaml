@@ -1,0 +1,17 @@
+version: 1
+id: bun-await-condition-not-sleep
+title: Tests await the condition, not the clock
+description: No bun test waits a fixed time or a fixed number of ticks for something to happen before it asserts.
+select:
+  glob: 'test/**/*.test.ts'
+assert:
+  - id: no-fixed-sleep
+    description: No test sleeps a fixed time and then carries on.
+    error: Await the event or promise, or poll with waitFor and a deadline; move the injected clock or fake timers for behaviour about time.
+    grep: '[Ss]leep|setTimeout|setInterval|[Dd]elay|timers'
+    decide: 'No test contains, in its own body, a pause for a fixed length of real time (such as await Bun.sleep(100) or an awaited setTimeout promise, whatever the delay) before it asserts or takes its next step. A pause does not count when it is inside a callback the test hands over as a fake job, handler or loader to stand in for slow work, inside a loop that re-checks a condition and gives up at a deadline, or run under fake timers. Every other pause counts, even when the same file also holds pauses that do not count.'
+  - id: no-counted-ticks
+    description: No test awaits a fixed number of empty ticks to let work finish.
+    error: Await the event or promise the work produces instead of flushing ticks.
+    grep: 'Promise\.resolve\(\)|setImmediate|nextTick|queueMicrotask'
+    decide: 'No test awaits a fixed number of empty ticks (such as await Promise.resolve(), setImmediate, process.nextTick or queueMicrotask) to give asynchronous work time to finish before it asserts.'

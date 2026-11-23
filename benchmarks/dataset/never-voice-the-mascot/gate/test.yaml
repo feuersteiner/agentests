@@ -1,0 +1,16 @@
+version: 1
+id: never-voice-the-mascot
+title: Never voice the mascot
+description: In emails, pages and app strings, the mascot Pip never speaks, is never quoted and is given no feelings or actions; Pip appears only as an illustration.
+select:
+  glob: ['emails/**/*.md', 'content/**/*.md', 'locales/**/*.json']
+  grep: '\b[Pp]ip(?![a-z])|[-_]pip\b|[Mm]ascot|\b[Ww]oo+f|\b[Aa]rf\b|\b[Bb]ark(s|ing|ed)?\b|\b[Ss]niff|\b[Pp]aws?\b|\b[Ww]ag(s|ging|ged)?\b|\b[Tt]ails?\b'
+assert:
+  - id: mascot-has-no-voice
+    description: Nothing is written as the mascot's own words.
+    error: Rewrite the line in Parcelpup's own voice; Pip never speaks, barks, is quoted or signs a message.
+    decide: 'Pip is the cartoon dog in the logo of the parcel-tracking app Parcelpup. In this text, Pip never talks. That means all four of these hold: (1) there is no "Woof" or other dog sound; (2) there is no sentence in which "I", "me" or "my" refers to Pip or to a dog; (3) there is no quotation attributed to Pip; (4) no message is signed by Pip. Sentences in which "we" or "us" means the company Parcelpup or its team are normal and are not Pip talking.'
+  - id: mascot-is-not-a-character
+    description: The copy does not say the mascot does, feels or thinks anything, and credits nothing to it.
+    error: Keep Pip to the illustration and its alt text or caption; say it in Parcelpup's own voice without Pip as a character.
+    decide: 'Pip is the cartoon dog in the logo of the parcel-tracking app Parcelpup. Pictures of Pip are allowed, and so is describing a picture: an image file name, or a description of the drawing in an alt-text or caption (any field whose name contains "alt" or "caption", the bracketed text of a Markdown image, or a caption line directly under an image), for example "Pip, the Parcelpup dog, holding a letter". Ignore those picture descriptions. In the rest of the text, no sentence, heading, subject line or button says that Pip does, did or will do something, or feels, thinks, wants, likes or knows something, and nothing is presented as belonging to or coming from Pip, such as "Pip''s tips". Stating that the dog in the logo is called Pip is allowed. A text that never mentions Pip outside picture descriptions meets this condition.'

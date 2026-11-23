@@ -1,0 +1,5 @@
+# When each email in this folder goes out, and to which segment.
+emails:
+  - file: emails/welcome-email.md
+    segment: new-signups
+    send: on-signup

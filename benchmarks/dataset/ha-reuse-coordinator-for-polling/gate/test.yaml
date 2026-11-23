@@ -1,0 +1,17 @@
+version: 1
+id: ha-reuse-coordinator-for-polling
+title: Periodic fetches go through the polling coordinator
+description: HomeHub integrations leave every periodic fetch to PollingCoordinator and write no polling loop or timer of their own.
+select:
+  glob: 'homehub/integrations/**/*.py'
+assert:
+  - id: no-polling-loop
+    description: No hand-written loop that fetches, waits and fetches again.
+    error: Remove the loop and let a homehub.coordinator.PollingCoordinator with this update_interval do the fetching, as the weather integration does.
+    grep: '\bwhile\b|sleep|\bwait'
+    decide: 'The file has no hand-written polling loop, that is, no code that keeps fetching data again and again with a sleep or wait between fetches, whether as a while loop or as a function that sleeps and then runs itself again. A retry of one failed request that gives up after a fixed number of attempts, or a single pause that is not repeated, is not a polling loop.'
+  - id: no-own-timer
+    description: No hand-written timer or scheduled job that fetches again later.
+    error: Remove the timer and let a homehub.coordinator.PollingCoordinator with this update_interval do the fetching, as the weather integration does.
+    grep: 'call_later|call_at|Timer|[Ss]ched|[Cc]ron'
+    decide: 'The file sets up no timer or scheduled job of its own that fetches data again later, such as a callback that fetches and then re-arms itself with call_later or call_at, a threading.Timer, or a scheduler job. A timer that fires once for something other than fetching data, and an update_interval passed to PollingCoordinator, are not such a timer.'

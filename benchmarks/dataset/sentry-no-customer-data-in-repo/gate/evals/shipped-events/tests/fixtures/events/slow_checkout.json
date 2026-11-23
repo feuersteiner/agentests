@@ -1,0 +1,8 @@
+{
+  "event_id": "evt-0001",
+  "org": "org-slug",
+  "user": { "email": "user@example.com" },
+  "tags": { "env": "prod" },
+  "metrics": { "p95_ms": 2400, "error_rate": 0.01 },
+  "fingerprint": "fp-0001"
+}

@@ -1,0 +1,20 @@
+version: 1
+id: no-celebrating-routine-tasks
+title: No celebrating routine tasks
+description: Confirmations of routine steps in UI strings, in-app copy and emails say plainly what happened, without congratulations, assumed excitement or "success" wording.
+select:
+  glob: ['locales/**/*.json', 'content/**/*.md', 'emails/**/*.md']
+assert:
+  - id: no-congratulation
+    description: No confirmation of a routine step congratulates, praises or cheers.
+    error: Say plainly what happened and what follows; remove the congratulation, praise, cheer or celebratory emoji.
+    decide: 'No message in the text that tells a user that a routine step they took is done (for example settings or details saved or updated, an account connected or disconnected, something imported, added, uploaded or sent, or a setup or onboarding step completed) congratulates, praises or cheers the user for it, whether in words such as "Congrats", "Great job", "Nice work", "Well done", "You did it", "Woohoo" or "Yay", or with a celebratory emoji such as a party popper, confetti or a trophy. A text that holds no message about a completed routine step meets this, and so does a text that celebrates only a rare milestone such as an anniversary.'
+  - id: no-assumed-excitement
+    description: No confirmation of a routine step assumes the user is excited.
+    error: Do not tell the user how they feel about the step; say what happened and what follows.
+    decide: 'No message in the text that tells a user that a routine step they took is done (for example settings or details saved or updated, an account connected or disconnected, something imported, added, uploaded or sent, or a setup or onboarding step completed) says or assumes that the user is excited, thrilled, delighted or proud about it, or presents the completed step as exciting news, in words such as "You must be thrilled", "Exciting news", "You will love this" or "The wait is over". A text that holds no message about a completed routine step meets this.'
+  - id: no-success-wording
+    description: No confirmation calls a routine step a success.
+    error: Name what happened instead of calling it a success, for example "Logo added." instead of "Logo successfully added."
+    grep: '([Ss]uccess|SUCCESS)(?![\w.-]*"\s*:)'
+    decide: 'No wording that a user reads in the text describes a routine step the user completed (for example settings or details saved or updated, an account connected or disconnected, something imported, added, uploaded or sent, or a setup or onboarding step completed) as a success, as successful or as done successfully, as in "Success!", "Import successful" or "You successfully added a logo". The word does not count when it appears only in the key, name or identifier of a string, or when it is about something other than a step the user completed, such as a customer success team, a wish for success, or something that failed or was not successful.'

@@ -1,0 +1,29 @@
+{
+  "nav": {
+    "forms": "Forms",
+    "responses": "Responses",
+    "integrations": "Integrations",
+    "settings": "Settings"
+  },
+  "emptyStates": {
+    "forms": {
+      "title": "No forms yet",
+      "body": "Forms you create appear here. Start from a template or a blank form.",
+      "action": "New form"
+    },
+    "responses": {
+      "title": "No responses yet",
+      "body": "Responses appear here once your form is published and someone submits it.",
+      "action": "Open the Share tab"
+    },
+    "integrations": {
+      "title": "No integrations yet",
+      "body": "Connect Slack, Google Sheets or a webhook in seconds. Setup is quick, and you will be sending responses to your tools in no time.",
+      "action": "Add integration"
+    }
+  },
+  "errors": {
+    "publishNoFields": "Add at least one field before you publish this form.",
+    "exportTooLarge": "This export has more than 10,000 rows. We will email you a download link."
+  }
+}

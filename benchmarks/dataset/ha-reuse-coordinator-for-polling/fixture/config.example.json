@@ -1,0 +1,10 @@
+{
+  "weather": {
+    "base_url": "https://weather.example.net/api",
+    "location": "larkfield"
+  },
+  "air_quality": {
+    "base_url": "https://air.example.net/api",
+    "station": "LF-02"
+  }
+}
