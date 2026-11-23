@@ -1,0 +1,18 @@
+version: 1
+id: email-links-use-configured-base-url
+title: Email links use the configured base URL
+description: Absolute links that the app puts into emails or other messages take their scheme and host from the configured base URL, never from the incoming request.
+select:
+  glob: 'app/**/*.py'
+  grep: 'send_mail|send_email|smtplib|EmailMessage|_external|X-Forwarded|HTTP_HOST|\.host_url|\.url_root|\breq(uest)?\.(host|url)\b|[\[(]["''][Hh]ost["'']'
+assert:
+  - id: message-links-not-from-request
+    description: No link put into an email or other message takes its scheme or host from the incoming request.
+    error: Build the link from the configured base URL, as in config.PUBLIC_BASE_URL + url_for(...), not from url_for(..., _external=True), request.host_url, request.url, request.host or the Host or X-Forwarded-Host header.
+    grep: '[Hh]ost|_external|url_root|\.url\b|HTTP_|[Oo]rigin'
+    decide: 'No link that this Python code puts into an email, or into another message sent to a person such as a text message or a chat notification, takes its scheme or host from the incoming HTTP request. Taking them from the request means building the link with `url_for(..., _external=True)`, `request.host_url`, `request.url_root`, `request.url`, `request.host`, or the request''s `Host` or `X-Forwarded-Host` header, including when the request''s host is only a fallback for an empty configured base URL. A link whose scheme and host come from a configured base URL setting, such as `config.PUBLIC_BASE_URL` or another value read from the environment or a settings file, passes. Code that puts no link into a message passes, even when it reads the request''s host for another purpose.'
+  - id: base-url-not-from-request
+    description: The app's public base URL never comes from the incoming request.
+    error: Read the public base URL only from configuration (PUBLIC_BASE_URL from the environment) and never fall back to the request's host; fail loudly when it is missing.
+    grep: 'BASE_URL|SITE_URL|PUBLIC_URL|APP_URL|FRONTEND_URL|SERVER_NAME|[Pp]ublic_?[Bb]ase|[Pp]ublic_?[Uu]rl|[Ss]ite_?[Uu]rl|[Aa]pp_?[Uu]rl|[Ff]rontend_?[Uu]rl|[Cc]anonical'
+    decide: 'Wherever this Python file defines the application''s public base URL as a setting or as a shared helper (the scheme and host that other code puts in front of a path to make links for emails and other messages, such as a `PUBLIC_BASE_URL`, `BASE_URL` or `SITE_URL` setting or a `public_base_url()` helper), its value comes only from configuration, such as an environment variable, a settings file or a fixed default. It is never taken from the incoming HTTP request (`request.host_url`, `request.url_root`, `request.url`, `request.host`, or the `Host` or `X-Forwarded-Host` header), not even as a fallback when the configured value is empty. A file that only uses the configured value without defining it passes, and so does a URL built from the request only to answer that same request, such as a pagination or redirect link in the response.'
