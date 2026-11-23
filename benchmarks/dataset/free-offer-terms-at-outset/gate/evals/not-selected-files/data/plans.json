@@ -1,0 +1,22 @@
+{
+  "currency": "EUR",
+  "annual_commitment_months": 12,
+  "plans": [
+    {
+      "id": "starter",
+      "name": "Starter",
+      "price_per_month": 19,
+      "members": 5,
+      "boards": 3,
+      "billing": ["monthly", "annual"]
+    },
+    {
+      "id": "pro",
+      "name": "Pro",
+      "price_per_month": 49,
+      "members": 25,
+      "boards": 50,
+      "billing": ["monthly", "annual"]
+    }
+  ]
+}
