@@ -17,7 +17,7 @@ import { toCost } from './prices.ts';
 import type { ModelPrice } from './prices.ts';
 import { startProxy } from './proxy.ts';
 import type { DecisionProxy } from './proxy.ts';
-import { prepareToolchain } from './toolchain.ts';
+import { prepareToolchain, useToolchain } from './toolchain.ts';
 import { gates } from './types.ts';
 import type { GateArm } from './types.ts';
 import { toConfig } from './workspace.ts';
@@ -31,6 +31,8 @@ export interface ProveSettings {
 	datasetDirectory: string;
 	pricesFile: string;
 	upstreams: Record<GateArm, string>;
+	/** A toolchain folder to reuse, or prepare once and keep, instead of one inside the proof folder. */
+	toolchain?: string;
 }
 
 /** An eval's outcome: the Test's, or `refused` when a decision was refused, worth 0, or `error` for any other failure. */
@@ -218,8 +220,10 @@ export const runProof = async (settings: ProveSettings): Promise<void> => {
 	const folder = join(runsDirectory, `prove-${new Date().toISOString().replace(/[:.]/g, '-')}`);
 	mkdirSync(folder, { recursive: true });
 	console.log(`Proof folder: ${folder}`);
-	console.log('Preparing the agentests toolchain (npm pack of core/, installed once)');
-	const modules = await prepareToolchain(join(folder, 'toolchain'));
+	const modules = settings.toolchain
+		? await useToolchain(settings.toolchain)
+		: (console.log('Preparing the agentests toolchain (npm pack of core/, installed once)'),
+			await prepareToolchain(join(folder, 'toolchain')));
 	const proxy = startProxy(settings.upstreams, keys);
 	const proof: Record<string, Partial<Record<GateArm, ArmProof>>> = {};
 	const manifest = {

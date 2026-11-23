@@ -32,3 +32,12 @@ export const prepareToolchain = async (folder: string): Promise<string> => {
 		throw new Error(`The toolchain in ${folder} has no agentests binary`);
 	return modules;
 };
+
+/**
+ * The `node_modules` of a toolchain prepared earlier in `folder`, reused as it is, or a new one prepared there.
+ * Many proofs can share one toolchain this way instead of packing and installing `core/` each time.
+ */
+export const useToolchain = async (folder: string): Promise<string> => {
+	const modules = join(folder, 'node_modules');
+	return existsSync(join(modules, '.bin', 'agentests')) ? modules : prepareToolchain(folder);
+};

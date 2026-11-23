@@ -123,7 +123,7 @@ const saveDiffs = (directory: string, observed: GitObservation): void => {
 export const runOne = async (plan: RunPlan, context: RunContext): Promise<RunResult> => {
 	const { entry, task, arm } = plan;
 	const key = toKey(plan);
-	const prompt = entry.tasks.get(task)!;
+	const { prompt } = entry.tasks.get(task)!;
 	const runDirectory = join(context.folder, 'runs', `${entry.id}--${task}--${arm}`);
 	// A neutral path: the agent sees its working directory, which must name neither the rule nor the arm.
 	const token = randomBytes(8).toString('hex');

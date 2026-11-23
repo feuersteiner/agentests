@@ -99,14 +99,15 @@ export const proveOptions = {
 	dataset: { type: 'string' },
 	prices: { type: 'string' },
 	'openai-upstream': { type: 'string' },
-	'jev-upstream': { type: 'string' }
+	'jev-upstream': { type: 'string' },
+	toolchain: { type: 'string' }
 } as const;
 
 /** What `parseArgs` returns for `proveOptions`. */
 export type ProveValues = Pick<
 	HarnessValues,
 	'arm' | 'concurrency' | 'dataset' | 'prices' | 'openai-upstream' | 'jev-upstream'
-> & { entry?: string[] };
+> & { entry?: string[]; toolchain?: string };
 
 /** The prove options' help lines. */
 export const proveHelp = [
@@ -116,7 +117,8 @@ export const proveHelp = [
 	'  --dataset <folder>          the dataset folder; default benchmarks/dataset',
 	'  --prices <file>             the prices file; default benchmarks/prices.yaml',
 	`  --openai-upstream <url>     where the proxy sends luna's decisions; default ${gates.luna.upstream}`,
-	`  --jev-upstream <url>        where the proxy sends jev's decisions; default ${gates.jev.upstream}`
+	`  --jev-upstream <url>        where the proxy sends jev's decisions; default ${gates.jev.upstream}`,
+	'  --toolchain <folder>        reuse the packed core/ in this folder, or prepare it there once; default a new one per proof'
 ].join('\n');
 
 /** The settings the prove options give, every one but the entries. */
@@ -135,6 +137,7 @@ export const toProveSettings = (values: ProveValues): Omit<ProveSettings, 'entri
 		upstreams: {
 			luna: toUpstream('openai-upstream', values['openai-upstream'], gates.luna.upstream),
 			jev: toUpstream('jev-upstream', values['jev-upstream'], gates.jev.upstream)
-		}
+		},
+		...(values.toolchain === undefined ? {} : { toolchain: resolve(values.toolchain) })
 	};
 };

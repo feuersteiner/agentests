@@ -2,6 +2,16 @@ import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import type { Domain, Verdict } from './catalogue.ts';
 
+/** One task of an entry: the prompt the agent gets, the researched request inside it, and whether it tempts. */
+export interface DatasetTask {
+	/** The whole multi-step prompt the agent gets, which contains `researched` word for word. */
+	prompt: string;
+	/** The researched task prompt, word for word, or as little changed as the fixture needed. */
+	researched: string;
+	/** Whether the wording pushes the agent toward breaking the rule, beyond giving it the chance. */
+	tempting: boolean;
+}
+
 /** One dataset entry: a rule with its tasks, rubric, fixture, skill and compiled Test. */
 export interface DatasetEntry {
 	/** The rule id, also the entry's folder name. */
@@ -12,8 +22,8 @@ export interface DatasetEntry {
 	verdict: Exclude<Verdict, 'drop'>;
 	/** The rule text that the skill, the Test and the rubric each contain word for word. */
 	rule: string;
-	/** The usable task prompts, by the task's 1-based position in the research entry. */
-	tasks: Map<number, string>;
+	/** The usable tasks, by the task's 1-based position in the research entry. */
+	tasks: Map<number, DatasetTask>;
 	/** The judge's rubric for this rule. */
 	rubric: string;
 	/** The entry's folder. */
@@ -90,19 +100,39 @@ class Problems {
 	};
 }
 
-/** The usable tasks of `benchmark.yaml`'s `tasks` mapping, noting any key or prompt that is not usable. */
-const toTasks = (value: unknown, problems: Problems): Map<number, string> => {
-	const tasks = new Map<number, string>();
+/**
+ * The usable tasks of `benchmark.yaml`'s `tasks` mapping, noting any key or task that is not usable: each task is a
+ * mapping with `prompt`, `researched`, which the prompt contains word for word, and `tempting`, true or false.
+ */
+const toTasks = (value: unknown, problems: Problems): Map<number, DatasetTask> => {
+	const tasks = new Map<number, DatasetTask>();
 	if (!isFields(value) || Object.keys(value).length === 0) {
-		problems.add('benchmark.yaml: tasks must map task positions to prompts');
+		problems.add('benchmark.yaml: tasks must map task positions to tasks');
 		return tasks;
 	}
-	for (const [key, prompt] of Object.entries(value)) {
+	for (const [key, task] of Object.entries(value)) {
 		const position = Number(key);
-		if (!/^[1-9]\d*$/.test(key))
+		if (!/^[1-9]\d*$/.test(key)) {
 			problems.add(`benchmark.yaml: task key "${key}" is not a 1-based position`);
-		else if (!isText(prompt)) problems.add(`benchmark.yaml: task ${key} has no prompt`);
-		else tasks.set(position, prompt.trim());
+			continue;
+		}
+		if (!isFields(task)) {
+			problems.add(
+				`benchmark.yaml: task ${key} must be a mapping with prompt, researched and tempting`
+			);
+			continue;
+		}
+		const { prompt, researched, tempting } = task;
+		if (!isText(prompt)) problems.add(`benchmark.yaml: task ${key} has no prompt`);
+		if (!isText(researched)) problems.add(`benchmark.yaml: task ${key} has no researched prompt`);
+		if (typeof tempting !== 'boolean')
+			problems.add(`benchmark.yaml: task ${key} needs tempting: true or false`);
+		if (isText(prompt) && isText(researched) && !flatten(prompt).includes(flatten(researched)))
+			problems.add(
+				`benchmark.yaml: task ${key}'s prompt does not contain its researched prompt word for word`
+			);
+		if (isText(prompt) && isText(researched) && typeof tempting === 'boolean')
+			tasks.set(position, { prompt: prompt.trim(), researched: researched.trim(), tempting });
 	}
 	return tasks;
 };
@@ -163,7 +193,7 @@ export const loadEntry = (directory: string, id: string): DatasetEntry => {
 	const problems = new Problems();
 	const meta = problems.readYaml(join(root, 'benchmark.yaml'), 'benchmark.yaml');
 	let rule: string | undefined;
-	let tasks = new Map<number, string>();
+	let tasks = new Map<number, DatasetTask>();
 	const fields: Fields = isFields(meta) ? meta : {};
 	if (meta !== undefined && !isFields(meta)) problems.add('benchmark.yaml: expected a mapping');
 	if (isFields(meta)) {
