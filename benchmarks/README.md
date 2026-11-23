@@ -134,12 +134,14 @@ benchmarks/
     business-communication.yaml    business rules on what a company says
     business-policy.yaml           business rules on what a company decides
     skills.yaml                    a survey of skills, for arm 2
+  tsconfig.json                    the TypeScript settings for the check script
 ```
 
 `package.json` makes this folder a Bun workspace of the repository. Its `benchmark` script runs
 `cli/index.ts` with Bun, which for now only reports that the harness is not built and exits with
-code 1. The dataset, the harness and the results will be added to this folder; their layout is not
-decided.
+code 1. Its `check` script runs `tsc --noEmit`, so the root `bun run check` covers this folder. Its
+only dependencies are `typescript` and `@types/bun`, for development. The dataset, the harness and
+the results will be added to this folder; their layout is not decided.
 
 ## The research catalogue
 
