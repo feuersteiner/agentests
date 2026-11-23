@@ -1,0 +1,13 @@
+# The site's navigation. `path` is the page's address on quillnote.example.
+header:
+  - label: Home
+    path: /
+    source: content/landing/home.md
+  - label: Pricing
+    path: /pricing
+    source: content/pricing.md
+footer:
+  - label: Help
+    path: /help
+  - label: Privacy
+    path: /privacy

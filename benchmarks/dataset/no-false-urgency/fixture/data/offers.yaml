@@ -1,0 +1,23 @@
+# The current offers. Dates are in ISO format; `ends: null` means the offer is ongoing.
+offers:
+  - id: annual
+    name: Annual plan discount
+    applies_to: plus
+    billing: annual
+    discount_percent: 20
+    ends: null
+    max_redemptions: null
+    terms: Pay for Plus yearly and pay 20% less than paying monthly. Available to everyone.
+
+  - id: student
+    name: Student code
+    code: STUDENT40
+    applies_to: plus
+    billing: annual
+    discount_percent: 40
+    ends: '2027-09-30'
+    max_redemptions: null
+    terms: >-
+      40% off the first year of annual Plus for anyone who signs up with a school or university
+      email address. The code works until the end of 30 September 2027. Later years are billed at
+      the usual annual price.

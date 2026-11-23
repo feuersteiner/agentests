@@ -1,0 +1,18 @@
+{
+  "currency": "USD",
+  "trial": { "plan": "plus", "days": 14, "then": "free" },
+  "plans": {
+    "free": {
+      "name": "Free",
+      "monthly": 0,
+      "notes": 100,
+      "devices": 1
+    },
+    "plus": {
+      "name": "Plus",
+      "monthly": 8,
+      "notes": null,
+      "devices": 5
+    }
+  }
+}
