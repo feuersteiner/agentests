@@ -6,6 +6,7 @@
 	"scripts": {
 		"benchmark": "bun cli/index.ts",
 		"check": "tsc --noEmit",
+		"pilot": "bun cli/pilot.ts",
 		"pilot:pick": "bun cli/pick.ts",
 		"test": "bun test ./tests"
 	},
