@@ -1,0 +1,9 @@
+[project]
+name = "perch-web"
+version = "0.5.0"
+description = "The Perch web app: sign-in and account help for studio members."
+requires-python = ">=3.11"
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
