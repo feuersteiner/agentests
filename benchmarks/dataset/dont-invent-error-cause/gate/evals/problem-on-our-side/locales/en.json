@@ -1,0 +1,59 @@
+{
+  "app": {
+    "name": "Ferrybox",
+    "tagline": "Send big files by link."
+  },
+  "nav": {
+    "transfers": "Transfers",
+    "send": "Send files",
+    "settings": "Settings",
+    "help": "Help"
+  },
+  "send": {
+    "title": "Send files with Ferrybox",
+    "fields": {
+      "recipients": "Email addresses",
+      "message": "Message",
+      "expiry": "Link expires after"
+    },
+    "help": {
+      "recipients": "Up to 50 addresses, separated by commas. To share a link yourself, choose Get a link.",
+      "expiry": "Links last 7 days on Free. On Pro you can choose up to 30 days."
+    },
+    "getLink": "Get a link",
+    "action": "Send",
+    "progress": "Uploading {{fileName}}: {{percent}}%",
+    "done": "Sent. We emailed a download link to {{count}} people."
+  },
+  "sync": {
+    "title": "Overnight sync",
+    "folder": "Folder to sync",
+    "hour": "Sync every night at",
+    "now": "Sync now",
+    "history": "Sync history",
+    "lastSync": "Last sync finished at {{finishedAt}}."
+  },
+  "dialogs": {
+    "deleteTransfer": {
+      "title": "Delete this transfer?",
+      "body": "The download link stops working at once and the files are deleted for everyone. This frees {{size}} of your storage.",
+      "confirm": "Delete transfer",
+      "cancel": "Keep it"
+    },
+    "signOut": {
+      "title": "Sign out of Ferrybox?",
+      "body": "You can sign in again at any time with your email address.",
+      "confirm": "Sign out",
+      "cancel": "Stay signed in"
+    }
+  },
+  "errors": {
+    "E_QUOTA_FULL": "Your storage is full: you are using all {{allowance}} of your {{plan}} plan. Delete transfers you no longer need under Transfers, or move to Pro for 2 TB.",
+    "E_FILE_TOO_LARGE": "{{fileName}} is over 20 GB, the largest file Ferrybox can send. Split it into parts of 20 GB or less and send them together.",
+    "E_FILE_TYPE_BLOCKED": "Ferrybox can't send {{fileName}}: .exe, .bat, .cmd, .scr and .msi files are blocked, even inside a .zip file. Remove it and send the rest.",
+    "E_LINK_EXPIRED": "This link expired on {{expiredOn}} and its files have been deleted. Ask {{senderName}} to send them again.",
+    "E_TOO_MANY_RECIPIENTS": "This transfer has {{count}} email addresses, and the limit is 50. Send it as several transfers, or choose Get a link and share the link.",
+    "E_UPLOAD_500": "Something went wrong and {{fileName}} wasn't uploaded, so the transfer wasn't sent. Try again. If it keeps happening, contact support and quote E_UPLOAD_500.",
+    "E_UNKNOWN": "Something went wrong on our side. Try again in a few minutes. If it keeps happening, contact support and quote E_UNKNOWN."
+  }
+}

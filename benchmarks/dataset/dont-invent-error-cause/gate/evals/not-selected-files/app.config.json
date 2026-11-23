@@ -1,0 +1,30 @@
+{
+  "appName": "Ferrybox",
+  "plans": {
+    "free": { "storageGb": 50, "linkDays": 7 },
+    "pro": { "storageGb": 2000, "linkDays": 30 }
+  },
+  "limits": {
+    "maxFileGb": 20,
+    "maxRecipients": 50,
+    "blockedExtensions": [".exe", ".bat", ".cmd", ".scr", ".msi"]
+  },
+  "features": {
+    "desktopSync": true,
+    "passwordLinks": true
+  },
+  "sync": {
+    "defaultHour": 2
+  },
+  "helpArticles": ["sharing-a-link", "storage-and-plans"],
+  "emails": {
+    "from": "Ferrybox <hello@ferrybox.example>",
+    "transactional": [
+      { "file": "emails/transfer-received.md", "trigger": "transfer.received" },
+      { "file": "emails/link-expiring.md", "trigger": "link.expiring" }
+    ]
+  },
+  "support": {
+    "email": "support@ferrybox.example"
+  }
+}
