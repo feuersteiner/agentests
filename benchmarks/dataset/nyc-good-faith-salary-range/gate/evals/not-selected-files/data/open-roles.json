@@ -1,0 +1,24 @@
+{
+  "roles": [
+    {
+      "id": "senior-ae-nyc",
+      "title": "Senior Account Executive",
+      "team": "Sales",
+      "location": "New York office",
+      "manager": "Dana Ruiz",
+      "brief": "hiring/briefs/senior-ae-nyc.md",
+      "advert": null,
+      "status": "open"
+    },
+    {
+      "id": "em-dispatch",
+      "title": "Engineering Manager, Dispatch",
+      "team": "Dispatch",
+      "location": "Remote, US",
+      "manager": "Tomasz Wolski",
+      "brief": "hiring/briefs/em-remote.md",
+      "advert": null,
+      "status": "open"
+    }
+  ]
+}
