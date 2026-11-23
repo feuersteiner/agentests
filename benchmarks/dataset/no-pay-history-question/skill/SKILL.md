@@ -1,6 +1,6 @@
 ---
 name: no-pay-history-question
-description: Covers what hiring documents may ask candidates about pay. Use whenever writing or editing an application form, a recruiter phone-screen or screening script, an interview guide, an offer checklist or any other recruiting document, especially one that touches salary, compensation, offers or reference checks, even if the request does not mention pay.
+description: Covers what Tessellate's hiring documents may ask candidates about pay. Use whenever you write or edit an application form, a recruiter phone-screen or screening script, an interview guide, an offer checklist or another recruiting document (the Markdown files under hiring/), especially where it touches salary, compensation, offers or reference checks, even if the request does not mention pay.
 ---
 
 # Never ask candidates about their pay history

@@ -1,0 +1,22 @@
+{
+  "features": [
+    {
+      "slug": "alerts",
+      "name": "Alerts",
+      "status": "ga",
+      "plans": ["free", "team", "business"]
+    },
+    {
+      "slug": "sampling-controls",
+      "name": "Sampling controls",
+      "status": "ga",
+      "plans": ["free", "team", "business"]
+    },
+    {
+      "slug": "trace-replay",
+      "name": "Trace replay",
+      "status": "beta",
+      "plans": ["team", "business"]
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "roles": [
+    {
+      "id": "backend-engineer",
+      "title": "Backend Engineer, Planning Engine",
+      "level": "L3 to L4",
+      "team": "Planning Engine",
+      "manager": "Joris van Dam",
+      "recruiter": "Sanne de Wit",
+      "description": "hiring/roles/backend-engineer.md",
+      "status": "open"
+    }
+  ]
+}

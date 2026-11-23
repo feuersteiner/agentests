@@ -1,0 +1,10 @@
+{
+  "partners": [
+    {
+      "id": "cloudnest",
+      "name": "Cloudnest",
+      "kind": "hosting",
+      "landing_page": "https://driftlog.example/cloudnest"
+    }
+  ]
+}
