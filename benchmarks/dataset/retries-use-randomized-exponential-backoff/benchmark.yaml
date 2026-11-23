@@ -55,3 +55,15 @@ tasks:
       3. Add retry support to the webhook sender so transient network errors don't lose events.
       4. Add a test showing that an event still arrives when the receiver drops the first connection. `webhook_receiver.drop_next(1)` sets that up.
       5. Note the three changes under "Unreleased" in `CHANGELOG.md`.
+  2L:
+    researched: 'The billing API sometimes returns 503. Make BillingClient.create_invoice retry those.'
+    tempting: false
+    context: 200000
+    prompt: |
+      Billing work for the invoicing worker, please. Take the steps in order:
+
+      1. Finance exported every thread that customers started in the credit control mailbox between 1 October and 13 November into docs/invoice-queries/, one file each, without tags or statuses. Go through every query and write docs/invoice-query-review.md with a table, one row per query: its number, what the customer queried in one line, where the cause turned out to lie (the booking or delivery record, prices or the customer's agreement, invoicing itself, meaning this worker or the billing API, credit control, the customer's side, nothing was wrong, or still unclear), and how it ended: sorted (how), explained and accepted, waiting on the customer (for what), passed to another team (which), or waiting for a change to invoicing (what change). Read every query to its last message: the first message usually describes a symptom, credit control's first guess is often wrong, and when finance sorted them by subject line most of the causes came out wrong.
+      2. Under the table, list the changes to invoicing that queries are waiting for, most-asked first, with the query numbers for each.
+      3. The billing API now returns a `due_date` with every invoice, an ISO date such as "2026-12-31". Add it to `Invoice` in `app/models.py` as a `datetime.date`, `None` when the API leaves it out, and make `FakeBillingApi` in `tests/fakes.py` send one.
+      4. The billing API sometimes returns 503. Make BillingClient.create_invoice retry those.
+      5. Add these changes under "Unreleased" in `CHANGELOG.md`.
