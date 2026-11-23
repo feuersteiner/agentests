@@ -1,0 +1,23 @@
+version: 1
+id: sentry-no-queries-in-serialize
+title: No queries in serialize
+description: Serializers under api/serializers/ run no database query once per object, in serialize or in a loop of get_attrs, and fetch related data for the whole list at once in get_attrs.
+select:
+  glob: 'api/serializers/**/*.py'
+  grep: 'def (serialize|get_attrs)\('
+assert:
+  - id: serialize-runs-no-query
+    description: The per-object serialize method makes no .objects call and follows no relation.
+    error: serialize runs once per object; fetch this related data for the whole list in get_attrs and have serialize read it from attrs.
+    grep: '\.objects\b|\.(team|project|user)\b|_set\b'
+    decide: 'In this Python file, serializer classes have a method `serialize(self, obj, attrs, user)` that runs once for every object of a list. No `serialize` method, and no function or method of this file that it calls, contains a `.objects` call (such as `Member.objects.filter(...)`) or an attribute access named `team`, `project` or `user`, or ending in `_set`, on any object (such as `x.team`, `x.user` or `x.member_set`, whatever `x` is called, including `obj` and rows stored in `attrs`): these are the models'' relations, and each use runs a database query. `x.user` counts even though the method also has an argument named `user`; reading that argument''s own fields, such as `user.id`, does not. Reading an object''s own fields, such as `project.name` or `project.team_id`, or a dict key, is fine, and `.objects` calls in `get_attrs` do not count here. A file with no such `serialize` method passes.'
+  - id: get-attrs-queries-outside-loops
+    description: get_attrs runs no .objects query once per item.
+    error: Collect the ids first and run one query with __in (or in_bulk) outside the loop, then group the rows in Python.
+    grep: '\.objects\b'
+    decide: 'In this Python file, serializer classes may have a method `get_attrs(self, item_list, user)` that runs once for a whole list of objects. Inside every `for` loop and comprehension in a `get_attrs` method, the code that is repeated (the loop body, or the comprehension''s expression and condition, but not the iterable it loops over) makes no `.objects` call, either directly or through a function or method of this file. A `.objects` query that is itself the iterable of a loop or stands outside the loops, such as `Member.objects.filter(project_id__in=ids)` or `Team.objects.in_bulk(ids)`, is fine. A file with no `get_attrs` method passes.'
+  - id: no-relations-in-get-attrs-loops
+    description: No loop in get_attrs follows a relation of a model object once per item.
+    error: A relation such as row.team or row.member_set runs a query for every item of the loop; collect the ids and fetch the related rows with one query outside the loop.
+    grep: '\.(team|project|user)\b|_set\b'
+    decide: 'In this Python file, serializer classes may have a method `get_attrs(self, item_list, user)` that runs once for a whole list of objects. The models have relations, the foreign keys `team`, `project` and `user` and every attribute whose name ends in `_set`, and using one runs a database query every time, on any object, including a row that a bulk query fetched. Inside every `for` loop and comprehension in a `get_attrs` method, the code that is repeated (the loop body, or the comprehension''s expression and condition) contains no attribute access named `team`, `project` or `user`, or ending in `_set`, on any object (such as `x.team` or `x.member_set`, whatever `x` is called), either directly or through a function or method of this file. Reading an object''s own fields, such as `project.name` or `project.team_id`, is not using a relation. A file with no `get_attrs` method passes.'
