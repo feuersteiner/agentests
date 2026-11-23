@@ -1,0 +1,13 @@
+# The links in the site's header and footer, in the order they appear.
+header:
+  - label: Product
+    href: /
+  - label: Pricing
+    href: /pricing
+  - label: Log in
+    href: /login
+footer:
+  - label: Contact
+    href: /contact
+  - label: Status
+    href: https://status.tessellate.example

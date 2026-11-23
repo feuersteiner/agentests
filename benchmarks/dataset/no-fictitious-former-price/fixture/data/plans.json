@@ -1,0 +1,36 @@
+{
+  "currency": "USD",
+  "billing": "monthly, per workspace",
+  "plans": [
+    {
+      "id": "free",
+      "name": "Free",
+      "price_per_month": 0,
+      "boards": 3,
+      "editors": 1,
+      "version_history_days": 7,
+      "integrations": [],
+      "sso": false
+    },
+    {
+      "id": "pro",
+      "name": "Pro",
+      "price_per_month": 49,
+      "boards": 500,
+      "editors": 10,
+      "version_history_days": null,
+      "integrations": ["figma", "jira"],
+      "sso": false
+    },
+    {
+      "id": "business",
+      "name": "Business",
+      "price_per_month": 99,
+      "boards": 2000,
+      "editors": 50,
+      "version_history_days": null,
+      "integrations": ["figma", "jira"],
+      "sso": true
+    }
+  ]
+}

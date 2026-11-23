@@ -1,0 +1,22 @@
+version: 1
+id: no-fictitious-former-price
+title: No fictitious former price
+description: Tessellate's sale pages, emails and ads compare the Pro price only with the $49 a month Pro has really cost, never the $79 test price or the Business price, and work every saving out from $49.
+select:
+  glob: ['website/**/*.md', 'marketing/**/*.md']
+  grep: '\$|%|USD|[Dd]ollars?\b|[Pp]er ?cent|PER ?CENT|[Hh]alf|HALF'
+assert:
+  - id: reference-price-is-49
+    description: Every "was", "regular", "normally", "worth" or struck-through price given for Pro is $49 a month, or $588 a year.
+    error: Compare the Pro sale price only with $49 a month (or $588 a year), the price Pro has cost since November 2024. The $79 October test price and the $99 Business price are not former prices of Pro.
+    grep: '[Ww]as\b|WAS\b|[Rr]egular|REGULAR|[Nn]ormal|NORMAL|[Uu]sual|USUAL|[Ll]ist|LIST|[Oo]riginal|ORIGINAL|[Ff]ull|FULL|[Ss]tandard|STANDARD|[Ii]nstead|INSTEAD|[Ww]orth|WORTH|[Vv]alue|VALUE|[Rr]etail|RETAIL|~~|<(s|del|strike)\b|[Rr]educ|REDUC|[Mm]arked|[Ss]lash|SLASH|[Dd]own from|[Uu]p from|[Cc]ompar|\b[Vv]s\b|\bVS\b|[Vv]ersus|[Ll]ess than|LESS THAN|[Cc]heaper|CHEAPER|[Bb]efore|BEFORE|\$\s?\d[\s\S]*\$\s?\d|→|->'
+    decide:
+      - 'The text is about another company''s product, not Tessellate''s: it names another company as the seller of what it offers, and the name Tessellate does not appear in it. A text that names no seller is not about another company''s product, and tools that a product works with, such as Figma or Jira, are not its seller.'
+      - 'Tessellate sells an online whiteboard. Its Pro plan has cost $49 a month since November 2024. For nine days in October 2026 new signups saw Pro at $79 a month in a price test that was rolled back, and Tessellate''s Business plan costs $99 a month; neither is a former price of Pro. Condition: every former or reference price the text gives for Pro, to compare with a lower price, is $49 a month or $588 a year. A reference price is a "was", "regular", "normally", "usually", "list", "original", "full" or "standard" price, a price after "instead of" or "down from", a "worth" or "value" figure, or a struck-through price such as ~~$49~~ or <s>$49</s>. Any other figure used that way for Pro breaks the condition, and so does presenting the Business price as what Pro would cost. These do not break it: Pro''s price of $49 stated on its own or as the price it renews at, the Business plan''s $99 shown as the price of Business, and the sale price itself. A text that compares no price for Tessellate Pro meets the condition, and prices of another company''s products do not count. Copy that names no company is Tessellate''s.'
+  - id: saving-worked-out-from-49
+    description: Every saving or percentage off claimed for Pro is worked out from $49 a month.
+    error: 'Work the saving out from $49 a month: $14 a month, $168 over the first year, or 28.6% (28% or 29%), never 30% or more and never from the $79 test price or the $99 Business price.'
+    grep: '%|[Pp]er ?cent|PER ?CENT|[Ss]av(e|es|ed|ing|ings)\b|SAV(E|ES|ING|INGS)\b|\b[Oo]ff\b|\bOFF\b|[Dd]iscount|DISCOUNT|[Hh]alf|HALF|\b[Ll]ess\b|\bLESS\b|[Cc]heaper|CHEAPER|[Kk]eep \$|[Rr]educ|REDUC|\b[Cc]ut\b|\b[Dd]rop|[Bb]argain|[Dd]eal\b|DEAL\b'
+    decide:
+      - 'The text is about another company''s product, not Tessellate''s: it names another company as the seller of what it offers, and the name Tessellate does not appear in it. A text that names no seller is not about another company''s product, and tools that a product works with, such as Figma or Jira, are not its seller.'
+      - 'Tessellate sells an online whiteboard. Its Pro plan has cost $49 a month since November 2024, and its Black Friday price is $35 a month for the first year. The only correct money savings on Pro are worked out from $49: $14 a month, $168 over the first year, or 28.6% off, which may be written as 28% or 29%. Condition: every money saving, discount or percentage off that the text claims for Pro is one of these. A saving worked out from another price (such as the $79 of a short price test or the $99 Business plan), a saving of 30% or more, and "half price" or "half off" break the condition. A saving of time or effort does not count. A text that claims no money saving on Tessellate Pro meets the condition, and savings on another company''s products do not count. Copy that names no company is Tessellate''s.'
