@@ -14,6 +14,17 @@ python3 -B benchmark/v1/archive.py restore
 bun --no-env-file run benchmark:restore
 ```
 
+On macOS, a Python installation without its own CA bundle can report
+`CERTIFICATE_VERIFY_FAILED`. With the system CA bundle available at
+`/etc/ssl/cert.pem`, the tested command is:
+
+```sh
+SSL_CERT_FILE=/etc/ssl/cert.pem python3 -B benchmark/v1/archive.py restore
+```
+
+This sets trust certificates for that process and preserves TLS verification;
+it changes no global Python or system configuration.
+
 Python 3.10+ downloads the pinned ZIP only when the ignored local cache is absent,
 checks its size and SHA-256, then checks every member and the canonical inventory
 before writing ignored `benchmark/v1/workbench/dataset/` paths. The tracked dataset

@@ -29,6 +29,16 @@
         "typescript": "^6.0.3",
       },
     },
+    "benchmark/v2/workbench": {
+      "name": "agentests-backend-pilot",
+      "dependencies": {
+        "agentests": "workspace:*",
+      },
+      "devDependencies": {
+        "@types/bun": "^1.4.4",
+        "typescript": "^6.0.3",
+      },
+    },
     "core": {
       "name": "agentests",
       "version": "1.0.1",
@@ -232,6 +242,8 @@
     "acorn-jsx": ["acorn-jsx@5.3.2", "", { "peerDependencies": { "acorn": "^6.0.0 || ^7.0.0 || ^8.0.0" } }, "sha512-rq9s+JNhf0IChjtDXxllJ7g41oZk5SlXtp0LHwyA5cejwn7vKmKp4pPri6YEePv2PU65sAsegbXtIinmDFDXgQ=="],
 
     "agentests": ["agentests@workspace:core"],
+
+    "agentests-backend-pilot": ["agentests-backend-pilot@workspace:benchmark/v2/workbench"],
 
     "agentests-benchmarks": ["agentests-benchmarks@workspace:benchmark/v1/workbench"],
 
