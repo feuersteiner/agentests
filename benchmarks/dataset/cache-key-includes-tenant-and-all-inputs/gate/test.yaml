@@ -1,0 +1,24 @@
+version: 1
+id: cache-key-includes-tenant-and-all-inputs
+title: A cache key includes the tenant and every input
+description: Every cache or memo key for a result computed for one tenant holds that tenant and every other input of the result, and every read of such an entry checks its stored tenant against the caller's.
+select:
+  glob: 'src/**/!(*.test|*.spec).ts'
+  grep: '[Cc]ach(e|ing)|[Rr]edis|(?<!use)[Mm]emo(?!r)'
+assert:
+  - id: tenant-in-key
+    description: The key of a per-tenant result holds the tenant's id.
+    error: Put the caller's organisation id (ctx.orgId, or the orgId the pipeline runs for) in the cache key.
+    decide: 'Wherever this file stores a computed result in a cache or memo (Redis, a get/set helper over it, or a Map or object kept between calls) or looks one up there, and that result is computed for one organisation, user or namespace, the key it uses contains that tenant''s id, such as ctx.orgId or the orgId a pipeline runs for, written into the key string or included in an object or list that is hashed or serialised into the key. A result is computed for one tenant when the code that produces it is given a request context (ctx) or an organisation, user, account or namespace id, or reads that tenant''s data. A file that builds no cache key passes, and so do a generic cache helper or class that only uses the keys its callers pass in and a cache of values that are the same for every tenant, such as a product catalogue or exchange rates.'
+  - id: all-inputs-in-key
+    description: The key also holds every other input that changes the cached result.
+    error: Add the cached value's other inputs to the key - the report id and params or the dashboard id with ctx.roles and ctx.locale, the query with ctx.roles for search, a pipeline step's op, args and input rows.
+    grep: '\bctx\b|[Oo]rg(ani[sz]ation)?I[Dd]|[Tt]enant|[Uu]ser(Id|ID)|[Aa]ccount(Id|ID)|[Ww]orkspace(Id|ID)|[Nn]amespace'
+    decide:
+      - 'Each cache or memo key built in this file holds the inputs listed here for what is stored under it; the tenant is checked separately. An input is held when it is written into the key, included in an object or list that is serialised or hashed into the key, or represented there by a value computed from it; the roles, for example, are held when the key has the roles or a value computed from them, such as whether the caller is an admin. One report, cached inside runReport or around a single call to it: the report id, the params, ctx.roles and ctx.locale. A rendered dashboard: the dashboard id, ctx.roles and ctx.locale; the dashboard id stands for its widgets'' report ids and params. Search results: the query and ctx.roles. A pipeline step''s output: the step''s op, its args and its input rows (the rows, a hash of them or the keys they were cached under); the ids of the steps it reads are not its input rows. Anything else: the arguments of the function that computes it, other than the request context and the tenant id; an organisation''s rows read from the warehouse, for example, need nothing beyond the tenant. A file that builds no cache key passes.'
+      - 'This file is not from Tidewell''s analytics API: it uses no RequestContext and defines or calls none of runReport, search, renderDashboard, runPipeline and runStep.'
+  - id: read-checks-tenant
+    description: A read of a cached per-tenant result checks the entry's stored tenant against the caller's.
+    error: Store the organisation id with each entry, as { orgId, value }, and use a hit only when its orgId equals the caller's; treat any other hit as a miss.
+    grep: '\bctx\b|[Oo]rg(ani[sz]ation)?I[Dd]|[Tt]enant|[Uu]ser(Id|ID)|[Aa]ccount(Id|ID)|[Ww]orkspace(Id|ID)|[Nn]amespace'
+    decide: 'Wherever this file reads a cached or memoised result that was computed for one organisation, user or namespace and then uses or returns it, it first confirms that the entry belongs to the caller''s tenant: the entry was stored together with the tenant id it was computed for (for example an orgId field next to the value) and the read compares that stored id with the caller''s (for example hit.orgId === ctx.orgId), treating a different id as a miss; or the read goes through a helper that is handed the caller''s tenant id, apart from the key, to make that comparison. A hit that is returned or used without such a comparison fails, even when the tenant id is part of the key. A file that reads no cached result passes, and so do a generic cache helper or class that only uses the keys its callers pass in and is not told the tenant, and a cache of values that are the same for every tenant.'
