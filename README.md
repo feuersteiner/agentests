@@ -20,7 +20,7 @@ comes next.
 https://github.com/user-attachments/assets/b7f71b93-9cb0-4d5e-9825-edc523b0ebdb
 
 One brand decision, from the meeting to a blocked commit: written down once, compiled into three
-clear questions, proved on six evals. The film's [SvelteKit app](demo-video) is in this repository.
+clear questions, proved on six evals. The film's [SvelteKit app](video) is in this repository.
 
 ## Get started
 
@@ -188,7 +188,7 @@ never reads `.env` or `process.env` itself: pass the environment in.
 - [`core`](core): the npm package, with the [CLI](core/cli) and the library in [`src`](core/src).
 - [`docs`](docs): use cases, the source of the planned documentation site.
 - [`library`](library): placeholder for the planned community library of shared Tests.
-- [`demo-video`](demo-video): the SvelteKit app that renders the demo film.
+- [`video`](video): the SvelteKit app that renders the demo film.
 - [`.github/workflows`](.github/workflows): publishing to npm.
 
 ## Roadmap

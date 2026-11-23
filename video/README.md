@@ -6,7 +6,7 @@ root README.
 
 ```sh
 bun install
-bun run --cwd demo-video dev
+bun run --cwd video dev
 ```
 
 The dev server uses port 5183. The player supports chapter seeking, Space to play or pause, and
@@ -20,7 +20,7 @@ frame.
 Requires Node.js 22+, Bun, FFmpeg with libx264, and Playwright Chromium.
 
 ```sh
-cd demo-video
+cd video
 bunx playwright install chromium
 bun run verify
 bun run render
@@ -105,9 +105,9 @@ into a comment box, pasted on its own line in "See it in 60 seconds". After a re
 that upload and replace the URL.
 
 The MP4 and a poster frame, one frame at 13.5 seconds, are also kept as assets of the pre-release
-tagged `demo-video`, uploaded with the GitHub CLI. Neither file is committed.
+tagged `video`, uploaded with the GitHub CLI. Neither file is committed.
 
 ```sh
 ffmpeg -ss 13.5 -i output/demo.mp4 -frames:v 1 output/poster.png
-gh release upload demo-video output/demo.mp4 output/poster.png --clobber
+gh release upload video output/demo.mp4 output/poster.png --clobber
 ```

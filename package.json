@@ -7,7 +7,7 @@
 	"workspaces": [
 		"benchmarks",
 		"core",
-		"demo-video"
+		"video"
 	],
 	"scripts": {
 		"prepare": "lefthook install",

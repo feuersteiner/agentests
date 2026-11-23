@@ -6,7 +6,7 @@ import { dirname, join } from 'node:path';
 import { setTimeout as sleep } from 'node:timers/promises';
 import { stripVTControlCharacters } from 'node:util';
 
-/** The demo-video folder; relative output paths resolve against it. */
+/** The video folder; relative output paths resolve against it. */
 export const root = fileURLToPath(new URL('../', import.meta.url));
 /** The film's frame size in CSS pixels. */
 export const width = 1920;
@@ -65,7 +65,7 @@ const viteCli = join(
 	'bin/vite.js'
 );
 
-/** Starts the Vite CLI in the demo-video folder and keeps what it prints for error messages. */
+/** Starts the Vite CLI in the video folder and keeps what it prints for error messages. */
 const runVite = (args) => {
 	const child = spawn(process.execPath, [viteCli, ...args], {
 		cwd: root,

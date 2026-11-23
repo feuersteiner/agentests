@@ -13,7 +13,7 @@ const usage = `Usage: node scripts/render.mjs [options]
   --fps <n>         frames per second, a whole number from 1 to 60 (30)
   --from <seconds>  film time of the first frame (0)
   --to <seconds>    film time where the render ends (the end of the film)
-  --output <path>   MP4 to write, relative to demo-video/ (output/demo.mp4)
+  --output <path>   MP4 to write, relative to video/ (output/demo.mp4)
   --port <n>        port for the built preview (4175)
   --url <base>      render from a server already running there; builds and starts nothing`;
 
