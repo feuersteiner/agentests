@@ -29,3 +29,11 @@ export const pickTests = (
 	}
 	return picks;
 };
+
+/** The seed `--seed` gives, or a fresh random 32-bit one when it is absent. */
+export const toSeed = (value?: string): number => {
+	if (value === undefined) return crypto.getRandomValues(new Uint32Array(1))[0]!;
+	if (!/^\d{1,10}$/.test(value) || Number(value) > 0xffffffff)
+		throw new Error(`--seed takes a whole number from 0 to 4294967295, not "${value}"`);
+	return Number(value);
+};
