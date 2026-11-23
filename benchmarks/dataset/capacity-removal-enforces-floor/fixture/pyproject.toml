@@ -1,9 +1,0 @@
-[project]
-name = "kestrel-ops"
-version = "0.4.0"
-description = "Operations commands for the Kestrel storage fleet"
-requires-python = ">=3.11"
-
-[tool.pytest.ini_options]
-testpaths = ["tests"]
-pythonpath = ["."]

@@ -1,0 +1,14 @@
+{
+	"luna": {
+		"api": "openai",
+		"url": "https://api.openai.com/v1",
+		"model": "gpt-6-luna",
+		"apiKeyEnv": "OPENAI_API_KEY"
+	},
+	"jev": {
+		"api": "jev",
+		"url": "https://api.typesafe.ai/v1",
+		"model": "jev-latest",
+		"apiKeyEnv": "TYPESAFE_AI_API_KEY"
+	}
+}

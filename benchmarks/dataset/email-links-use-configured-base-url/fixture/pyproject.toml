@@ -1,9 +1,0 @@
-[project]
-name = "plover-web"
-version = "1.4.0"
-description = "The web app of Plover Rota, shift rotas for small teams"
-requires-python = ">=3.11"
-
-[tool.pytest.ini_options]
-testpaths = ["tests"]
-pythonpath = ["."]

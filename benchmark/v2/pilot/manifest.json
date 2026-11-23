@@ -1,0 +1,11 @@
+{
+	"id": "refund-replies-first-pilot-v1",
+	"status": "development-data-not-run",
+	"labelStatus": "synthetic-provisional-not-human-reviewed",
+	"caseIds": ["refund-01", "refund-02", "refund-03", "refund-04", "refund-05"],
+	"threshold": 0.5,
+	"defaultRepeat": 1,
+	"cases": "cases.json",
+	"expectations": "expectations.json",
+	"test": "test.json"
+}

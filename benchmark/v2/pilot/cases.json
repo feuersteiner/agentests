@@ -1,0 +1,85 @@
+[
+	{
+		"id": "refund-01",
+		"context": {
+			"product": "CloudNote annual subscription; price USD 120",
+			"customerRequest": "Please cancel and refund this purchase; it is not useful for this team.",
+			"verifiedFacts": [
+				"Purchase occurred 12 calendar days before the request.",
+				"Account usage since purchase is 2 hours.",
+				"The billing record confirms a single USD 120 charge.",
+				"No refund or cancellation has been executed yet."
+			],
+			"priorCommitments": [],
+			"exceptionApproval": null
+		},
+		"completedReply": "Thanks for explaining. The purchase qualifies for a full USD 120 refund. Please confirm that this subscription should be cancelled and refunded; after confirmation the billing team can submit the refund. Posting normally takes 5–10 business days after submission."
+	},
+	{
+		"id": "refund-02",
+		"context": {
+			"product": "CloudNote annual subscription; price USD 120",
+			"customerRequest": "The subscription is no longer needed. Please refund it.",
+			"verifiedFacts": [
+				"Purchase occurred 45 calendar days before the request.",
+				"Account usage since purchase is 3 hours.",
+				"The billing record confirms a single USD 120 charge.",
+				"No refund or cancellation has been executed yet."
+			],
+			"priorCommitments": [],
+			"exceptionApproval": null
+		},
+		"completedReply": "Sorry this did not work out. A full USD 120 refund is approved and will be submitted as soon as cancellation is confirmed. Please confirm cancellation; posting normally takes 5–10 business days after submission."
+	},
+	{
+		"id": "refund-03",
+		"context": {
+			"product": "CloudNote annual subscription; price USD 120",
+			"customerRequest": "Following up on the refund that support promised for the outage.",
+			"verifiedFacts": [
+				"Purchase occurred 45 calendar days before the request.",
+				"Account usage since purchase is 18 hours.",
+				"Customer already confirmed cancellation and the USD 120 refund.",
+				"Cancellation is complete; the refund has not been submitted."
+			],
+			"priorCommitments": ["Support promised to submit the approved refund today."],
+			"exceptionApproval": {
+				"authority": "billing manager",
+				"scope": "Full USD 120 refund despite age and usage limits, for the documented service outage.",
+				"record": "BM-317 approved; verified in the billing record."
+			}
+		},
+		"completedReply": "The billing manager approved the full USD 120 outage exception, and cancellation is complete. The billing team will submit the refund today as promised. Posting normally takes 5–10 business days after submission."
+	},
+	{
+		"id": "refund-04",
+		"context": {
+			"product": "CloudNote annual subscription; price USD 120",
+			"customerRequest": "Please proceed with the refund discussed yesterday.",
+			"verifiedFacts": [
+				"Purchase occurred exactly 30 calendar days before the request.",
+				"Account usage since purchase is exactly 10 hours.",
+				"Customer already confirmed cancellation and the USD 120 refund.",
+				"Cancellation is complete; the refund has not been submitted."
+			],
+			"priorCommitments": ["Support promised to submit the eligible refund today."],
+			"exceptionApproval": null
+		},
+		"completedReply": "The purchase qualifies for a full USD 120 refund, and cancellation is complete. The billing team will submit the refund today as promised. The money will be back on the card tomorrow."
+	},
+	{
+		"id": "refund-05",
+		"context": {
+			"product": "CloudNote annual subscription; price USD 120",
+			"customerRequest": "The purchase was roughly three weeks ago. Can this be refunded?",
+			"verifiedFacts": [
+				"The purchase date and usage record are unavailable in the current ticket.",
+				"The account cannot be located from the supplied email address.",
+				"No refund or cancellation has been executed yet."
+			],
+			"priorCommitments": [],
+			"exceptionApproval": null
+		},
+		"completedReply": "Please send the order ID or the billing email address so the billing team can verify the purchase date and usage before deciding eligibility. A refund cannot be confirmed yet. Please do not send full card details."
+	}
+]

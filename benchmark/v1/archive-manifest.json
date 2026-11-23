@@ -1,0 +1,24 @@
+{
+	"version": "v1",
+	"description": "Fixture/case dataset only. No results, proof reports, conversations or run history.",
+	"source": {
+		"repository": "https://github.com/feuersteiner/agentests.git",
+		"commit": "71d5e886b0655b5ad920d1f472b53802c434aeee",
+		"prefix": "benchmarks/"
+	},
+	"paths": ["dataset"],
+	"excluded": ["dataset/README.md"],
+	"contents": {
+		"files": 9440,
+		"bytes": 17099658,
+		"inventory_sha256": "b7dd0701b8b4d071b63a5998b36fe8f30bf71c57e7ea16d086673c79c38743e2"
+	},
+	"archive": {
+		"name": "agentests-v1-fixtures.zip",
+		"url": "https://github.com/feuersteiner/agentests/releases/download/benchmark-v1-fixtures-1/agentests-v1-fixtures.zip",
+		"bytes": 19428564,
+		"sha256": "19c51a550493f725e922cac20c86524ee25892f0fb88e5188278538986296b6b",
+		"format": "ZIP_STORED; sorted regular files, fixed 1980-01-01 timestamp, Unix 0644/0755 modes; no compression-library dependency"
+	},
+	"inventory_format": "SHA-256 of UTF-8 JSON list, sorted by path; records contain path, mode (decimal), bytes, sha256; json.dumps(sort_keys=True, separators=(comma, colon))"
+}

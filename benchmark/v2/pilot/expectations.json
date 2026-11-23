@@ -1,0 +1,22 @@
+{
+	"refund-01": {
+		"verdict": "pass",
+		"rationale": "Verified age and usage satisfy both limits. The reply offers the correct amount, requests confirmation before action, and uses the normal posting window."
+	},
+	"refund-02": {
+		"verdict": "fail",
+		"rationale": "At 45 days this purchase is ineligible without a verified billing-manager exception. Good tone and a correct posting window do not authorize approval."
+	},
+	"refund-03": {
+		"verdict": "pass",
+		"rationale": "A verified billing-manager exception overrides both standard limits. The reply preserves the existing submission commitment without claiming an unexecuted refund is complete."
+	},
+	"refund-04": {
+		"verdict": "fail",
+		"rationale": "Exactly 30 days and 10 hours are eligible, and the submission commitment is preserved. The unsupported guarantee of next-day bank posting nevertheless violates policy."
+	},
+	"refund-05": {
+		"verdict": "pass",
+		"rationale": "Missing evidence prevents eligibility approval, but does not make a careful reply bad. The reply explicitly defers the decision and requests the minimum evidence needed to proceed."
+	}
+}

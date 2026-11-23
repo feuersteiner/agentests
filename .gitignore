@@ -13,4 +13,17 @@ coverage/
 /core/README.md
 /core/LICENSE
 
-benchmarks/results/
+# Raw benchmark evidence is private; only public access notes are tracked.
+/benchmark/*/results/*
+!/benchmark/*/results/README.md
+
+# Frozen v1 fixtures are downloaded explicitly from a checksummed release.
+/benchmark/v1/archives/
+/benchmark/v1/workbench/dataset/*
+!/benchmark/v1/workbench/dataset/README.md
+/benchmark/v1/workbench/orchestration/reports-short/
+/benchmark/v1/workbench/orchestration/reports-long/
+/benchmark/v1/workbench/orchestration/long-wip/
+/benchmark/v1/__pycache__/
+
+/benchmark/__pycache__/

@@ -1,8 +1,0 @@
-{
-  "banners": {
-    "published": "You just published this form. Responses will appear on the Responses page.",
-    "ownersOnly": "Only owners can delete a workspace.",
-    "draftSaved": "Draft saved just now.",
-    "planLimit": "The Free plan includes only 3 published forms. Unpublish a form or change your plan."
-  }
-}

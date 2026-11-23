@@ -1,6 +1,0 @@
-# Which email goes to whom, and when. `after_days` counts from the event.
-emails:
-  - file: welcome.md
-    audience: new signups
-    event: signup
-    after_days: 0

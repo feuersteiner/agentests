@@ -1,9 +1,0 @@
-[project]
-name = "fernbank-orders"
-version = "0.3.0"
-description = "The orders service of Fernbank Seeds"
-requires-python = ">=3.11"
-
-[tool.pytest.ini_options]
-testpaths = ["store/tests", "orders/tests"]
-pythonpath = ["."]

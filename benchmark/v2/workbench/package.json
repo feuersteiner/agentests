@@ -1,0 +1,11 @@
+{
+	"name": "agentests-backend-pilot",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"validate": "bun --no-env-file --no-install cli.ts validate",
+		"pilot": "bun --no-env-file --no-install cli.ts run",
+		"test": "bun --no-env-file --no-install test ./tests",
+		"check": "tsc --noEmit -p tsconfig.json"
+	}
+}

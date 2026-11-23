@@ -1,9 +1,0 @@
-[project]
-name = "hearth"
-version = "0.4.0"
-description = "The home-automation hub of the flat on Brookside Road"
-requires-python = ">=3.11"
-dependencies = ["pyweatherapi>=1.4", "pylumen>=0.3"]
-
-[tool.pytest.ini_options]
-testpaths = ["tests", "libs"]

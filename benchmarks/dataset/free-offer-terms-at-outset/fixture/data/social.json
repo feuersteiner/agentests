@@ -1,7 +1,0 @@
-{
-  "accounts": [
-    { "network": "LinkedIn", "handle": "quiltboard-hq", "url": "https://www.linkedin.com/company/quiltboard-hq" },
-    { "network": "X", "handle": "@quiltboard", "url": "https://x.com/quiltboard" },
-    { "network": "Instagram", "handle": "@quiltboard.app", "url": "https://www.instagram.com/quiltboard.app" }
-  ]
-}

@@ -1,0 +1,3 @@
+[submodule "benchmark/private"]
+	path = benchmark/private
+	url = https://github.com/feuersteiner/agentests-benchmark-evidence.git

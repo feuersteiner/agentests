@@ -1,8 +1,0 @@
-name,header,contains,weight
-ua_headless,user-agent,headlesschrome,1.5
-ua_python_requests,user-agent,python-requests,1
-ua_curl,user-agent,curl/,0.5
-ua_go_http,user-agent,go-http-client,1
-lang_wildcard,accept-language,*,0.5
-accept_any,accept,*/*,0.25
-conn_close,connection,close,0.25

@@ -1,9 +1,0 @@
-# Which email goes to whom, and when.
-# An email sent on an event has a trigger; a one-off email has a send_on date instead.
-emails:
-  - file: emails/welcome.md
-    audience: new-accounts
-    trigger: account.opened
-  - file: emails/monthly-summary.md
-    audience: all-customers
-    trigger: schedule.monthly

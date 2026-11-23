@@ -1,9 +1,0 @@
-[project]
-name = "zone-enactor"
-version = "0.2.0"
-description = "Applies Fernhill's DNS plans to its endpoints"
-requires-python = ">=3.11"
-
-[tool.pytest.ini_options]
-testpaths = ["tests"]
-pythonpath = ["."]

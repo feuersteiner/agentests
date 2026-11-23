@@ -19,7 +19,7 @@
         "typescript-eslint": "^8.60.1",
       },
     },
-    "benchmarks": {
+    "benchmark/v1/workbench": {
       "name": "agentests-benchmarks",
       "dependencies": {
         "minimatch": "11.0.4",
@@ -233,7 +233,7 @@
 
     "agentests": ["agentests@workspace:core"],
 
-    "agentests-benchmarks": ["agentests-benchmarks@workspace:benchmarks"],
+    "agentests-benchmarks": ["agentests-benchmarks@workspace:benchmark/v1/workbench"],
 
     "ai": ["ai@7.0.162", "", { "dependencies": { "@ai-sdk/gateway": "4.0.135", "@ai-sdk/provider": "4.0.35", "@ai-sdk/provider-utils": "5.0.74" }, "peerDependencies": { "zod": "^3.25.76 || ^4.1.8" } }, "sha512-NPzL6/GmjjPwhzM1kGP9O60TfJ3uXV4Z4A/ztljxcJFAmRAFAjgk5mAHaikk3sE8NQo4NbRCiS+DgHinE2d0sQ=="],
 

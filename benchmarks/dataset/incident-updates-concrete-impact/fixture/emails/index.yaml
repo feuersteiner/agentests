@@ -1,7 +1,0 @@
-# Emails sent to merchants. trigger is the event that sends one, or manual for a one-off send.
-- id: welcome
-  file: welcome.md
-  trigger: store.created
-- id: payout-sent
-  file: payout-sent.md
-  trigger: payout.paid

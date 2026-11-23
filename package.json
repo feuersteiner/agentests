@@ -5,24 +5,25 @@
 	"license": "MIT",
 	"packageManager": "bun@1.3.4",
 	"workspaces": [
-		"benchmarks",
+		"benchmark/v1/workbench",
 		"core",
 		"video"
 	],
 	"scripts": {
 		"prepare": "lefthook install",
-		"build": "cp README.md LICENSE core/ && bun run --cwd core build",
-		"check": "bun run --workspaces --if-present check",
-		"test": "bun run --workspaces --if-present test",
+		"build": "cp README.md LICENSE core/ && bun --no-env-file run --cwd core build",
+		"check": "bun --no-env-file run --workspaces --if-present check",
+		"test": "bun --no-env-file run --workspaces --if-present test",
 		"test:models": "bun run build && cd core/tests/models && node --env-file-if-exists=../../../.env ../../dist/cli/index.js eval",
-		"lint": "bun run format:check && eslint .",
-		"pack": "bun run build && cd core && npm pack",
+		"lint": "bun --no-env-file run format:check && eslint .",
+		"pack": "bun --no-env-file run build && cd core && npm pack",
 		"format": "prettier --write .",
 		"format:check": "prettier --check .",
-		"benchmark": "bun run --cwd benchmarks benchmark",
-		"benchmark:pick": "bun run --cwd benchmarks pilot:pick",
-		"benchmark:pilot": "bun run --cwd benchmarks pilot",
-		"benchmark:prove": "bun run --cwd benchmarks prove"
+		"benchmark": "bun run --cwd benchmark/v1/workbench benchmark",
+		"benchmark:pick": "bun run --cwd benchmark/v1/workbench pilot:pick",
+		"benchmark:pilot": "bun run --cwd benchmark/v1/workbench pilot",
+		"benchmark:prove": "bun run --cwd benchmark/v1/workbench prove",
+		"benchmark:restore": "python3 -B benchmark/v1/archive.py restore"
 	},
 	"devDependencies": {
 		"@eslint/js": "^10.0.1",

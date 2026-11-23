@@ -18,4 +18,8 @@ core/LICENSE
 core/tests/models/.agents/
 
 # Benchmark dataset sample repositories, with deliberate violations
-benchmarks/dataset/
+benchmark/*/workbench/dataset/
+benchmark/*/results/
+
+# Optional private evidence submodule
+benchmark/private/

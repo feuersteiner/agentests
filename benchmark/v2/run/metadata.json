@@ -1,0 +1,14 @@
+{
+	"status": "not-run",
+	"kind": "future-full-evaluation-plan",
+	"pilotReference": "../pilot/manifest.json",
+	"plan": "plan.md",
+	"heldOutDataset": null,
+	"humanReview": "not-started",
+	"modelsFrozen": false,
+	"thresholdFrozenForHeldOutRun": false,
+	"runId": null,
+	"results": null,
+	"costUsd": null,
+	"usage": null
+}

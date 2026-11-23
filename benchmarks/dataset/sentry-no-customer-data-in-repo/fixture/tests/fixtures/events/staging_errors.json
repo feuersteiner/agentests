@@ -1,7 +1,0 @@
-{
-  "event_id": "evt-0003",
-  "org": "other-org-slug",
-  "user": { "email": "other-user@example.com" },
-  "tags": { "env": "staging" },
-  "metrics": { "p95_ms": 900, "error_rate": 0.2 }
-}

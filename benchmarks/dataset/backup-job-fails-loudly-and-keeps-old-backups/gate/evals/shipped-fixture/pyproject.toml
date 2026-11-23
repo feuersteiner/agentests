@@ -1,9 +1,0 @@
-[project]
-name = "acme-ops"
-version = "1.2.0"
-description = "Jobs and tools for the Acme Tutors operations host."
-requires-python = ">=3.10"
-
-[tool.pytest.ini_options]
-testpaths = ["tests"]
-pythonpath = ["."]

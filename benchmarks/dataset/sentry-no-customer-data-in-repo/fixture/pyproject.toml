@@ -1,8 +1,0 @@
-[project]
-name = "alerts"
-version = "0.4.0"
-description = "Alert rule engine for Pinewatch"
-requires-python = ">=3.11"
-
-[tool.pytest.ini_options]
-addopts = "-q"

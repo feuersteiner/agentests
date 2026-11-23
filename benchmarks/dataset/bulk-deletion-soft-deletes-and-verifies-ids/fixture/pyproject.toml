@@ -1,9 +1,0 @@
-[project]
-name = "pebblework-admin"
-version = "1.3.0"
-description = "Admin tooling for the Pebblework support and operations teams"
-requires-python = ">=3.11"
-
-[tool.pytest.ini_options]
-testpaths = ["tests"]
-pythonpath = ["."]

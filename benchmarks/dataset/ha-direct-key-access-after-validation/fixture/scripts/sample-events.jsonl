@@ -1,7 +1,0 @@
-{"id": "evt_1001", "type": "customer.created", "created": "2026-03-02T09:14:00Z", "data": {"customer_id": "cus_41", "email": "ines@fernhill.example", "name": "Ines Okafor"}}
-{"id": "evt_1002", "type": "charge.succeeded", "created": "2026-03-02T09:15:10Z", "data": {"charge_id": "ch_900", "customer_id": "cus_41", "amount": 4900, "currency": "EUR", "description": "Team plan, March"}}
-{"id": "evt_1003", "type": "customer.updated", "created": "2026-03-04T16:02:41Z", "data": {"customer_id": "cus_41", "email": "billing@fernhill.example", "tax_id": "DE811907980"}}
-{"id": "evt_1004", "type": "invoice.paid", "created": "2026-03-05T08:00:03Z", "data": {"invoice_id": "inv_310", "amount": 4900, "currency": "EUR"}}
-{"id": "evt_1005", "type": "refund.created", "created": "2026-03-09T11:30:00Z", "data": {"refund_id": "re_77", "charge_id": "ch_900", "amount": 1500, "note": "Two unused seats"}}
-{"id": "evt_1006", "type": "subscription.cancelled", "created": "2026-03-20T13:45:22Z", "data": {"subscription_id": "sub_12", "reason": "switched_provider", "effective_date": "2026-03-31"}}
-{"id": "evt_1002", "type": "charge.succeeded", "created": "2026-03-02T09:15:10Z", "data": {"charge_id": "ch_900", "customer_id": "cus_41", "amount": 4900, "currency": "EUR", "description": "Team plan, March"}}

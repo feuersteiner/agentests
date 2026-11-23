@@ -1,5 +1,0 @@
-{
-  "linkedin": { "name": "LinkedIn", "max_chars": 3000 },
-  "x": { "name": "X", "max_chars": 280 },
-  "mastodon": { "name": "Mastodon", "max_chars": 500 }
-}

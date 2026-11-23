@@ -1,7 +1,0 @@
-# The macros the help desk offers, by queue.
-queues:
-  cards:
-    - support/macros/card-delivery.md
-  account:
-    - support/macros/change-address.md
-  lending: []

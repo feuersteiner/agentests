@@ -1,0 +1,21 @@
+{
+	"name": "agentests-benchmarks",
+	"private": true,
+	"type": "module",
+	"license": "MIT",
+	"scripts": {
+		"benchmark": "bun cli/index.ts",
+		"check": "tsc --noEmit",
+		"pilot": "bun cli/pilot.ts",
+		"pilot:pick": "bun cli/pick.ts",
+		"prove": "bun cli/prove.ts",
+		"test": "bun --no-env-file test ./tests && python3 -B ../archive-test.py"
+	},
+	"dependencies": {
+		"minimatch": "11.0.4"
+	},
+	"devDependencies": {
+		"@types/bun": "^1.4.4",
+		"typescript": "^6.0.3"
+	}
+}

@@ -1,12 +1,12 @@
 pre-commit:
   jobs:
     - name: format
-      run: bunx --no-install prettier --write --ignore-unknown {staged_files}
+      run: bun --no-env-file x --no-install prettier --write --ignore-unknown {staged_files}
       stage_fixed: true
     - name: check
-      run: bun run lint && bun run check
+      run: bun --no-env-file run lint && bun --no-env-file run check
 
 pre-push:
   jobs:
     - name: test
-      run: env -u GIT_DIR -u GIT_WORK_TREE -u GIT_INDEX_FILE bun run test
+      run: env -u GIT_DIR -u GIT_WORK_TREE -u GIT_INDEX_FILE bun --no-env-file run test
