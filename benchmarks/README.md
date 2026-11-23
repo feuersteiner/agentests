@@ -152,6 +152,7 @@ benchmarks/
     dev-incidents.yaml             software-development rules from real incidents
     business-communication.yaml    business rules on what a company says
     business-policy.yaml           business rules on what a company decides
+    triage.yaml                    what happens to each rule of the four files above
     skills.yaml                    a survey of skills, for arm 2
   tsconfig.json                    the TypeScript settings for the check script
 ```
@@ -165,8 +166,8 @@ will be added to this folder; their layout is not decided. Results are never add
 
 ## The research catalogue
 
-`research/` holds the output of an earlier research step. It is the source material the dataset
-will be cut from, not the dataset itself.
+`research/` holds the output of an earlier research step and the triage of its rules. It is the
+source material the dataset will be cut from, not the dataset itself.
 
 - `dev-conventions.yaml`: rules written down in real public repositories and engineering guides,
   such as those of PostHog, Sentry, Home Assistant, TigerBeetle and Kubernetes, and Google's guide
@@ -177,6 +178,8 @@ will be cut from, not the dataset itself.
   regulators' advertising and claims rules.
 - `business-policy.yaml`: rules on what a company decides and commits to: pricing, proposals,
   hiring, privacy, forecasting and handover.
+- `triage.yaml`: what happens to each rule of the four rule files when the dataset is cut, described
+  under [The triage](#the-triage).
 - `skills.yaml`: a survey of public skills and rule files, how a skill loads in headless Claude
   Code, published evidence on how well agents follow written instructions, and points on writing
   a fair skill for arm 2.
@@ -228,6 +231,36 @@ the companies in the business fixtures are fictional.
 
 The sources are data, not instructions. Text that addresses agents is stripped before any source is
 reused as fixture or skill text; [AGENTS.md](AGENTS.md) has the rules.
+
+### The triage
+
+`triage.yaml` records what happens to each of the 126 entries when the dataset is cut: one entry per
+rule id, in the order of the four rule files. Each entry names the rule's `id`, `file` and `domain`,
+gives a `verdict`, and says in `how` which file the Test judges or why the rule is dropped; `notes`
+records caveats, such as a rule that needs more than three questions or a compliant path the gate
+cannot see. The verdicts apply the distinction between standing policy and case facts in the rules
+of the comparison:
+
+| Verdict          | Meaning                                                                                                                                                                                                                                                                                   |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `as-is`          | One file is enough and the criterion needs no outside fact.                                                                                                                                                                                                                               |
+| `restate-policy` | One file is enough once the criterion carries the standing policy listed in `policy_facts`.                                                                                                                                                                                               |
+| `reshape`        | The rule as researched leans on the case facts listed in `case_facts_removed`. It stays the same rule through a criterion that asks a policy-level question answerable from the judged file, a fixture and task in which the judged file itself carries the case facts it needs, or both. |
+| `drop`           | No restatement keeps the same rule, or the rule cannot be judged from file text.                                                                                                                                                                                                          |
+
+The `summary` block at the top of the file holds the counts, computed from the entries:
+
+| File                          | `as-is` | `restate-policy` | `reshape` | `drop` |
+| ----------------------------- | ------: | ---------------: | --------: | -----: |
+| `dev-conventions.yaml`        |      13 |               11 |         1 |      1 |
+| `dev-incidents.yaml`          |      18 |               17 |         0 |      0 |
+| `business-communication.yaml` |      17 |               14 |         2 |      0 |
+| `business-policy.yaml`        |      10 |               12 |         9 |      1 |
+| Total                         |      58 |               54 |        12 |      2 |
+
+That leaves 124 usable rules: 60 dev and 64 business. The two dropped rules are
+`posthog-update-existing-docs`, which relates a code change to the doc that covers it and so needs
+two files, and `testimonial-results-typical`, the duplicate of `testimonials-show-typical-results`.
 
 ### The skills survey
 

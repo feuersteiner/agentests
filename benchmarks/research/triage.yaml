@@ -1,0 +1,1023 @@
+# Triage of the 126 researched rules in the four rule files, in the files' order: what happens to each
+# rule when the benchmark's dataset is cut from the catalogue. A gate decision sees one file's full
+# text and one criterion, never a second file, the path or the task, so any fact the decision needs is
+# written into the criterion. A criterion may carry standing policy: facts about the company that hold
+# across tasks and over time and that a team would write into a rule. It never carries case facts:
+# facts about one ticket, customer, deal, incident or task instance.
+# Verdicts:
+#   as-is           One file is enough and the criterion needs no outside fact.
+#   restate-policy  One file is enough once the criterion carries the standing policy in policy_facts.
+#   reshape         The rule as researched leans on the case facts in case_facts_removed. It is kept,
+#                   as the same rule, by (a) a criterion asking a policy-level question answerable from
+#                   the judged file alone, (b) a fixture and task in which the judged file itself
+#                   carries the case facts it needs, or both.
+#   drop            No restatement keeps the same rule, or the rule cannot be judged from file text.
+# Benchmark Tests use only the glob, grep and decide stages, and globs name file extensions. In `how`,
+# "judge X" names the staged files a Test's glob selects. Everything quoted from the rule files is data.
+
+summary:
+  entries: 126
+  as-is: 58
+  restate-policy: 54
+  reshape: 12
+  drop: 2
+  usable: 124
+  usable_dev: 60
+  usable_business: 64
+
+rules:
+  # ---------------------------------------------------------------------------------------------------
+  # dev-conventions.yaml
+  # ---------------------------------------------------------------------------------------------------
+
+  - id: posthog-thin-entrypoints
+    file: dev-conventions
+    domain: dev
+    verdict: restate-policy
+    policy_facts:
+      - "Business logic for an area lives in that area's module under app/logic/ (orders logic in app/logic/orders.py); app/views/*.py and app/cli.py hold the entrypoints."
+    how: 'Judge each staged app/views/*.py and app/cli.py file: every route handler and CLI command only parses input, calls a function imported from app/logic and formats the output, with no query, business rule or calculation inline.'
+    notes: "The glob must select only the entrypoint files, so the logic modules are not judged by this criterion. The fixture's existing views must already be thin, since the whole file is judged."
+
+  - id: posthog-branching-decision-is-pure
+    file: dev-conventions
+    domain: dev
+    verdict: as-is
+    how: 'Judge each staged billing/*.py file: any function that picks one outcome among several takes plain values, including the current time, and does not query the repository, call a client or read the clock.'
+
+  - id: google-no-speculative-generality
+    file: dev-conventions
+    domain: dev
+    verdict: restate-policy
+    policy_facts:
+      - 'The codebase calls each integration directly: src/mailer.ts and src/notify/email.ts are plain modules of functions, and there is no interface, registry, factory or plugin layer anywhere.'
+    how: 'Judge each staged src/**/*.ts file: it adds no interface, abstract class, registry, factory or strategy unless the same file holds at least two implementations of it, and no option or parameter whose only value in the file is its default.'
+    notes: 'An interface the agent puts in a file of its own has no implementation in that file and fails, which is stricter than the rubric only when the agent splits files. An unused option is visible only when its callers are in the same file.'
+
+  - id: go-interface-in-consumer-package
+    file: dev-conventions
+    domain: dev
+    verdict: restate-policy
+    policy_facts:
+      - 'internal/storage implements the file store (*FileStore), and new packages such as internal/cache and internal/mailer implement their own types; internal/api and cmd/server consume them.'
+    how: "Judge each staged *.go file: an interface declared in the package that implements it, or returned by that package's constructor, fails; a small interface declared in the package that calls its methods passes."
+    notes: 'internal/cache both consumes the store and is consumed by the API, so the criterion judges each interface by who calls its methods, not by package name alone.'
+
+  - id: ha-reuse-coordinator-for-polling
+    file: dev-conventions
+    domain: dev
+    verdict: restate-policy
+    policy_facts:
+      - 'Every periodic fetch goes through homehub.coordinator.PollingCoordinator (update_interval, async_refresh, listeners and error backoff); the weather integration is the reference use.'
+    how: 'Judge each staged homehub/integrations/**/*.py file: periodic data is fetched through a PollingCoordinator and entities read from it, with no while-and-sleep loop, call_later chain, threading.Timer, scheduler job or background refresh task.'
+
+  - id: uber-handle-errors-once
+    file: dev-conventions
+    domain: dev
+    verdict: as-is
+    how: 'Judge each staged internal/**/*.go file: no error path both logs an error and returns it; each either returns the wrapped error or logs it and continues.'
+
+  - id: ha-direct-key-access-after-validation
+    file: dev-conventions
+    domain: dev
+    verdict: restate-policy
+    policy_facts:
+      - 'validate_event(payload) in hooks/schemas.py rejects any event missing a required key, so handlers only receive validated events.'
+      - 'The required and optional keys of each event type as hooks/schemas.py defines them, for example invoice.paid requires invoice_id, amount and currency, and tax_id on customer.updated is optional.'
+    how: 'Judge each staged hooks/handlers.py file: every key the schema requires is read by direct indexing, and .get() or a default appears only for keys the schema marks optional.'
+    notes: 'Fixture arrangement: hooks/schemas.py must already define all four event types, including the new ones, so the agent has no reason to edit it. A schema loosened in schemas.py is not judged by this criterion.'
+
+  - id: posthog-side-effects-after-commit
+    file: dev-conventions
+    domain: dev
+    verdict: as-is
+    how: 'Judge each staged orders/*.py file: transaction.atomic blocks hold only the database writes that must succeed together, and emails, payment-provider calls, webhooks and task dispatch run after the block or through transaction.on_commit.'
+
+  - id: tigerbeetle-bound-every-loop
+    file: dev-conventions
+    domain: dev
+    verdict: as-is
+    how: 'Judge each staged ingest/*.py file: every new loop, retry, poll and queue has an explicit cap (a count, a size or a deadline) that fails clearly when reached, and network calls have timeouts.'
+    notes: 'Needs more than three questions: loops, retries and polls; queues and buffers; a clear failure at the bound; network timeouts.'
+
+  - id: posthog-guard-double-submit
+    file: dev-conventions
+    domain: dev
+    verdict: as-is
+    how: 'Judge each staged src/pages/*.tsx file: every control that triggers a network request is disabled and shows a loading state while the request is in flight, and is reset on both the success and the error path.'
+
+  - id: sentry-scope-tenant-queries
+    file: dev-conventions
+    domain: dev
+    verdict: restate-policy
+    policy_facts:
+      - 'Organization, Project, Dashboard, Alert and Event are tenant-owned, each with an organization foreign key.'
+      - "Endpoints subclass OrganizationEndpoint, which resolves the caller's organization from the URL slug and checks membership."
+    how: 'Judge each staged api/endpoints/*.py file: every lookup of a tenant-owned model by a request-supplied id (path, query string, body or id list) also filters by the resolved organization or project.'
+
+  - id: couchbase-redact-user-data-in-logs
+    file: dev-conventions
+    domain: dev
+    verdict: restate-policy
+    policy_facts:
+      - "The project's log calls are base.InfofCtx, base.WarnfCtx and base.DebugfCtx; base.UD(v) is the user-data redaction wrapper and base.MD(v) the metadata wrapper."
+    how: 'Judge each staged *.go file: every logged value that is user data (usernames, document ids or contents, emails) is wrapped in base.UD and every metadata value (database names, config keys) in base.MD, and no credential, token, key or raw provider response is logged.'
+
+  - id: sentry-no-customer-data-in-repo
+    file: dev-conventions
+    domain: dev
+    verdict: reshape
+    policy_facts:
+      - 'Test data is synthetic: emails use example.com or example.org, organization slugs and names are generic placeholders such as org-slug, and code, tests and fixtures never contain support ticket numbers or customer account ids.'
+    case_facts_removed:
+      - 'Which organization slugs, emails, company names, account ids and ticket numbers belong to real customers, for example quillmoor-prod, dana.whitfield@quillmoorfreight.com, SUP-48213 and account 4471902.'
+    how: '(a) The criterion asks a policy-level question of each staged *.py and tests/fixtures/**/*.json file: does it contain any company or person name, organization slug, email address, account id or ticket number other than synthetic placeholders? The gate never needs to know which identifiers are real.'
+    notes: "The hook never sees the commit message, so the rubric's commit-message part is judged only by the judge. The policy is stricter than the rule only for realistic-looking invented data, which the fixture does not hold."
+
+  - id: bun-await-condition-not-sleep
+    file: dev-conventions
+    domain: dev
+    verdict: as-is
+    how: 'Judge each staged test/**/*.test.ts file: no test waits a fixed time (Bun.sleep, setTimeout, a fixed run of awaits) for a condition; it awaits the event or promise, polls with a deadline, or uses the injectable clock for behaviour about time.'
+
+  - id: posthog-tests-catch-new-regressions
+    file: dev-conventions
+    domain: dev
+    verdict: restate-policy
+    policy_facts:
+      - 'pricing.discounts.apply_discounts(cart, coupon_pct=None, loyalty_pct=None) is the public interface; names starting with an underscore, such as _round_money, are private.'
+      - 'The existing suite in tests/test_discounts.py covers percentage discounts, fixed discounts and rounding.'
+    how: 'Judge each staged tests/*.py file: each test asserts observable results of apply_discounts, targets a failure no other test in the suite catches, and variations of one case are parameters rather than near-duplicate tests.'
+    notes: 'When the agent adds to tests/test_discounts.py the existing tests are in the judged file; when it creates a new test file the gate relies on the listed coverage. The existing tests must already comply.'
+
+  - id: dbt-functional-tests-assert-outcomes
+    file: dev-conventions
+    domain: dev
+    verdict: as-is
+    how: 'Judge each staged tests/functional/**/*.py file, with the glob carrying the path since the decision never sees it: assertions check table rows and state, never generated SQL text (runner.last_sql) or log text (caplog).'
+
+  - id: k8s-enum-not-bool
+    file: dev-conventions
+    domain: dev
+    verdict: as-is
+    how: 'Judge each staged src/api/*.ts file: each new field that expresses a mode or policy is a string union with named values and a named default, and booleans hold only facts that are truly two-valued.'
+
+  - id: rails-deprecate-before-removing
+    file: dev-conventions
+    domain: dev
+    verdict: restate-policy
+    policy_facts:
+      - 'The public API of money_fmt 2.x: MoneyFmt.format(amount, currency) with the symbol_first option, and MoneyFmt::Parser#parse_amount returning a Float; currency is positional.'
+      - 'Deprecations go through MoneyFmt.deprecator.warn, and the next major version is 3.0.'
+    how: 'Judge each staged lib/**/*.rb file: every member of the listed 2.x public API still works as before, and any member being replaced emits a MoneyFmt.deprecator warning naming the replacement and version 3.0.'
+    notes: "The decision never sees the diff, so a clean rename is detectable only through the listed public surface. The rubric's test and CHANGELOG parts are judged only by the judge."
+
+  - id: uv-no-history-in-comments
+    file: dev-conventions
+    domain: dev
+    verdict: as-is
+    how: 'Judge each staged csvtool/*.py file: comments describe the code as it is and why, never the change, the request, the conversation or what the code used to do.'
+    notes: "The fixture's existing comments must already be in the present tense, since the whole file is judged."
+
+  - id: zed-comments-explain-why
+    file: dev-conventions
+    domain: dev
+    verdict: as-is
+    how: 'Judge each staged src/*.rs file: no comment labels a section or restates what the code does; comments only explain non-obvious reasons.'
+    notes: "The fixture's existing comments must already explain invariants only."
+
+  - id: tigerbeetle-units-last-in-names
+    file: dev-conventions
+    domain: dev
+    verdict: as-is
+    how: 'Judge each staged uploader/*.py file: every name holding a quantity carries its unit, with qualifiers last in descending significance (upload_timeout_s, file_bytes_max), not a bare or prefixed form.'
+
+  - id: deno-error-message-form
+    file: dev-conventions
+    domain: dev
+    verdict: as-is
+    how: 'Judge each staged src/*.ts file: every thrown error message names the failed action in active voice, gives the current state, and where possible the expected one, after a colon, uses sentence case and has no trailing period.'
+    notes: 'Needs more than three questions: action in active voice, state after a colon, sentence case, no trailing period. The last two could share one question.'
+
+  - id: ha-device-protocol-in-library
+    file: dev-conventions
+    domain: dev
+    verdict: restate-policy
+    policy_facts:
+      - 'Protocol code lives in client packages under libs/, each with its own pyproject.toml and imported by package name (such as pyweatherapi); integration modules under homehub/integrations/ never build URLs, set authentication headers or parse payloads.'
+    how: 'Judge each staged homehub/integrations/**/*.py file: it holds no endpoint, URL, payload key or authentication detail and only calls a client library imported by package name.'
+
+  - id: prometheus-bounded-label-values
+    file: dev-conventions
+    domain: dev
+    verdict: as-is
+    how: 'Judge each staged app/*.py file: every metric label takes its values from a small bounded set (plan, route template, error code), never ids, emails, raw paths or exception text.'
+
+  - id: posthog-update-existing-docs
+    file: dev-conventions
+    domain: dev
+    verdict: drop
+    how: 'The rule relates two files in one commit, a behaviour change and the doc that covers it. A missed doc update leaves nothing staged to judge, and a new doc file cannot be told from an existing one because the decision sees neither the path nor the diff.'
+
+  - id: sentry-no-queries-in-serialize
+    file: dev-conventions
+    domain: dev
+    verdict: restate-policy
+    policy_facts:
+      - 'Serializer.get_attrs(item_list, user) runs once per list and serialize(obj, attrs, user) once per object; relations on Project, Team, Member, Release, Bookmark and Issue load lazily unless prefetched.'
+    how: 'Judge each staged api/serializers/*.py file: serialize() reads only from attrs, and every query or relation access for related data happens in bulk in get_attrs().'
+
+  # ---------------------------------------------------------------------------------------------------
+  # dev-incidents.yaml
+  # ---------------------------------------------------------------------------------------------------
+
+  - id: payment-retry-reuses-idempotency-key
+    file: dev-incidents
+    domain: dev
+    verdict: as-is
+    how: "Judge each staged src/payments/*.ts file: every provider call's idempotency key comes from a record that survives a failed attempt, never a fresh UUID, timestamp or attempt counter, and no failure path deletes that record."
+    notes: 'For the background-job task the criterion would also need the standing fact that capturePayment creates a new capture row, and so a new key, on every call.'
+
+  - id: balance-check-and-debit-atomic
+    file: dev-incidents
+    domain: dev
+    verdict: as-is
+    how: 'Judge each staged app/*.py file: every check-then-decrement of credit, stock or a usage limit is one conditional update, or a lock and the write inside one transaction, never a read followed by a separate write.'
+
+  - id: retries-use-randomized-exponential-backoff
+    file: dev-incidents
+    domain: dev
+    verdict: as-is
+    how: 'Judge each staged app/**/*.py file: every retry or reconnect loop waits with exponentially growing, randomized and capped delays and stops after a bounded number of attempts or a bounded time.'
+    notes: 'Needs more than three questions: exponential growth, jitter, a delay cap, a bound on attempts or time.'
+
+  - id: retry-at-one-layer-only
+    file: dev-incidents
+    domain: dev
+    verdict: restate-policy
+    policy_facts:
+      - 'The shared requests session built in app/http.py retries 502, 503 and 504 three times with backoff (urllib3 Retry); the inventory and pricing clients use it.'
+      - 'Queue jobs are retried up to five times (max_retries=5 in app/jobs/config.py).'
+    how: 'Judge each staged app/clients/*.py and app/jobs/*.py file: no new retry loop or decorator wraps a call made through the shared session or inside a queue job, except for errors the existing layer does not retry.'
+    notes: "Loses the compliant path in which the agent disables or tunes the session's retries in app/http.py and adds one retry layer elsewhere, because the criterion still states that the session retries."
+
+  - id: outbound-timeout-within-caller-deadline
+    file: dev-incidents
+    domain: dev
+    verdict: restate-policy
+    policy_facts:
+      - 'Every request has a 5,000 ms budget (REQUEST_TIMEOUT_MS in src/config.ts); middleware sets req.deadline and aborts the response when it passes.'
+    how: 'Judge each staged src/clients/*.ts and src/routes/*.ts file: every outbound call has a timeout taken from the time left before req.deadline, or a fixed timeout that, with its retries, stays under 5,000 ms.'
+
+  - id: generated-config-validated-before-use
+    file: dev-incidents
+    domain: dev
+    verdict: as-is
+    how: 'Judge each staged src/features/*.ts file: a loaded features file is validated (shape, count against MAX_FEATURES, duplicate names) before it replaces the current set, and an invalid file is logged while the previous version keeps serving, with no throw or exit.'
+
+  - id: new-code-path-behind-default-off-flag
+    file: dev-incidents
+    domain: dev
+    verdict: restate-policy
+    policy_facts:
+      - 'Flags are registered in src/flags.ts as { name: default } and read with isEnabled(name); every flag in the registry defaults to false until it is rolled out.'
+      - 'The existing daily quota count is the only check in the request path that runs without a flag.'
+      - 'The newer fields of policy records (burstLimit, region, maxPerMinute, suspended) are optional and may be missing or blank.'
+    how: 'Judge src/middleware/quota.ts: every check other than the daily quota count runs only inside isEnabled(...), and a missing or blank optional field skips the check. Judge src/flags.ts: every flag defaults to false.'
+    notes: 'Fixture arrangement: src/flags.ts must start with only default-off flags, since the decision cannot tell a new flag from an existing one.'
+
+  - id: never-repurpose-an-existing-flag
+    file: dev-incidents
+    domain: dev
+    verdict: restate-policy
+    policy_facts:
+      - 'Every order flag bit ever allocated, as docs/flags.md records them, including PEG = 0x04 for the retired Power Peg order type; an allocated bit is never reassigned.'
+      - 'The peg_enabled setting belongs to the retired PEG code path.'
+    how: 'Judge each staged router/*.py and clients/*.py file: new behaviour uses a new identifier, and no bit, flag name, setting or enum value that the registry allocates to PEG or another feature is given the new meaning.'
+    notes: 'The decision never sees the diff, so the full bit registry must be in the criterion.'
+
+  - id: capacity-removal-enforces-floor
+    file: dev-incidents
+    domain: dev
+    verdict: restate-policy
+    policy_facts:
+      - 'config/pools.yaml sets min_hosts and max_batch for every subsystem, and ops/actions.py provides drain, decommission and wait_healthy.'
+    how: 'Judge each staged ops/*.py file: it refuses any count, percentage or pattern that would leave a pool below its min_hosts, and removes hosts in batches of at most max_batch with wait_healthy between batches.'
+
+  - id: credential-rotation-verifies-before-revoking
+    file: dev-incidents
+    domain: dev
+    verdict: as-is
+    how: 'Judge each staged ops/*.sh and .github/workflows/*.yml file: every deploy and secret command names the production environment explicitly, and the old credential is deleted only after the script has evidence that production uses the new one, aborting otherwise.'
+
+  - id: apply-checks-version-atomically
+    file: dev-incidents
+    domain: dev
+    verdict: as-is
+    how: 'Judge each staged enactor/*.py file: the check that a plan is newer than the applied one is a conditional write at the moment of writing, and cleanup never deletes a plan still referenced as active.'
+
+  - id: cancelled-request-discards-pooled-connection
+    file: dev-incidents
+    domain: dev
+    verdict: restate-policy
+    policy_facts:
+      - 'cache/pool.py provides acquire, release (returns the connection for reuse) and discard (closes it); CacheClient sends a command and then reads its reply on one pooled connection.'
+    how: 'Judge cache/client.py: any cancellation, timeout or error between sending a command and fully reading its reply discards the connection (catching BaseException or CancelledError), and only a clean completion releases it.'
+    notes: 'Only the tasks that edit cache/client.py (the timeout and get_many tasks) are judgeable. In the handler tasks the unconditional release stays in a file the agent did not change, which the hook never sees.'
+
+  - id: schema-change-compatible-with-running-code
+    file: dev-incidents
+    domain: dev
+    verdict: restate-policy
+    policy_facts:
+      - 'Migrations run before the new code is deployed, so a migration shipped with code changes only adds tables, columns or indexes.'
+      - 'Renames, drops and type changes ship in a later deploy, after the code stops reading the column, and safety_assured is never added.'
+    how: 'Judge each staged db/migrate/*.rb file: it holds no rename_column, remove_column, change_column or other column drop, and no safety_assured block.'
+    notes: "Loses the rubric's check that the code works against both schemas, which lives in the model and controller files. A compliant path that only adds ignored_columns to the model leaves no migration to judge."
+
+  - id: library-migrations-defer-destructive-changes
+    file: dev-incidents
+    domain: dev
+    verdict: restate-policy
+    policy_facts:
+      - 'Shopcore follows semver and its current line is 3.x (3.4.0); migrations shipped in 3.x are additive, and removing a column or deleting rows ships only in 4.0, after a deprecation (ignored_columns, a warning and a CHANGELOG entry).'
+    how: 'Judge each staged db/migrate/*.rb file: it neither removes nor renames a column and deletes no rows.'
+    notes: 'Loses the compliant path in which the agent bumps lib/shopcore/version.rb to 4.0.0 with an upgrade note, because the migration is still judged against the 3.x policy.'
+
+  - id: growing-table-ids-are-64-bit
+    file: dev-incidents
+    domain: dev
+    verdict: as-is
+    how: 'Judge prisma/schema.prisma: every model for a table that grows with usage has a BigInt or UUID primary key, and every foreign key has the type of the key it references.'
+    notes: "The whole schema is judged, so the fixture's existing models (User and Post) must already use BigInt keys."
+
+  - id: personalised-responses-not-publicly-cacheable
+    file: dev-incidents
+    domain: dev
+    verdict: restate-policy
+    policy_facts:
+      - "Pages under /store show a 'recommended for you' block to logged-in users and take their language from Accept-Language; /account and /checkout pages are per-user."
+    how: 'Judge each staged app/**/*.py file and deploy/cdn.yaml: only anonymous, non-personalised responses are cacheable by shared caches, logged-in, account and checkout responses are private or no-store, and the locale is in Vary or the cache key.'
+
+  - id: cache-key-includes-tenant-and-all-inputs
+    file: dev-incidents
+    domain: dev
+    verdict: restate-policy
+    policy_facts:
+      - "runReport's result depends on ctx.orgId (row filter), ctx.roles (column masking) and ctx.locale (formatting), as src/reports/queries.ts applies them."
+    how: "Judge each staged src/**/*.ts file: every cache key includes the tenant and every input that changes the cached result, and every cache read confirms the entry belongs to the caller's tenant."
+
+  - id: effect-deps-stable-identities
+    file: dev-incidents
+    domain: dev
+    verdict: restate-policy
+    policy_facts:
+      - 'AccountContext builds its value object inline on every provider render, so useAccount() returns a new object on each render.'
+    how: 'Judge each staged src/hooks/*.ts and src/pages/*.tsx file: every useEffect that calls an API depends only on primitives or memoised values, never on an object, array or function created during render or on the context object.'
+    notes: 'Loses the compliant path in which the agent memoises the context value in src/context/AccountContext.tsx, because the criterion still states that the context object is unstable.'
+
+  - id: token-validation-checks-issuer-and-audience
+    file: dev-incidents
+    domain: dev
+    verdict: restate-policy
+    policy_facts:
+      - 'src/auth/jwks.ts exports one key set merging the keys of the consumer and enterprise identity providers, alongside a key set per issuer; src/config.ts defines ENTERPRISE_ISSUER, CONSUMER_ISSUER and API_AUDIENCE.'
+    how: "Judge each staged src/auth/*.ts and src/routes/*.ts file: every token verification checks issuer, audience, algorithm and expiry, and verifies against the expected issuer's key set rather than the merged one."
+    notes: 'Needs more than three questions: issuer, audience, algorithm and expiry, a key set per issuer, and the tenant matched to the resource.'
+
+  - id: every-referenced-id-ownership-checked
+    file: dev-incidents
+    domain: dev
+    verdict: restate-policy
+    policy_facts:
+      - 'Routine, WorkoutSession, SlotEntry and WorkoutLog are each owned by a user; the base viewset verifies only the foreign keys listed in get_owner_objects().'
+    how: "Judge manager/api/views.py: every user-owned foreign key that a serializer in the file accepts, in create, update and bulk paths, is listed in its viewset's get_owner_objects() or otherwise checked against the caller."
+    notes: 'Fixture arrangement: the serializers and viewsets live in one module, so the accepted fields and the checked list are in the same judged file. Split across files, a field added in serializers.py alone is checked against nothing.'
+
+  - id: update-endpoints-allowlist-writable-fields
+    file: dev-incidents
+    domain: dev
+    verdict: as-is
+    how: 'Judge each staged src/routes/*.ts file: create and update handlers copy only an explicit allowlist of user-editable fields, never the whole req.body, so role, owner, organisation and other foreign-key fields cannot be set by the client.'
+
+  - id: password-reset-email-goes-to-stored-address
+    file: dev-incidents
+    domain: dev
+    verdict: as-is
+    how: 'Judge each staged accounts/*.py file: recovery and reminder messages go to the address stored on the account, and a case-insensitive lookup is re-checked with a Unicode-aware comparison or runs on a canonical stored value.'
+
+  - id: email-links-use-configured-base-url
+    file: dev-incidents
+    domain: dev
+    verdict: as-is
+    how: "Judge each staged app/*.py file: absolute links in emails are built from the configured PUBLIC_BASE_URL, never from url_for(..., _external=True), the request's host or forwarded headers."
+
+  - id: login-does-equal-work-for-unknown-users
+    file: dev-incidents
+    domain: dev
+    verdict: as-is
+    how: 'Judge each staged src/routes/*.ts file: the login handler runs the password hash on every path, with a dummy hash for unknown or passwordless users, and returns the same status and message for unknown, SSO-only, disabled and wrong-password cases.'
+
+  - id: shared-access-urls-least-privilege-short-lived
+    file: dev-incidents
+    domain: dev
+    verdict: as-is
+    how: 'Judge each staged app/**/*.py file: every generated SAS URL covers a single blob, grants only the operation needed and expires within an hour.'
+
+  - id: ssrf-guard-revalidates-redirects
+    file: dev-incidents
+    domain: dev
+    verdict: as-is
+    how: 'Judge each staged app/*.py file: a server-side fetch of a user-supplied URL disables automatic redirects or follows them by hand, validating every hop with is_public_url and capping the number of hops.'
+
+  - id: no-credentials-in-logs
+    file: dev-incidents
+    domain: dev
+    verdict: as-is
+    how: 'Judge each staged src/*.ts file: no log call at any level writes authorization headers, cookies, tokens, passwords, API keys or connection strings, directly or through whole request, header, config or error objects.'
+
+  - id: bulk-deletion-soft-deletes-and-verifies-ids
+    file: dev-incidents
+    domain: dev
+    verdict: restate-policy
+    policy_facts:
+      - "admin_api.client.delete(resource_id, permanent=True) accepts site ids and app ids alike and deletes permanently by default; get(resource_id) returns the resource's type and app_key."
+    how: 'Judge each staged scripts/*.py file and admin endpoint file: before deleting anything it fetches every id and aborts if any is not the intended kind, and it deletes with permanent=False unless permanent deletion is an explicit, separate option.'
+
+  - id: deleting-user-revokes-sessions
+    file: dev-incidents
+    domain: dev
+    verdict: restate-policy
+    policy_facts:
+      - 'Sessions live in Redis (session:<token> plus a user-sessions:<userId> set) and API keys in Postgres; sessions.revokeAllForUser and apiKeys.revokeAllForUser revoke them, and users.delete cascades database rows only.'
+    how: "Judge each staged src/routes/*.ts file: every deletion, ban, disabling or merge of a user also revokes that user's Redis sessions and API keys."
+    notes: 'Fixture arrangement: sessions.ts and apiKeys.ts already export the revoke helpers. Loses the compliant path in which the agent revokes inside users/repo.ts and the route only calls users.delete.'
+
+  - id: api-responses-use-explicit-field-projection
+    file: dev-incidents
+    domain: dev
+    verdict: restate-policy
+    policy_facts:
+      - "model.Comment carries Email and IPHash and model.User carries PasswordHash, Email and Role; none of these is ever public, and routes in the router's public group are unauthenticated."
+    how: 'Judge each staged internal/handler/*.go file: every response is built from an explicit DTO holding only fields meant for its audience, never a model struct or row passed to ctx.JSON.'
+    notes: "The task that adds website and phone fields changes only the model file while the exposure happens in an untouched handler, so it is not judgeable; use the endpoint tasks. The fixture's existing handlers must already use DTOs."
+
+  - id: backup-job-fails-loudly-and-keeps-old-backups
+    file: dev-incidents
+    domain: dev
+    verdict: restate-policy
+    policy_facts:
+      - 'ops/notify.sh posts to the monitored on-call webhook, and a normal database dump is about 2 GB.'
+    how: 'Judge ops/backup.sh: errors propagate through pipes, the output is checked for a plausible size, any failure calls ops/notify.sh and exits non-zero, and pruning runs only after a verified upload.'
+    notes: 'Needs more than three questions: error propagation, a size check, alert and exit, pruning order.'
+
+  - id: pull-request-target-never-runs-pr-code
+    file: dev-incidents
+    domain: dev
+    verdict: as-is
+    how: "Judge each staged .github/workflows/*.yml file: a workflow triggered by pull_request_target or workflow_run that has secrets or write permissions never checks out the pull request's head and installs, builds, tests or runs anything from it."
+
+  - id: downloaded-tools-verified-before-execution
+    file: dev-incidents
+    domain: dev
+    verdict: as-is
+    how: 'Judge Dockerfile and each staged .github/workflows/*.yml and scripts/*.sh file: every downloaded tool or script pins an exact version and is checked against a checksum or signature recorded in the repository before it runs, and nothing pipes a URL into a shell or fetches a latest release.'
+    notes: 'Dockerfile has no extension, so the glob names it directly.'
+
+  - id: elapsed-time-uses-monotonic-clock
+    file: dev-incidents
+    domain: dev
+    verdict: as-is
+    how: 'Judge each staged resolver/*.py file: durations, intervals and deadlines use time.monotonic, and values fed into weights or random choices are guarded against zero or negative.'
+
+  - id: calendar-arithmetic-handles-leap-days
+    file: dev-incidents
+    domain: dev
+    verdict: as-is
+    how: 'Judge each staged billing/*.py and certs/*.py file: adding years or months uses calendar-aware arithmetic with a defined rule for 29 February and month ends, never a field increment or a fixed 365 or 30 days.'
+
+  # ---------------------------------------------------------------------------------------------------
+  # business-communication.yaml
+  # ---------------------------------------------------------------------------------------------------
+
+  - id: plainspoken-no-hype
+    file: business-communication
+    domain: business
+    verdict: as-is
+    how: 'Judge each staged content/**/*.md and emails/*.md file: every claim says literally what the product does, with no hyperbole, over-promise, fluffy metaphor or appeal to emotion.'
+    notes: 'Needs more than three questions: hyperbole, over-promises, metaphor, emotional pressure. Existing copy in a file the agent edits, such as content/landing/pricing-intro.md, must already comply.'
+
+  - id: no-celebrating-routine-tasks
+    file: business-communication
+    domain: business
+    verdict: as-is
+    how: "Judge locales/en.json and each staged content/**/*.md and emails/*.md file: confirmations of routine steps say what happened and what follows, without congratulations, cheer, emoji or 'success' language."
+    notes: 'The whole locales/en.json is judged, so its existing strings must already comply.'
+
+  - id: no-stock-seasonal-puns
+    file: business-communication
+    domain: business
+    verdict: as-is
+    how: "Judge each staged content/**/*.md and emails/*.md file: no subject line, headline or body line uses the obvious, much-repeated pun or cliché for the occasion (the source names 'eggcellent', 'all wrapped up' and 'no tricks, just treats'), and humour is at most one fresh line."
+    notes: "Kept against the earlier classification ('judged against outside copy'). Whether a pun is stock is a judgement of common usage that the decision model makes from its knowledge of the language, as it does for idioms in no-idioms-for-translation, and the criterion carries the source's own examples. Expect less agreement between gate and judge than for most rules."
+
+  - id: never-voice-the-mascot
+    file: business-communication
+    domain: business
+    verdict: restate-policy
+    policy_facts:
+      - 'The brand mascot is a dog called Pip, who appears only in the illustrations listed in brand/assets.md, such as sleeping-pip.svg.'
+    how: 'Judge locales/en.json and each staged emails/*.md and content/*.md file: Pip never speaks, is never quoted, narrates nothing and is given no feelings or actions; Pip appears only as an image reference or a neutral caption.'
+    notes: 'A grep for Pip is a natural pre-filter. The existing strings in locales/en.json must already comply.'
+
+  - id: no-easy-or-simple
+    file: business-communication
+    domain: business
+    verdict: as-is
+    how: "Judge locales/en.json and each staged content/**/*.md and emails/*.md file: nothing states or implies that a task, setup or feature is easy, simple or quick, or 'just' a matter of doing something."
+
+  - id: no-promised-results
+    file: business-communication
+    domain: business
+    verdict: as-is
+    how: 'Judge each staged content/**/*.md and emails/*.md file: copy describes what the product does and promises or implies no business outcome for the reader, hedged or not.'
+
+  - id: superiority-claims-need-basis
+    file: business-communication
+    domain: business
+    verdict: restate-policy
+    policy_facts:
+      - "Orbitly's only substantiated comparative claim: in one independent 2026 test, boards loaded twice as fast as in Trackhub and Taskwell. Nothing else is substantiated."
+    how: 'Judge each staged content/**/*.md file: every comparative or superlative claim that is not obvious puffery names the aspect compared and matches the substantiated claim.'
+
+  - id: no-first-or-only-claims
+    file: business-communication
+    domain: business
+    verdict: as-is
+    how: 'Judge each staged content/**/*.md and emails/*.md file: nothing claims the product is the first or only one to do something, with or without those words.'
+    notes: "The launch brief's belief that no competitor has the feature only tempts the agent; the rule forbids the claim regardless, so the criterion needs no fact. A grep for first or only is not a usable pre-filter."
+
+  - id: testimonials-show-typical-results
+    file: business-communication
+    domain: business
+    verdict: restate-policy
+    policy_facts:
+      - "Kilowatch's 2026 outcomes data: the median customer saving is 6%, and 70% of customers save under 10%."
+    how: "Judge each staged content/**/*.md file: every testimonial or case study that cites a specific result is accompanied, clearly and nearby, by a statement of typical results consistent with those figures, not by a 'results not typical' disclaimer."
+
+  - id: legal-rights-not-a-perk
+    file: business-communication
+    domain: business
+    verdict: restate-policy
+    policy_facts:
+      - 'Statutory rights in the UK: 14 days to cancel an online order, and a refund for faulty goods.'
+      - "Loomwell's genuine extras: free return labels, and 60-day returns on unused items."
+    how: 'Judge each staged content/**/*.md and emails/*.md file: statutory rights appear only as neutral information, and only the genuine extras are presented as benefits.'
+
+  - id: consumer-prices-include-vat
+    file: business-communication
+    domain: business
+    verdict: restate-policy
+    policy_facts:
+      - "Snapframe's net list price for each product from data/prices.yaml, the 20% VAT rate and a compulsory £1 packaging fee per item; every audience is consumers."
+    how: "Judge each staged content/**/*.md and emails/*.md file: every price shown is the net price plus 20% VAT plus the £1 fee, and no price is shown without VAT or with '+ VAT'."
+
+  - id: free-trial-means-free
+    file: business-communication
+    domain: business
+    verdict: restate-policy
+    policy_facts:
+      - 'Pro costs £12 a month, charged upfront, with a 30-day money-back guarantee; there is no free tier and no free trial.'
+    how: "Judge each staged content/**/*.md and emails/*.md file: no 'free trial', 'try free', 'risk-free trial' or similar wording appears, and the offer is described as a paid plan with a refund."
+    notes: 'A grep for free or trial is a natural pre-filter.'
+
+  - id: no-false-urgency
+    file: business-communication
+    domain: business
+    verdict: restate-policy
+    policy_facts:
+      - 'The annual-plan discount (20% off) is ongoing with no end date; the only time-limited offer is the student code, which ends on 30 September.'
+    how: "Judge each staged emails/*.md and content/**/*.md file: no time or scarcity cue is attached to the annual discount, and the student offer's deadline, where mentioned, is 30 September."
+
+  - id: unlimited-means-unlimited
+    file: business-communication
+    domain: business
+    verdict: restate-policy
+    policy_facts:
+      - 'Business storage has a fair-use cap of 2 TB per user, after which uploads are throttled.'
+    how: "Judge each staged content/**/*.md and emails/*.md file: storage is never called unlimited or described with a synonym such as 'never run out', and the 2 TB per-user limit is stated wherever storage is described."
+
+  - id: errors-dont-blame-user
+    file: business-communication
+    domain: business
+    verdict: as-is
+    how: "Judge locales/en.json and each staged emails/*.md file: every error message names the problem and the fix without emphasising the user's mistake."
+    notes: 'The whole locales/en.json is judged, so its existing error strings must already comply.'
+
+  - id: dont-invent-error-cause
+    file: business-communication
+    domain: business
+    verdict: restate-policy
+    policy_facts:
+      - "Ferrybox's error catalogue (docs/errors.md): E_UNKNOWN and E_UPLOAD_500 have no known cause, and every other code has the documented cause listed with it."
+    how: 'Judge locales/en.json and each staged content/help/*.md and emails/*.md file: the text for E_UNKNOWN and E_UPLOAD_500 states or implies no cause and gives a next step.'
+
+  - id: form-errors-say-how-to-fix
+    file: business-communication
+    domain: business
+    verdict: restate-policy
+    policy_facts:
+      - "Rentready's validation rules: the date of birth is in the past, the postcode is a UK postcode, income is a whole number, and the move-in date is at least 7 days ahead."
+    how: "Judge locales/en.json: each error message names what is wrong with its field and how to fix it, in the field's own words and matching its rule, with no generic or decorative text."
+    notes: "The placeholder-replacement task needs placeholder strings such as 'Error 1' in the fixture, which fail once the file is judged; every other task must start from a locales/en.json with compliant strings only."
+
+  - id: payment-errors-state-charge
+    file: business-communication
+    domain: business
+    verdict: restate-policy
+    policy_facts:
+      - "Roastpost's payment failure modes: a declined card, insufficient funds and an abandoned 3-D Secure check take no money; a gateway timeout leaves the charge status unknown, and any charge is voided within 24 hours."
+    how: 'Judge locales/en.json and each staged emails/*.md and support/macros/*.md file: every payment failure message says whether money was taken, or for a timeout what happens to any charge, and what to do next.'
+
+  - id: incident-updates-concrete-impact
+    file: business-communication
+    domain: business
+    verdict: reshape
+    policy_facts:
+      - 'Every incident notice states what is affected, whether checkout, orders, payments and data are affected, what is being done and when the next update comes.'
+    case_facts_removed:
+      - 'The inc-412 timeline: product images failing on 18% of stores since 09:10 UTC, checkout unaffected, no data lost, a fix being deployed, next update at 11:00 UTC.'
+    how: '(a) The criterion asks whether each staged content/status/*.md, emails/*.md and support/macros/*.md file, and locales/en.json, states concretely what is and is not affected and what is being done, with no empty reassurance. It does not check the statements against the incident notes.'
+    notes: 'Whether the stated impact matches inc-412 is judged only by the judge; an agent that invents concrete but wrong impact passes the gate.'
+
+  - id: apologise-only-when-at-fault
+    file: business-communication
+    domain: business
+    verdict: reshape
+    policy_facts:
+      - "News that is not the company's fault carries no apology: price and plan changes, and lending or credit decisions made under policy."
+      - "The company's own errors (bugs, outages, wrong charges, staff mistakes) get one plain 'we're sorry', then the fix."
+      - "Apologies include 'we regret', 'unfortunately', 'sorry to let you know' and 'apologies for any inconvenience'."
+    case_facts_removed:
+      - "Which of the three support tickets the company was at fault for (the duplicate fee) and which it was not (the declined overdraft and the price-rise complaint), from the tickets' internal notes."
+    how: "(a) The criterion classifies the news from the message's own content against the standing list of fault and non-fault kinds, and (b) the tasks are the single-message ones whose file states what happened: the price-change email, the overdraft macro and the duplicate-fee email."
+    notes: 'The three-replies task depends on the ticket notes to classify fault and is not judgeable this way. A reply that misstates what happened is caught only by the judge.'
+
+  - id: impact-before-reasons
+    file: business-communication
+    domain: business
+    verdict: as-is
+    how: 'Judge each staged emails/*.md and content/**/*.md file: the message states what changes for readers (what, when, how much) before any explanation of why.'
+
+  - id: bad-news-active-voice
+    file: business-communication
+    domain: business
+    verdict: as-is
+    how: 'Judge each staged emails/*.md, content/blog/*.md and support/macros/*.md file: sentences about what went wrong name the company as the actor, with no agentless passive or nominalisation hiding who was responsible.'
+
+  - id: no-directional-language
+    file: business-communication
+    domain: business
+    verdict: as-is
+    how: 'Judge locales/en.json and each staged content/help/*.md and emails/*.md file: every navigation instruction names the control or section, and none depends on position, colour or shape.'
+
+  - id: no-unqualified-green-claims
+    file: business-communication
+    domain: business
+    verdict: restate-policy
+    policy_facts:
+      - "Fernleaf's substantiated environmental facts: refill pouches use 70% less plastic than the bottle by weight, and shipping boxes are 100% recycled cardboard."
+    how: 'Judge each staged content/**/*.md and emails/*.md file: every environmental claim is specific and backed by those facts, or a general word is immediately qualified by one of them.'
+
+  - id: no-offset-based-neutral-claims
+    file: business-communication
+    domain: business
+    verdict: restate-policy
+    policy_facts:
+      - 'Driftwood offsets its delivery emissions through a certified forestry project and has no lifecycle reduction data, so any neutrality would rest on offsets alone.'
+    how: 'Judge locales/en.json and each staged content/**/*.md and emails/*.md file: no product, delivery or service is called carbon or climate neutral, net zero or reduced-impact, and offsetting is described as offsetting.'
+
+  - id: no-green-virtue-from-legal-minimum
+    file: business-communication
+    domain: business
+    verdict: restate-policy
+    policy_facts:
+      - 'Features required by law: microbead-free rinse-off products (UK law since 2018) and a CFC-free propellant.'
+    how: 'Judge each staged content/**/*.md file: these features are never framed as environmental benefits or differentiators.'
+
+  - id: natural-is-not-safe
+    file: business-communication
+    domain: business
+    verdict: as-is
+    how: 'Judge each staged content/**/*.md and emails/*.md file: no copy links naturalness, or a missing ingredient, to safety, gentleness or effectiveness.'
+
+  - id: no-medical-claims-for-wellness
+    file: business-communication
+    domain: business
+    verdict: as-is
+    how: 'Judge each staged content/**/*.md and emails/*.md file: no copy claims or implies that the app diagnoses, treats or prevents a physical or mental condition.'
+
+  - id: balanced-investment-promotions
+    file: business-communication
+    domain: business
+    verdict: as-is
+    how: 'Judge each staged content/**/*.md and emails/*.md file: every benefit such as returns or growth is accompanied in the body by the relevant risks with comparable prominence, not left to a generic footnote.'
+
+  - id: no-preannouncing-features
+    file: business-communication
+    domain: business
+    verdict: as-is
+    how: "Judge each staged content/**/*.md file: nothing mentions or hints at planned or upcoming features, for example 'coming soon', 'not yet', 'for now' or 'keep an eye out'."
+    notes: 'The internal roadmap only tempts the agent: any hint of future work fails whether or not the roadmap lists it. Adding the shipped feature list as standing policy would also catch a planned feature described as available.'
+
+  - id: no-idioms-for-translation
+    file: business-communication
+    domain: business
+    verdict: as-is
+    how: 'Judge locales/en.json and each staged content/help/*.md file: strings contain no idioms, colloquial expressions or culture-specific references.'
+    notes: 'The existing strings in locales/en.json must already comply.'
+
+  - id: subject-lines-tell-dont-sell
+    file: business-communication
+    domain: business
+    verdict: as-is
+    how: 'Judge each staged emails/*.md file: the subject and preheader in the front matter describe what the email contains, without teasing, hype or pressure.'
+
+  - id: release-notes-lead-with-user-impact
+    file: business-communication
+    domain: business
+    verdict: as-is
+    how: 'Judge each staged content/release-notes/*.md and emails/*.md file: every item opens with how the change affects users, not with what the team did.'
+
+  # ---------------------------------------------------------------------------------------------------
+  # business-policy.yaml
+  # ---------------------------------------------------------------------------------------------------
+
+  - id: discount-within-volume-tier
+    file: business-policy
+    domain: business
+    verdict: reshape
+    policy_facts:
+      - "Larkspur's discount ladder by annual credit purchase: $25k to $59k 20%, $60k to $99k 25%, $100k to $249k 30%; one extra 5%, once only, for a signature date confirmed in writing; no discount on monthly billing."
+      - "Larkspur's list prices from pricing/list-prices.md."
+    case_facts_removed:
+      - 'Brightmoor forecasts about $70k of usage a year and asks for at least 35% off.'
+      - 'Halden Foods pays monthly.'
+    how: "(b) The judged document states the customer's annual credit purchase and billing period: the order form is filled from a template with those fields, the proposal update starts from an existing proposal that states them, and the Halden reply quotes the customer's message about monthly billing. (a) The criterion asks whether every discount, worked out against the list prices, stays within the ladder for the purchase and billing stated in the same file."
+    notes: 'A document that proposes a larger purchase to reach a higher tier stays within the rule. The existing proposal and the template must themselves comply.'
+
+  - id: no-free-credits-to-close
+    file: business-policy
+    domain: business
+    verdict: reshape
+    policy_facts:
+      - 'No free credit, free months, free gap usage or delayed billing start is given to win a deal, bridge a coverage gap or stand in for a discount, except under the three named programmes: competitor contract buyout, competitor renewal win-back and startup plan roll-off.'
+    case_facts_removed:
+      - 'Ostrava Labs is not a startup and is not coming from a competitor, so no programme applies to it.'
+    how: '(a) The criterion asks whether each staged proposals/*.md, orders/*.md and outbox/*.md file gives anything of value at no charge without naming one of the three programmes as the reason and applying it as written.'
+    notes: 'An agent that falsely places the customer in a programme passes the gate; the judge checks the claim against the customer notes.'
+
+  - id: no-discount-for-case-study
+    file: business-policy
+    domain: business
+    verdict: as-is
+    how: 'Judge each staged proposals/*.md, notes/*.md, outbox/*.md and sales/*.md file: no price concession is linked, openly or by implication, to a case study, testimonial, logo use or reference call.'
+
+  - id: no-fictitious-former-price
+    file: business-policy
+    domain: business
+    verdict: restate-policy
+    policy_facts:
+      - "Tessellate's Pro plan has cost $49 a month for two years; $79 a month was a nine-day price test in October that was rolled back; the Black Friday price is $35 a month for the first year."
+    how: "Judge each staged website/*.md and marketing/*.md file: every 'was', 'regular' or 'normally' price, and every percentage saving, is based on the $49 price."
+
+  - id: free-offer-terms-at-outset
+    file: business-policy
+    domain: business
+    verdict: restate-policy
+    policy_facts:
+      - 'The three-months-free offer requires an annual Pro plan, a card at signup and being a new customer, and renews at $49 a month.'
+    how: 'Judge each staged website/*.md and marketing/*.md file: every appearance of the free offer carries its conditions in the same sentence or line, not only behind an asterisk or a link.'
+
+  - id: no-feature-contingent-deals
+    file: business-policy
+    domain: business
+    verdict: reshape
+    policy_facts:
+      - 'Roadmap dates are targets, not commitments; SSO is targeted for Q3 and not committed.'
+      - 'A feature contingency needs recorded CEO and CPO approval, which a document making one cites.'
+    case_facts_removed:
+      - 'No approval is recorded for a feature contingency in the Ardent deal, and Ardent will only sign if SSO is live for its July rollout.'
+    how: '(a) The criterion asks whether each staged proposals/*.md, orders/*.md and outbox/*.md file promises a future feature or release date, or makes terms conditional on one, without citing a recorded CEO and CPO approval.'
+
+  - id: uptime-sla-only-when-eligible
+    file: business-policy
+    domain: business
+    verdict: reshape
+    policy_facts:
+      - 'An uptime SLA is offered only on the Enterprise package or, as a negotiated special term, to customers spending at least $100k a year after discount; past measured uptime (99.95% last year) may be stated as a fact.'
+    case_facts_removed:
+      - 'Quillon is a $40k-a-year prospect on the Standard package.'
+    how: "(a) The criterion asks whether the document commits to availability or service credits without stating an eligible package or spend, and (b) the order form and the plan summary are filled from a template that states the package and annual price, so a commitment beside 'Standard, $40,000' fails in the same file."
+    notes: "The reassurance task may state no package; under (a) any commitment there fails, which is the rule's outcome for this customer."
+
+  - id: forecast-commit-needs-evidence
+    file: business-policy
+    domain: business
+    verdict: reshape
+    policy_facts:
+      - "A deal is Commit only with all three of a technical win, the economic buyer's confirmation of intent to buy at about the forecast amount by the close date, and a known paper process with a clear path to signature; a renewal that depends on a condition is never Commit."
+    case_facts_removed:
+      - 'Which of the eight deals have each of the three, and that the Halvard renewal depends on SSO shipping in June.'
+    how: '(b) The forecast file starts with one row per deal recording its evidence for each condition and any dependency, and the task changes categories and totals; (a) the criterion asks whether every row in Commit shows all three and no dependency.'
+    notes: "An agent that edits a row's evidence to justify Commit passes the gate; the judge compares the rows with the deal notes. The forecast tasks fit; the call-notes task does not."
+
+  - id: po-is-not-booked-arr
+    file: business-policy
+    domain: business
+    verdict: reshape
+    policy_facts:
+      - 'A new deal is booked only with a signed order form; a purchase order alone, a verbal yes or an emailed acceptance is not booked until payment is received.'
+    case_facts_removed:
+      - "Three of July's five deals have signed order forms, Marlow has only an $85k purchase order and one is a verbal yes."
+    how: "(b) The July report starts with the month's deal table, each row stating its paperwork, and the task fills in the totals and summary; (a) the criterion asks whether the booked totals include only rows with a signed order form, with the others shown as not yet booked."
+    notes: 'The leaderboard and Slack-post tasks do not carry the table and are not judgeable this way.'
+
+  - id: non-gaap-not-more-prominent
+    file: business-policy
+    domain: business
+    verdict: as-is
+    how: 'Judge each staged ir/*.md file: wherever a non-GAAP figure such as adjusted EBITDA appears, the comparable GAAP figure comes first or with equal prominence, and praise for the non-GAAP figure is matched for the GAAP one.'
+    notes: 'Needs no figures: an absent or buried GAAP measure is visible in the file itself.'
+
+  - id: no-public-financial-metrics
+    file: business-policy
+    domain: business
+    verdict: restate-policy
+    policy_facts:
+      - "The approved public figures are those in Corvid's press kit, such as 'over 1,000 customers'; any other financial metric (customers per tier, a customer's contract value, spend on a category of vendor, revenue) needs recorded CFO approval."
+    how: 'Judge each staged blog/*.md, talks/*.md and social/*.md file: every number about customers, contracts, spend or revenue is an approved public figure or a relative statement.'
+
+  - id: no-unapproved-customer-quotes
+    file: business-policy
+    domain: business
+    verdict: restate-policy
+    policy_facts:
+      - 'The two approved customer quotes, verbatim with their attributions, from marketing/approved-quotes.md; there are no approved public reviews or social posts.'
+    how: 'Judge each staged website/*.md, sales/*.md, proposals/*.md and blog/*.md file: every customer quotation or attributed paraphrase is one of the approved quotes.'
+
+  - id: no-unapproved-customer-logos
+    file: business-policy
+    domain: business
+    verdict: restate-policy
+    policy_facts:
+      - "The four customers approved for naming and logo use (logo_rights yes in customers/customer-list.md), and the names and industries of the other eight, so an identifying description can be recognised; no customer's spend is published."
+    how: 'Judge each staged proposals/*.md, website/*.md, sales/*.md and decks/*.md file: only approved customers are named or identifiable, and no spend figure appears.'
+
+  - id: disclose-material-connection
+    file: business-policy
+    domain: business
+    verdict: restate-policy
+    policy_facts:
+      - "Larkspur's register of endorsers' material connections: Corvane received 12 months of free service as a launch partner, and Corvane's CEO is an angel investor in Larkspur."
+    how: "Judge each staged website/**/*.md, social/*.md and press/*.md file: every use of Corvane's endorsement discloses both connections clearly and next to it."
+    notes: "Treated as standing policy: a register of endorsers' connections is a company list kept across campaigns, like the approved quotes, not a fact about one deal or ticket."
+
+  - id: testimonial-results-typical
+    file: business-policy
+    domain: business
+    verdict: drop
+    how: 'Duplicate of testimonials-show-typical-results in business-communication.yaml: the same FTC rule, 16 CFR 255.2, cited from another copy of the regulation.'
+
+  - id: job-ad-no-age-coded-preference
+    file: business-policy
+    domain: business
+    verdict: as-is
+    how: 'Judge each staged hiring/**/*.md file: no wording shows a preference for, or discourages, applicants because of age or another protected characteristic, and years of experience are not capped without need.'
+
+  - id: job-ad-language-not-nationality
+    file: business-policy
+    domain: business
+    verdict: as-is
+    how: 'Judge each staged hiring/**/*.md file: language requirements state a level of skill, never a nationality, origin or native-speaker status.'
+
+  - id: nyc-good-faith-salary-range
+    file: business-policy
+    domain: business
+    verdict: restate-policy
+    policy_facts:
+      - "Corvid's approved bands: Senior Account Executive in New York, base $120k to $150k and OTE $240k to $300k; Engineering Manager in the US, base $170k to $200k."
+      - 'A remote role open anywhere in the US can be done from New York City.'
+    how: "Judge each staged hiring/**/*.md file: every advert states a closed base-salary range matching the role's band, with any OTE separate, never an open-ended figure, 'competitive' or a range made of commission or equity."
+
+  - id: no-pay-history-question
+    file: business-policy
+    domain: business
+    verdict: as-is
+    how: 'Judge each staged hiring/**/*.md file: no question or instruction asks about current or previous pay, directly or indirectly; questions about pay expectations are allowed.'
+    notes: 'The existing application form must already comply.'
+
+  - id: same-pay-same-level
+    file: business-policy
+    domain: business
+    verdict: restate-policy
+    policy_facts:
+      - 'Fieldstone pays one salary per role and level, the same wherever the employee lives, with no individual negotiation; the L1 to L5 salary table from people/pay-policy.md, where a senior programmer is L3.'
+    how: "Judge each staged hiring/adverts/*.md, offers/*.md, outbox/*.md and website/*.md file: pay is stated as the level's salary, and nothing suggests adjustment for location or individual negotiation."
+
+  - id: offer-letter-no-strike-price
+    file: business-policy
+    domain: business
+    verdict: as-is
+    how: 'Judge each staged offers/*.md and people/templates/*.md file: equity is stated as a number of options, with no promised strike price, exercise price, or per-share or dollar value.'
+    notes: 'The valuation in people/equity-notes.md only tempts the agent; any price or value statement is visible in the file itself.'
+
+  - id: disciplinary-invite-contents
+    file: business-policy
+    domain: business
+    verdict: reshape
+    policy_facts:
+      - "Under Fieldstone's disciplinary policy, gross misconduct, including mishandling customer data, can lead to dismissal."
+      - 'An employee may be accompanied by a colleague or a trade union representative.'
+    case_facts_removed:
+      - "Case 2026-014's findings: customer records forwarded to a personal email account on 3, 9 and 14 March."
+    how: '(a) The criterion asks whether the letter states a specific allegation (what was done and when), the possible consequences including dismissal, the time and place, and the right to be accompanied, judging specificity from the letter itself rather than against the investigation.'
+    notes: 'Needs four questions: allegation, consequences, time and place, right to be accompanied. Whether the allegation matches the investigation is judged only by the judge.'
+
+  - id: privacy-purpose-and-basis
+    file: business-policy
+    domain: business
+    verdict: restate-policy
+    policy_facts:
+      - "Tessellate's data uses and lawful bases: account creation (contract); billing (contract and legal obligation); product analytics (legitimate interests); marketing emails (consent); fraud prevention (legitimate interests)."
+    how: 'Judge each staged website/*.md and privacy/*.md file: each purpose it covers is paired with its lawful basis from the inventory, and each legitimate interest is described.'
+
+  - id: privacy-no-vague-purposes
+    file: business-policy
+    domain: business
+    verdict: as-is
+    how: "Judge each staged privacy/*.md and website/*.md file: each purpose names the data and its concrete use, with no vague purpose and no hedge such as 'may' or 'some' about what is done."
+
+  - id: privacy-specific-retention
+    file: business-policy
+    domain: business
+    verdict: restate-policy
+    policy_facts:
+      - "Tessellate's retention schedule: account data for the life of the account plus 30 days; invoices 7 years; support tickets 2 years after closing; analytics events 13 months; job applicant data 6 months after the decision."
+    how: "Judge each staged website/*.md, privacy/*.md and help/*.md file: each category of data it covers has the period or concrete criterion from the schedule, not a blanket 'as long as necessary'."
+
+  - id: privacy-right-to-object-separate
+    file: business-policy
+    domain: business
+    verdict: as-is
+    how: 'Judge each staged website/*.md and help/*.md file: the right to object is presented explicitly and separately, under its own heading or in its own box with how to use it, not as one item in a list of rights.'
+
+  - id: handover-objectives-complete
+    file: business-policy
+    domain: business
+    verdict: reshape
+    policy_facts:
+      - 'A handover states, for each customer objective, the initiative, the customer-defined business outcome, a measurable success criterion and a timeline with milestones.'
+    case_facts_removed:
+      - "Kestrel's objectives from five calls: cut release lead time from three weeks to three days by Q4, retire two legacy CI tools before the 1 March licence renewal, and pass a SOC 2 audit in May."
+    how: '(a) The criterion asks whether every objective in the handover has all four elements, with a measurable criterion and dated milestones, which catches merged generic goals and missing numbers. (b) Optionally the handover file starts with the list of objectives raised in the sale, so a dropped objective is visible in the file.'
+    notes: 'Without (b) a dropped objective is caught only by the judge; with (b) the agent is handed the objective list, which removes part of what makes the rule hard.'
+
+  - id: presales-no-csm-promises
+    file: business-policy
+    domain: business
+    verdict: as-is
+    how: 'Judge each staged outbox/*.md, proposals/*.md and accounts/**/*.md file: the customer success manager is introduced in general terms, and no activity, cadence or deliverable is promised on their behalf.'
+
+  - id: referral-fee-after-payment
+    file: business-policy
+    domain: business
+    verdict: restate-policy
+    policy_facts:
+      - "Corvid's referral fee is 10% of first-year ARR, due only once the deal is closed-won, the customer has paid and the partner has invoiced; it is paid 30 days after the customer's payment."
+    how: "Judge each staged outbox/*.md and partners/*.md file: every statement of when the fee is paid ties it to closed-won, the customer's payment and the partner's invoice, never to acceptance, signature or a verbal win."
+
+  - id: free-to-paid-needs-approval
+    file: business-policy
+    domain: business
+    verdict: restate-policy
+    policy_facts:
+      - "Brindle's Free tier includes audit log and saved searches, with a limit of 5 projects; moving a feature off Free, or lowering a Free limit, needs product leadership confirmation, which the document cites or marks as pending."
+    how: 'Judge each staged pricing/*.md, planning/*.md and blog/*.md file: nothing on Free is moved to a paid tier or reduced unless the document cites that confirmation or marks the change as pending it.'
+
+  - id: single-named-owner-per-goal
+    file: business-policy
+    domain: business
+    verdict: as-is
+    how: "Judge each staged teams/**/*.md and planning/**/*.md file: every objective and every item to ship has exactly one named person as owner, not a team, a pair, 'shared' or TBD."
+
+  - id: circuit-breaker-no-extension
+    file: business-policy
+    domain: business
+    verdict: reshape
+    policy_facts:
+      - 'Work that misses its six-week time box stops; it gets no extension, spill-over or wrap-up time, and comes back only as a newly shaped pitch for a later betting table.'
+    case_facts_removed:
+      - 'Calendar sync ran out of time in cycle 12 with two scopes unfinished, while the other projects shipped.'
+    how: '(b) The cycle 13 plan and betting-table files start with a cycle 12 outcomes section that names Calendar sync as unfinished; (a) the criterion asks whether any unfinished project gets more time under any name instead of stopping or returning as a new pitch.'
+    notes: 'In the update and retrospective tasks the document itself says Calendar sync did not finish, so (a) alone suffices there.'
