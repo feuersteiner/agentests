@@ -148,7 +148,8 @@ This is not decided:
 
 ## The dataset
 
-`dataset/` holds one folder per rule, named by the rule's id:
+`dataset/` holds one folder per rule, named by the rule's id. [dataset/README.md](dataset/README.md)
+is the runbook for building one.
 
 ```text
 dataset/<rule-id>/
@@ -434,7 +435,8 @@ supplies, and only the owner starts it.
 ## Status
 
 The research catalogue, `bun run benchmark:pick`, the harness and `bun run benchmark:prove` exist.
-The dataset's first entries exist and a pilot has run; the rest of the dataset is being built. No
+Three of the dataset's 124 entries exist and a pilot has run once; the other 121 entries are still
+to be built. No
 benchmark result is published here.
 
 ## Folder structure
@@ -449,6 +451,7 @@ benchmarks/
     pilot.ts                       entry of bun run benchmark:pilot; picks a pilot's 3 tests and runs them
     prove.ts                       entry of bun run benchmark:prove; proves the Tests on their evals
   dataset/                         one folder per rule, as The dataset describes
+    README.md                      the runbook for building one entry
   package.json                     the private workspace package agentests-benchmarks
   prices.yaml                      the decision models' list prices
   research/                        the research catalogue

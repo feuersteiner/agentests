@@ -3,6 +3,7 @@
 ## Layout
 
 - `README.md`: the method, the dataset contract, the harness and the folder's structure, for people; read it before any change here.
+- `dataset/README.md`: the runbook for building one dataset entry: the steps, each requirement with its reason, the verification list and what to report.
 - `cli/index.ts`: the entry `bun run benchmark` runs; loads every entry of the dataset, or those `--test <rule-id>/<task>` names, and runs each task in every arm, or those `--arm` names, through `runBenchmark`; `--help` lists the options; any error prints `Error: ...` to stderr and exits with code 1.
 - `cli/pilot.ts`: the entry `bun run benchmark:pilot` runs, through the package's `pilot`; picks 3 tests as `cli/pick.ts` does, from a fresh seed or `--seed <n>`, prints them with the seed, and stops with code 1, running nothing, when a picked test has no entry, an invalid one, or lacks the task; otherwise runs them with the seed recorded. It takes the same shared options as `cli/index.ts`.
 - `cli/prove.ts`: the entry `bun run benchmark:prove` runs, through the package's `prove`; loads every dataset entry, or those `--entry <rule-id>` names, and proves their evals on `luna` and `jev`, or those `--arm` names, through `runProof`; `--help` lists the options; any error prints `Error: ...` to stderr and exits with code 1. It makes decision calls only: no agent and no judge.
@@ -42,6 +43,7 @@ Status: `research/`, `bun run benchmark:pick`, the harness (`bun run benchmark` 
 - A pilot's tests are always the 3 that `bun run benchmark:pick` picks, never chosen by hand: do not pick, swap or drop a pilot test yourself, and keep the seed it prints so the pick can be replayed.
 - Never write a measured number (a score, a time, tokens, a cost or a count of blocked commits) into a document unless it came from a real run's archive; never take one from memory, a dry run or an estimate. When a research file changes, recount the README's figures and the `triage.yaml` summary from the files.
 - Never commit results, fixture working copies or run archives: they live outside the repository, and this folder holds only the tests.
+- Build a dataset entry to `dataset/README.md`, calling no model, and change nothing outside the entry's own folder.
 - A benchmark Test uses only the `glob`, `grep` and `decide` stages, and its criteria carry standing policy, never case facts; the README's rules of the comparison define both.
 - Change nothing in `core/` for the benchmark's sake: the benchmark measures the package as it ships.
 - A run never writes inside the repository, and the real decision keys never reach a workspace or the agent's environment: they stay in the harness process, and the proxy adds them to the requests it forwards.
