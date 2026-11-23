@@ -16,3 +16,6 @@ core/LICENSE
 
 # Model accuracy fixture samples, with deliberate violations
 core/tests/models/.agents/
+
+# Benchmark dataset sample repositories, with deliberate violations
+benchmarks/dataset/
