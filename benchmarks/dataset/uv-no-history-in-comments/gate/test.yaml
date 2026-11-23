@@ -1,0 +1,21 @@
+version: 1
+id: uv-no-history-in-comments
+title: Comments describe the code, not its history
+description: Comments and docstrings in the csvtool package describe the code as it is and why, never the edit, the request behind it or what the code used to do.
+select:
+  glob: 'csvtool/**/*.py'
+  grep: '#|"""|'''''''
+assert:
+  - id: no-edit-narration
+    description: No comment or docstring reports an edit made to the code.
+    error: Describe what the code does and why, as if it had always been this way. Say what was fixed or changed in the commit message or the changelog.
+    decide: 'No comment or docstring in this Python file reports an edit made to the code: none says that something in it was fixed, changed, switched, replaced, added, removed, updated, rewritten, refactored or optimised, as in "Fix: ...", "Fixed ...", "Changed X to Y", "Switched to ..." or "Now handles the empty case", and none names the version or date in which the code changed, as in "since 1.2". Comments that state what the code does and why pass, and so do comments that name an outside fact the code has to deal with, such as what the files it reads contain. Words such as "new", "changed" or "now" pass when they describe the data the program handles or the moment it runs, not an edit to the code. Only comments and docstrings count: code, string literals and the names of functions and variables are not comments.'
+  - id: no-request-or-conversation
+    description: No comment or docstring refers to the request or conversation behind the code.
+    error: Leave the request and the discussion out of the comment and keep the reason it gives. They belong in the commit message or the pull request.
+    decide: 'No comment or docstring in this Python file says that someone asked for, wanted, suggested or reviewed the code, or points to the request, task, prompt, conversation, meeting, review or ticket behind it, as in "as requested", "as you asked", "the customer wanted this", "per the review", "as discussed" or "see ticket 12". A comment that names an outside fact the code depends on, such as what the files from another system contain or what a downstream program accepts, passes. Only comments and docstrings count, not code or string literals.'
+  - id: no-former-behaviour
+    description: No comment or docstring describes what the code used to do.
+    error: Describe the code as it is now. What it did before belongs in the commit message or the changelog.
+    grep: '[Uu]sed to|[Pp]reviously|[Nn]o longer|[Aa]ny ?more|\b[Oo]ld\b|[Oo]riginal|[Ff]ormer|[Ii]nstead|[Rr]ather than|\b[Ww]as\b|\b[Ww]ere\b|\b[Hh]ad\b|\b[Dd]id\b|[Uu]ntil now|[Bb]efore (this|the|that) (change|fix|edit|commit|patch|version)'
+    decide: 'No comment or docstring in this Python file describes what the code itself used to do or how it worked before, as in "used to raise", "previously took a list", "no longer blocks", "the old format" or "instead of the old loop": a comment saying that the code no longer does something, or what it did previously, fails. Words such as "now", "was", "original", "earlier", "before", "previous" or "changed" pass when they describe the data the program handles or the moment it runs, such as "the line before this one" or "records that changed since the last sync", and not the past of the code itself. A comparison with an alternative, as in "X instead of Y" or "X rather than Y", passes unless it says that the code did Y before. Only comments and docstrings count, not code or string literals.'
