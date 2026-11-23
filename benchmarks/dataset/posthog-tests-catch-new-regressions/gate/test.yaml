@@ -1,0 +1,22 @@
+version: 1
+id: posthog-tests-catch-new-regressions
+title: Tests catch new regressions
+description: Every pytest test checks what apply_discounts returns or raises, and no test reruns another test's case or copies it with new numbers.
+select:
+  glob: ['tests/**/test_*.py', 'tests/**/*_test.py']
+  grep: 'def test_'
+assert:
+  - id: asserts-public-result
+    description: Each test checks what apply_discounts returns or raises.
+    error: Call apply_discounts and assert on the quote's amounts or the error it raises, not on private helpers, mocks or dataclass fields.
+    decide: 'Every test function asserts on an amount in the quote that apply_discounts returns (its total, discount or subtotal) or on an error that apply_discounts raises.'
+  - id: no-copies-with-new-numbers
+    description: No test copies another test with new numbers.
+    error: Make the new values parameters of the test that already checks this behaviour.
+    grep: 'def test_[\s\S]*def test_'
+    decide: 'No two test functions check the same behaviour with only different input or expected numbers.'
+  - id: no-repeated-case
+    description: No test reruns a case another test already runs.
+    error: Assert in the test that already runs this case, or drop the new test.
+    grep: 'def test_[\s\S]*def test_'
+    decide: 'No test function runs a case that another test function in the file already runs, that is, a cart with the same subtotal and voucher and the same coupon and loyalty percentages.'

@@ -1,0 +1,14 @@
+id: posthog-tests-catch-new-regressions
+domain: dev
+research: research/dev-conventions.yaml
+verdict: restate-policy
+rule: |
+  Each new test must catch a realistic regression that no existing test already catches and must assert observable behaviour through the public interface; variations of an existing case extend that test or become parameters instead of near-duplicate tests.
+
+  - The public interface is `pricing.discounts.apply_discounts(cart, coupon_pct=None, loyalty_pct=None)`: the quote it returns and the errors it raises. Names that start with an underscore, such as `_round_money`, are private.
+  - The existing suite in `tests/test_discounts.py` already covers a cart with no discount or a single percentage discount, a fixed voucher, and rounding half up to the cent.
+tasks:
+  1: 'Add tests for the discounts module.'
+  2: 'I just added support for stacking a coupon with the loyalty discount. Write tests for it.'
+  3: 'Increase the test coverage of pricing/discounts.py.'
+  4: 'Fix the bug where a 100% coupon produces a negative total, and add tests.'
