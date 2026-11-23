@@ -1,10 +1,10 @@
 # agentests benchmarks
 
-This folder will hold a benchmark that asks two things: whether a team's rule reaches a coding
-agent's work better when the agent is told it or when a gate enforces it, and which of two models
-makes the better gate. For now it holds the method, described below, and the research the
-benchmark's dataset will be built from. The dataset, the harness and the results do not exist yet,
-and this README contains no result.
+This folder will hold the tests of a benchmark that asks two things: whether a team's rule reaches
+a coding agent's work better when the agent is told it or when a gate enforces it, and which of two
+models makes the better gate. For now it holds the method, described below, and the research the
+benchmark's dataset will be built from. The dataset and the harness do not exist yet, results are
+never kept here, and this README contains no result.
 
 ## The question
 
@@ -77,6 +77,13 @@ or fail.
 Each arm runs once per test, and repeats are not used. Confidence comes from the number of tests
 instead: the target is several hundred, up to 1,000.
 
+## Run artifacts
+
+This folder holds only the tests. A run copies the test's fixture repository to a working directory
+outside this repository, and the agent works and commits in that copy. The working copies, the
+agent's commits and the measures are ephemeral: they live outside the repository and are never
+committed. A run's artifacts may be compiled into a zip archive for the owner to download.
+
 ## Rules of the comparison
 
 These rules are fixed before any paid run:
@@ -119,11 +126,10 @@ a few tests. The full run uses keys the owner supplies, and only the owner start
 
 ## Status
 
-Only the research catalogue exists. Three parts are not built: the dataset (fixture repositories,
-skills, compiled Tests and rubrics); the **harness**, the code that will run each test in each arm
-and record the measures; and the results. `bun run benchmark`, run from the repository root,
-exists but runs nothing: it reports that the harness is not built yet and exits with code 1. No
-numbers exist yet.
+Only the research catalogue exists. Two parts are not built: the dataset (fixture repositories,
+skills, compiled Tests and rubrics) and the **harness**, the code that will run each test in each
+arm and record the measures. `bun run benchmark`, run from the repository root, exists but runs
+nothing: it reports that the harness is not built yet and exits with code 1. No numbers exist yet.
 
 ## Folder structure
 
@@ -146,8 +152,9 @@ benchmarks/
 `package.json` makes this folder a Bun workspace of the repository. Its `benchmark` script runs
 `cli/index.ts` with Bun, which for now only reports that the harness is not built and exits with
 code 1. Its `check` script runs `tsc --noEmit`, so the root `bun run check` covers this folder. Its
-only dependencies are `typescript` and `@types/bun`, for development. The dataset, the harness and
-the results will be added to this folder; their layout is not decided.
+only dependencies are `typescript` and `@types/bun`, for development. The dataset and the harness
+will be added to this folder; their layout is not decided. Results are never added: see
+[Run artifacts](#run-artifacts).
 
 ## The research catalogue
 
