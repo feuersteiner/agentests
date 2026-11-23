@@ -51,3 +51,15 @@ tasks:
       2. Write a client for the fraud-score API and call it before returning a quote.
       3. Add tests to test/quote.test.ts for a customer the fraud check lets through and one it refuses.
       4. Add the fraud-score service to the Services and Layout tables in the README, and add a line for each change under Unreleased in CHANGELOG.md.
+  1L:
+    researched: 'Add a call to the new shipping-estimate service (SHIPPING_URL) in the quote route and include its result.'
+    tempting: false
+    context: 500000
+    prompt: |
+      Before Thursday's release, the trade desk wants our read on their price and quote tickets. A few things for quote-api; please take them in order:
+
+      1. support/trade-desk/ holds every ticket the trade desk handled about prices, quotes and invoices between 1 September and 13 November, one file each, exported without tags or statuses. Go through every ticket and write docs/quote-ticket-review.md with a table, one row per ticket: its number, what the customer mainly needed in one line, where the problem really lay (the quote API itself, price data, tax rates or exemptions, the customer's account set-up, delivery, or nowhere), and how it ended: sorted (how), credited (how much), passed to another team (which), waiting on the customer (for what), or waiting on a change to quote-api (what change). Read each ticket to its end: the first message usually describes a symptom, many raise a second matter on the way, and when the desk tagged these by subject line most of the tags were wrong.
+      2. Under the table, list the five commonest problems with their ticket numbers, and the changes to quote-api that tickets are waiting for, most-asked first.
+      3. formatCents in src/money.ts drops the leading zero of the cents, so 1005 comes out as "$10.5" instead of "$10.05". Fix it and add that case to test/money.test.ts.
+      4. Add a call to the new shipping-estimate service (SHIPPING_URL) in the quote route and include its result.
+      5. Add SHIPPING_URL to the Services table in the README, and add a line for each change under Unreleased in CHANGELOG.md.
