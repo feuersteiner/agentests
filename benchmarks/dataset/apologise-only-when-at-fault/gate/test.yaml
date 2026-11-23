@@ -1,0 +1,25 @@
+version: 1
+id: apologise-only-when-at-fault
+title: Apologise only when at fault
+description: Pennyjar's emails and support messages say sorry only for Pennyjar's own mistakes, and then once, plainly, as "we're sorry"; news such as a price change or a declined application carries no apology.
+select:
+  glob: ['emails/**/*.md', 'support/macros/**/*.md', 'support/replies/**/*.md']
+  grep: '[Ss]orry|SORRY|[Aa]polog|APOLOG|[Rr]egret|REGRET|[Uu]nfortunate|UNFORTUNATE|[Ss]adly|SADLY|[Bb]ugs?\b|[Ee]rror|[Mm]istake|[Tt]wice|two times|more than once|[Dd]uplicate|[Dd]ouble|[Oo]utage|[Rr]efund|[Ww]rong|[Ii]ncorrect|[Oo]ver-?charg|[Gg]litch|[Ff]ault|[Ff]ail|[Pp]roblem|[Ii]ssue|[Dd]elay|[Bb]roke|\b[Dd]own\b|[Uu]navailable|[Ss]houldn.t have|[Ss]hould not have|[Bb]y accident|[Aa]ccidental'
+assert:
+  - id: no-apology-unless-our-mistake
+    description: The message apologises only for a mistake Pennyjar made, never for news such as a price change or a declined application.
+    error: 'Remove the apology: only Pennyjar''s own mistakes (bugs, outages, wrong or duplicate charges, staff mistakes) get a "we''re sorry". Give news such as a price change or a declined application plainly, without "sorry", "unfortunately" or "we regret".'
+    grep: '[Ss]orry|SORRY|[Aa]polog|APOLOG|[Rr]egret|REGRET|[Uu]nfortunate|UNFORTUNATE|[Ss]adly|SADLY'
+    decide: 'Pennyjar is a UK budgeting app and current account. Condition: the text is a message from a company other than Pennyjar (it names another company, not Pennyjar, as its sender), or every apology in the text is for a mistake that Pennyjar itself made. An apology is any "sorry" (including "sorry to let you know" and "sorry to hear"), "apologise", "apologies" (including "apologies for any inconvenience"), "we regret", "regrettably", "unfortunately" or "sadly" addressed to the reader. Pennyjar''s own mistakes are things such as a bug, an outage, a wrong or duplicate charge, a delay Pennyjar caused and a staff mistake. Anything else is not Pennyjar''s mistake and must carry no apology, in particular a price or plan change, and an overdraft, loan or credit application declined under Pennyjar''s lending policy. A text with no apology meets the condition.'
+  - id: our-mistake-gets-a-sorry
+    description: A message about a mistake Pennyjar made says sorry for it.
+    error: 'This message is about a mistake Pennyjar made: say "We''re sorry." once, before explaining what went wrong and how it was put right.'
+    grep: '[Bb]ugs?\b|[Ee]rror|[Mm]istake|[Tt]wice|two times|more than once|[Dd]uplicate|[Dd]ouble|[Oo]utage|[Rr]efund|[Ww]rong|[Ii]ncorrect|[Oo]ver-?charg|[Gg]litch|[Ff]ault|[Ff]ail|[Pp]roblem|[Ii]ssue|[Dd]elay|[Bb]roke|\b[Dd]own\b|[Uu]navailable|[Ss]houldn.t have|[Ss]hould not have|[Bb]y accident|[Aa]ccidental'
+    decide: 'Pennyjar is a UK budgeting app and current account. Condition: the text is a message from a company other than Pennyjar (it names another company, not Pennyjar, as its sender), or the text does not tell the reader about a mistake Pennyjar made, or it says sorry for that mistake. Pennyjar''s own mistakes are things such as a bug, an outage, a wrong or duplicate charge, a delay Pennyjar caused and a staff mistake. Saying sorry means a sentence with "sorry", "apologise" or "apologies", such as "We''re sorry" or "We apologise for the error". A text that tells the reader about such a mistake and only explains it, puts it right or thanks the reader for their patience, without one of those words, does not meet the condition. A price or plan change and a declined application are not mistakes by Pennyjar.'
+  - id: one-plain-sorry
+    description: The message apologises at most once, and in the plain form "we're sorry".
+    error: 'Say sorry once, in the plain form "We''re sorry", before the fix; remove any second apology and formal ones such as "We apologise for any inconvenience", "we regret" or "unfortunately".'
+    grep: '[Aa]polog|APOLOG|[Rr]egret|REGRET|[Uu]nfortunate|UNFORTUNATE|[Ss]adly|SADLY|([Ss]orry|SORRY)[\s\S]*([Ss]orry|SORRY)'
+    decide:
+      - 'Pennyjar is a UK budgeting app and current account. Count the apologies in the text, front matter included. An apology is each "sorry", "apologise", "apologies", "we regret", "regrettably", "unfortunately" or "sadly" said to the reader, counted every time it appears. The subject line is part of the message like the body, so an apology in the subject line and another in the body are two apologies. Condition: the text has no apology, or it has exactly one apology and that apology uses the word "sorry", as in "We''re sorry", "We are sorry", "I''m sorry" or "Sorry". Two or more apologies anywhere in the text do not meet the condition, for example "We''re sorry" near the top and "Sorry again for the trouble" or "Apologies for any inconvenience" at the end; nor does a single apology without "sorry", such as "We apologise", "We would like to apologise", "Please accept our apologies", "We regret", "Unfortunately" or "Sadly".'
+      - 'The text is a message from a company other than Pennyjar: it names another company, not Pennyjar, as its sender.'
