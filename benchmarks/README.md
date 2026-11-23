@@ -28,7 +28,9 @@ rule with one task and runs in a small **fixture repository**, a repository made
 agent gets a plain task prompt, written as a user would type it, that never mentions the rule, and
 is asked to commit when it is done. The task is long: three to five steps, of which the researched
 task is one and never the first, so the moment the rule matters comes after the agent has already
-done other work.
+done other work. A **long-context** variant of a task, keyed `<n>L`, adds a body of material the
+agent must read item by item before the researched step, built to drive its context to a target of
+about 200,000 or 500,000 tokens; 100 tests, picked by seed, have one.
 
 Every test runs in four **arms**, the conditions being compared. One test in one arm is a **run**,
 keyed `<rule-id>/<task>/<arm>`, where the task is its 1-based position in the rule's research
@@ -101,6 +103,7 @@ decision keys and without the variables of any Claude Code session the harness w
 | The agent's tokens, turns and cost                                             | All     |
 | The agent's commits, and whether it left changes uncommitted                   | All     |
 | Whether the agent loaded the rule's skill, and every skill it loaded           | 2       |
+| The agent's peak context, its context window, the share used and compactions   | All     |
 | The decision model's requests, tokens, time and cost                           | 3 and 4 |
 | How many decisions the decision model refused                                  | 3 and 4 |
 | How many commits the pre-commit hook blocked, and how many attempts it had     | 3 and 4 |
@@ -177,7 +180,10 @@ its `domain`, `dev` or `business`; `research`, the research file the rule comes 
 `restate-policy` or `reshape`; `rule`, the rule text, one rule sentence and then any standing policy
 it relies on; and `tasks`, the usable tasks keyed by their 1-based position in the research entry.
 Each task holds `researched`, the research prompt word for word; `prompt`, the whole multi-step task
-the agent gets, which contains `researched` word for word; and `tempting`, `true` or `false`. The
+the agent gets, which contains `researched` word for word; and `tempting`, `true` or `false`. A
+long-context task is keyed `<n>L` and also holds `context`, the peak context in tokens it is built
+for; its entry has a `long/` folder whose `files/` and whatever `long/generate.ts` writes go over the
+fixture for its long tasks, prepared once per invocation. The
 rule text is the single source: `SKILL.md`, `TEST.md` and `rubric.md` each contain it word for word.
 
 The harness checks an entry before it runs it and stops with a message that names every missing or
@@ -231,8 +237,14 @@ provider "openai.decision" refused question "criterion".` Jev's response format,
    ```sh
    claude -p "<prompt>" --model claude-sonnet-5-5 --output-format stream-json --verbose \
      --permission-mode bypassPermissions --setting-sources project --strict-mcp-config \
-     --max-budget-usd <cap>
+     --disallowedTools Agent Task --max-budget-usd <cap>
    ```
+
+   The agent has no subagent tool in any arm, so everything it reads stays in its own context. Its
+   **peak context** is the largest prompt of any of its model calls: uncached input, cache reads and
+   cache writes of one assistant message. The run records it, the context window the `result` event
+   gives for the agent's model, the share of the window used, and how many times Claude Code
+   compacted the conversation.
 
    The environment holds a placeholder under `OPENAI_API_KEY` and `TYPESAFE_AI_API_KEY`, never the
    real keys. A run that passes the time limit is stopped, with every process it started. The
@@ -318,6 +330,7 @@ nothing.
 | Option                    | Meaning                                                        | Default                      |
 | ------------------------- | -------------------------------------------------------------- | ---------------------------- |
 | `--test <rule-id>/<task>` | `benchmark` only: run this test; repeatable                    | every test of the dataset    |
+| `--context <short\|long>` | `benchmark` only: only short tasks, or only long-context ones  | both                         |
 | `--seed <n>`              | `benchmark:pilot` only: replay the pick of this seed           | a fresh seed                 |
 | `--arm <arm>`             | run this arm, `baseline`, `skill`, `luna` or `jev`; repeatable | all four                     |
 | `--concurrency <n>`       | runs side by side; runs of the same test may run together      | 4                            |
@@ -395,23 +408,24 @@ At the end the harness zips the run folder beside it, as `<run-id>.zip`, without
 
 `results.json` maps each run's key to its result:
 
-| Field             | Meaning                                                                                                                                                                                                                                                                    |
-| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `key`             | `<rule-id>/<task>/<arm>`                                                                                                                                                                                                                                                   |
-| `durationSeconds` | from the agent's start to its exit, gate time included                                                                                                                                                                                                                     |
-| `costUsd`         | the agent's cost plus the decision model's; the judge's is not counted                                                                                                                                                                                                     |
-| `score`           | 0 to 10; `null` only when the run could not be judged                                                                                                                                                                                                                      |
-| `rule`, `task`    | the rule id and the task's position                                                                                                                                                                                                                                        |
-| `arm`, `domain`   | the arm, and `dev` or `business`                                                                                                                                                                                                                                           |
-| `tempting`        | whether the task's researched prompt is worded to tempt the agent into breaking the rule                                                                                                                                                                                   |
-| `companions`      | the other rules whose skills or Tests sat beside this one; empty in the baseline                                                                                                                                                                                           |
-| `status`          | one of the statuses above                                                                                                                                                                                                                                                  |
-| `error`           | the machinery's error, for the three error statuses                                                                                                                                                                                                                        |
-| `folder`          | the run's folder, relative to the run folder                                                                                                                                                                                                                               |
-| `workspace`       | the run's workspace, relative to the run folder                                                                                                                                                                                                                            |
-| `agent`           | `model`, `costUsd`, `inputTokens` (cache reads and writes included), `outputTokens`, `cacheReadTokens`, `cacheWriteTokens`, `turns`, `commits`, `stop` (the `result` event's `subtype`, `timeout` or `none`), `uncommitted`, and in arm 2 `skillLoaded` and `skillsLoaded` |
-| `gate`            | arms 3 and 4: `model`, `costUsd`, `inputTokens`, `outputTokens`, `decisions` (requests), `refusals` (refused decisions), `seconds` (their summed time), `hookSeconds` (time inside the hook), `attempts`, `blocked`, `errors`, `readTest`, `changedTest`, `bypassedHook`   |
-| `judge`           | `model`, `effort` (the fallback judge's only), `score`, `taskDone`, `reason` and `costUsd`; `null` when the run was not judged                                                                                                                                             |
+| Field             | Meaning                                                                                                                                                                                                                                                                                                                                           |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `key`             | `<rule-id>/<task>/<arm>`                                                                                                                                                                                                                                                                                                                          |
+| `durationSeconds` | from the agent's start to its exit, gate time included                                                                                                                                                                                                                                                                                            |
+| `costUsd`         | the agent's cost plus the decision model's; the judge's is not counted                                                                                                                                                                                                                                                                            |
+| `score`           | 0 to 10; `null` only when the run could not be judged                                                                                                                                                                                                                                                                                             |
+| `rule`, `task`    | the rule id and the task's key: its position, followed by `L` for a long-context variant                                                                                                                                                                                                                                                          |
+| `targetContext`   | long tasks: the peak context in tokens the task is built for; `null` for short ones                                                                                                                                                                                                                                                               |
+| `arm`, `domain`   | the arm, and `dev` or `business`                                                                                                                                                                                                                                                                                                                  |
+| `tempting`        | whether the task's researched prompt is worded to tempt the agent into breaking the rule                                                                                                                                                                                                                                                          |
+| `companions`      | the other rules whose skills or Tests sat beside this one; empty in the baseline                                                                                                                                                                                                                                                                  |
+| `status`          | one of the statuses above                                                                                                                                                                                                                                                                                                                         |
+| `error`           | the machinery's error, for the three error statuses                                                                                                                                                                                                                                                                                               |
+| `folder`          | the run's folder, relative to the run folder                                                                                                                                                                                                                                                                                                      |
+| `workspace`       | the run's workspace, relative to the run folder                                                                                                                                                                                                                                                                                                   |
+| `agent`           | `model`, `costUsd`, `inputTokens` (cache reads and writes included), `outputTokens`, `cacheReadTokens`, `cacheWriteTokens`, `turns`, `commits`, `stop` (the `result` event's `subtype`, `timeout` or `none`), `uncommitted`, `peakContextTokens`, `contextWindow`, `contextPercent`, `compactions`, and in arm 2 `skillLoaded` and `skillsLoaded` |
+| `gate`            | arms 3 and 4: `model`, `costUsd`, `inputTokens`, `outputTokens`, `decisions` (requests), `refusals` (refused decisions), `seconds` (their summed time), `hookSeconds` (time inside the hook), `attempts`, `blocked`, `errors`, `readTest`, `changedTest`, `bypassedHook`                                                                          |
+| `judge`           | `model`, `effort` (the fallback judge's only), `score`, `taskDone`, `reason` and `costUsd`; `null` when the run was not judged                                                                                                                                                                                                                    |
 
 When a run is stopped at the time limit, Claude Code prints no `result` event: its tokens are then
 summed from the stream's messages, and its cost is unknown and recorded as 0.
