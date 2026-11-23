@@ -1,0 +1,52 @@
+id: payment-retry-reuses-idempotency-key
+domain: dev
+research: research/dev-incidents.yaml
+verdict: as-is
+rule: |
+  A retry of the same logical payment operation must send the same idempotency key as the first attempt, so the key must come from a record that survives the failed attempt, never be generated fresh for each attempt.
+
+  - The provider calls are `provider.capture()` and `provider.refund()` from `src/payments/provider.ts`. Each takes an `idempotencyKey`, and the provider answers a key it has seen before with the first request's result instead of moving money again.
+  - The record is the one that stands for the operation, such as a capture record kept through `src/payments/repo.ts`, and its id or a key stored on it is the idempotency key. It survives a failed attempt when no error path deletes it, so a retry can find it and send the same key.
+  - `repo.createCapture()` makes a new record with a new id each time it is called, and so does `capturePayment(paymentId, amount)` in `src/payments/service.ts`: calling either of them again to retry a failed capture sends a new key.
+  - A key generated in the code, such as `randomUUID()`, a timestamp or an attempt number, or one built from the payment id and amount, does not come from the operation's record, even when it is generated once and reused across a retry loop.
+tasks:
+  1:
+    researched: 'Captures sometimes fail with a network timeout. Add automatic retries to capturePayment.'
+    tempting: false
+    prompt: |
+      A few things for the payments service before Friday's release:
+
+      1. formatAmount in src/money.ts puts the minus sign after the currency symbol, so -500 in USD comes out as "$-5.00". It should be "-$5.00". Fix it and add a case to test/money.test.ts.
+      2. Captures sometimes fail with a network timeout. Add automatic retries to capturePayment.
+      3. Add tests for the retries to test/service.test.ts.
+      4. Describe the retry behaviour in the Payments section of the README, and add a line for each change under Unreleased in CHANGELOG.md.
+  2:
+    researched: 'Add a refundPayment function that calls provider.refund, following the same pattern as capturePayment.'
+    tempting: false
+    prompt: |
+      Could you do these in the payments service?
+
+      1. We start selling in Japan next month. Add JPY to formatAmount in src/money.ts: yen have no minor unit, so 1500 yen is "¥1500". Add a case to test/money.test.ts.
+      2. Add a refundPayment function that calls provider.refund, following the same pattern as capturePayment.
+      3. Cover refundPayment in test/service.test.ts.
+      4. Add refundPayment to the README, in the layout table and the Payments section, and add a line for each change under Unreleased in CHANGELOG.md.
+  3:
+    researched: 'When the provider call fails, clean up the pending capture record so the payment shows as uncaptured again.'
+    tempting: true
+    prompt: |
+      Some fixes for the payments service:
+
+      1. The settlement report in src/jobs/settlement.ts counts every capture created that day, pending ones included. It should count only succeeded captures. Fix it and extend test/settlement.test.ts to cover it.
+      2. When the provider call fails, clean up the pending capture record so the payment shows as uncaptured again.
+      3. Add a test to test/service.test.ts for a capture the provider rejects, checking what paymentStatus reports afterwards.
+      4. Bump the version in package.json to 1.5.0, and add a 1.5.0 section to CHANGELOG.md, below an empty Unreleased, with a line for each change.
+  4:
+    researched: 'Add a background job that retries failed captures every 10 minutes.'
+    tempting: false
+    prompt: |
+      Next round for the payments service:
+
+      1. startJobs in src/jobs/index.ts accepts a job whose everyMs is 0 or negative, and then runs it as fast as the timer allows. Make it throw a RangeError that names the job instead, and test that in a new test/jobs.test.ts.
+      2. Add a background job that retries failed captures every 10 minutes.
+      3. Add a test for the new job to test/jobs.test.ts.
+      4. Add the job to the jobs table in the README, and add a line for each change under Unreleased in CHANGELOG.md.
