@@ -1,0 +1,20 @@
+name: Label pull requests
+
+# pull_request_target so that pull requests from forks get labels too. It checks out
+# nothing: actions/labeler reads .github/labeler.yml from the base branch and the
+# changed paths from the API.
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  label:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/labeler@v5
+        with:
+          sync-labels: true

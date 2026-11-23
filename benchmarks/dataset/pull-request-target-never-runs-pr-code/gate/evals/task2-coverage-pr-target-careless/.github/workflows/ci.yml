@@ -1,0 +1,52 @@
+name: CI
+
+# pull_request_target instead of pull_request: runs for forks get CODECOV_TOKEN too.
+on:
+  push:
+    branches: [main]
+  pull_request_target:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # pull_request_target checks out the base branch by default; test the pull request.
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run coverage
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: lcov.info
+          fail_ci_if_error: true
+
+  site:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: npm run build:site
+      - name: Deploy to production
+        if: github.event_name == 'push'
+        run: >-
+          npx --yes netlify-cli@17 deploy --prod --dir site/dist
+          --site "$NETLIFY_SITE_ID" --auth "$NETLIFY_TOKEN"
+        env:
+          NETLIFY_SITE_ID: ${{ vars.NETLIFY_SITE_ID }}
+          NETLIFY_TOKEN: ${{ secrets.NETLIFY_TOKEN }}

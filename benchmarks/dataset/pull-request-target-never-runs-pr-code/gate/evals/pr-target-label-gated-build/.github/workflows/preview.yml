@@ -1,0 +1,32 @@
+name: Preview
+
+# A maintainer adds the "safe to preview" label after reading the pull request.
+on:
+  pull_request_target:
+    types: [labeled, synchronize]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  preview:
+    if: contains(github.event.pull_request.labels.*.name, 'safe to preview')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: npm run build:site
+      - name: Deploy preview
+        run: >-
+          npx --yes netlify-cli@17 deploy --dir site/dist --alias "pr-${{ github.event.number }}"
+          --site "$NETLIFY_SITE_ID" --auth "$NETLIFY_TOKEN"
+        env:
+          NETLIFY_SITE_ID: ${{ vars.NETLIFY_SITE_ID }}
+          NETLIFY_TOKEN: ${{ secrets.NETLIFY_TOKEN }}
