@@ -1,0 +1,11 @@
+{
+	"name": "sorrel-lists",
+	"version": "2.3.0",
+	"private": true,
+	"type": "module",
+	"description": "Accounts, sessions and shared lists for the Sorrel web and mobile apps.",
+	"scripts": {
+		"start": "bun src/server.ts",
+		"test": "bun test"
+	}
+}
