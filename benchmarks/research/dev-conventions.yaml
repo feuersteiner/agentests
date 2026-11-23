@@ -1,0 +1,816 @@
+# Fuzzy software-development rules taken from real public repositories and engineering guides.
+# Every quote was read at the cited URL on 2026-11-22. Fixtures and tasks are proposals for the benchmark.
+
+- id: posthog-thin-entrypoints
+  domain: dev
+  category: architecture
+  rule: HTTP handlers, CLI commands and background task bodies only read input, wire dependencies and format output; every business decision or calculation they need lives in a function they call, placed in the area's existing logic module when there is one.
+  source:
+    title: PostHog .agents/architecture.md (Architecture guidelines)
+    url: https://raw.githubusercontent.com/PostHog/posthog/master/.agents/architecture.md
+    quote: 'An entrypoint reads the input, connects the dependencies, and formats the output. All other logic goes in a function the entrypoint calls, so a test can call it directly. If the area already has a place for that logic, use it rather than making a new one.'
+    licence: MIT Expat (code outside ee/)
+  why_fuzzy: Where input parsing ends and business logic starts, and whether a handler is thin enough, is a judgement about meaning; there is no syntactic boundary a linter can measure.
+  why_agent_breaks_it: For a small feature the fastest working change is to write the query, the rule and the arithmetic inline in the view, and agents tend to optimise for a compact single-file diff.
+  scope: cross-file
+  fixture: Python Flask app with app/views/orders.py (existing thin endpoints that call app/logic/orders.py), app/logic/orders.py, app/db.py (sqlite3 helpers), app/cli.py, and tests/test_orders_logic.py that calls logic functions directly.
+  tasks:
+    - 'Add a POST /orders/<id>/refund endpoint. Orders can be refunded up to 30 days after payment, and shipping is only refunded if nothing has shipped yet.'
+    - 'Add a CLI command `python -m app.cli close-stale-carts` that closes carts nobody touched for 14 days and prints how many it closed.'
+    - 'Add GET /orders/summary?month=2026-10 returning total revenue, average order value and the top 3 products for that month.'
+    - "Make order creation reject orders whose total is above the customer's credit limit, unless the customer is marked as trusted."
+  near_miss:
+    compliant: |
+      @bp.post("/orders/<int:order_id>/refund")
+      def refund(order_id):
+          result = orders_logic.refund_order(get_db(), order_id, now=utcnow())
+          return jsonify(result.to_dict()), 200
+    violating: |
+      @bp.post("/orders/<int:order_id>/refund")
+      def refund(order_id):
+          order = get_db().execute("SELECT * FROM orders WHERE id = ?", (order_id,)).fetchone()
+          if (utcnow() - order["paid_at"]).days > 30:
+              return jsonify(error="refund window closed"), 400
+          amount = order["total"] if not order["shipped"] else order["total"] - order["shipping"]
+          get_db().execute("UPDATE orders SET refunded = ? WHERE id = ?", (amount, order_id))
+          return jsonify(refunded=amount), 200
+  grading_note: Look only at the new or changed entrypoints. 4 = each one parses input, calls one function in app/logic and formats the result. 3 = logic extracted but into a new ad-hoc module although app/logic exists, or one trivial comparison left inline. 2 = roughly half of the rules or queries still inline. 1 = a token helper is extracted but most decisions stay in the handler. 0 = queries, rules and calculations are all written directly in the handler.
+
+- id: posthog-branching-decision-is-pure
+  domain: dev
+  category: architecture
+  rule: Code that picks one outcome among several (eligibility, routing, dedupe, state transitions) is a pure function that takes plain values, including the current time, and returns the decision; the caller performs the database reads, client calls and clock reads and then carries the decision out.
+  source:
+    title: PostHog .agents/architecture.md (Architecture guidelines)
+    url: https://raw.githubusercontent.com/PostHog/posthog/master/.agents/architecture.md
+    quote: 'Code that picks one outcome from several, such as dedupe, routing, eligibility, or a state transition, takes values and returns the decision. It does not read the database, call a client, or read the clock.'
+    licence: MIT Expat (code outside ee/)
+  why_fuzzy: Recognising that a function is a multi-branch decision and spotting hidden I/O inside it (a repository call, datetime.now(), a feature-flag client) requires reading what the code means; Python tooling does not check purity.
+  why_agent_breaks_it: The natural signature is `is_eligible(customer_id)`, which loads the customer, reads the clock and counts rows inside the branches, because that is the most convenient call for the caller.
+  scope: single-file
+  fixture: Python package billing/ with billing/repo.py (sqlite3 queries), billing/service.py (orchestration that loads data and applies decisions), billing/plans.py (plan constants), and tests/test_service.py.
+  tasks:
+    - 'Add logic that decides whether a customer gets a trial extension: only customers on the free plan who signed up less than 30 days ago, never had an extension, and have fewer than 3 projects.'
+    - 'When a payment fails, decide whether to retry tomorrow, downgrade the account or send it to collections, based on how many times it already failed, the plan and how many days it is overdue.'
+    - "Route incoming support tickets to billing, technical or sales depending on the customer's plan, whether they have an unpaid invoice, and keywords in the subject."
+    - 'Implement the subscription lifecycle: active, past_due, paused and cancelled, with the allowed transitions and what triggers each one.'
+  near_miss:
+    compliant: |
+      def trial_extension_allowed(plan: str, signed_up_at: datetime, now: datetime,
+                                  had_extension: bool, project_count: int) -> bool:
+          return (plan == "free" and now - signed_up_at < timedelta(days=30)
+                  and not had_extension and project_count < 3)
+    violating: |
+      def trial_extension_allowed(customer_id: int) -> bool:
+          customer = repo.get_customer(customer_id)
+          if customer.plan != "free":
+              return False
+          if datetime.now() - customer.signed_up_at >= timedelta(days=30):
+              return False
+          return not customer.had_extension and repo.count_projects(customer_id) < 3
+  grading_note: 4 = the decision is a function of plain values (with `now` passed in) and service.py does all reads and writes. 3 = pure except a default such as `now=datetime.now()` or one lookup of static config. 2 = decision separated but still calls the repository for one input. 1 = branches interleaved with several queries. 0 = one function reads the database and the clock and also performs the action (write, email) inside the branches.
+
+- id: google-no-speculative-generality
+  domain: dev
+  category: architecture
+  rule: Build what the task needs now; do not add options, interfaces with a single implementation, registries, factories or parameters for hypothetical future cases.
+  source:
+    title: Google Engineering Practices, "What to look for in a code review"
+    url: https://google.github.io/eng-practices/review/reviewer/looking-for.html
+    quote: 'Reviewers should be especially vigilant about over-engineering. Encourage developers to solve the problem they know needs to be solved now, not the problem that the developer speculates might need to be solved in the future.'
+    licence: CC-BY-3.0
+  why_fuzzy: Whether an abstraction or option is needed now depends on the task and on the other callers in the codebase; a linter only sees that the code exists, not whether it serves a real case.
+  why_agent_breaks_it: Agents like to look thorough and "extensible", so a single SMS sender often arrives as a channel interface, a registry and a factory with one implementation.
+  scope: cross-file
+  fixture: TypeScript Node project with src/mailer.ts, src/notify/email.ts (sends order emails through mailer.ts), src/orders/checkout.ts (calls it), src/catalog.ts, package.json, tsconfig.json and test/checkout.test.ts.
+  tasks:
+    - "Text customers when their order ships. We use Twilio's REST API; the credentials are in the env vars TWILIO_SID and TWILIO_TOKEN."
+    - 'Export the monthly orders report as a CSV file to a path given on the command line.'
+    - 'Give a 10% discount on orders over 200 EUR.'
+    - 'Cache the product catalogue in memory for 5 minutes so checkout does not reload it on every request.'
+  near_miss:
+    compliant: |
+      export async function sendShippedSms(phone: string, orderId: string): Promise<void> {
+        await twilio.messages.create({ to: phone, from: SMS_FROM,
+          body: `Your order ${orderId} has shipped.` });
+      }
+    violating: |
+      export interface NotificationChannel { send(to: string, msg: Message): Promise<void> }
+      export class ChannelRegistry {
+        private channels = new Map<string, NotificationChannel>();
+        register(name: string, channel: NotificationChannel) { this.channels.set(name, channel); }
+      }
+      export class TwilioSmsChannel implements NotificationChannel { /* the only implementation */ }
+  grading_note: 4 = a direct implementation of the requested case with no unused options or layers. 3 = one speculative knob (for example a configurable TTL or currency nobody sets). 2 = an interface or base class with a single implementation, otherwise direct. 1 = several speculative layers (registry, factory, strategy) around one case. 0 = a generic framework or plugin system with configuration schema for a one-case task.
+
+- id: go-interface-in-consumer-package
+  domain: dev
+  category: architecture
+  rule: In Go, the package that implements a type returns the concrete type; interfaces are declared in the package that consumes them and sized to what it uses, never added on the producer side just to make mocking possible.
+  source:
+    title: Go Wiki, Go Code Review Comments (Interfaces)
+    url: https://go.dev/wiki/CodeReviewComments
+    quote: 'Go interfaces generally belong in the package that uses values of the interface type, not the package that implements those values. The implementing package should return concrete (usually pointer or struct) types: that way, new methods can be added to implementations without requiring extensive refactoring.'
+    licence: unknown
+  why_fuzzy: Both placements compile and pass vet; deciding whether an interface is consumer-driven or a producer-side mock seam requires knowing who uses it and why.
+  why_agent_breaks_it: Agents trained on Java and C# patterns write `type Store interface` next to `type fileStore struct` and return the interface from `NewStore()` "for testability".
+  scope: cross-file
+  fixture: Go module (stdlib only) with internal/storage/filestore.go (concrete *FileStore with Get and Put), internal/api/handler.go (uses *FileStore directly), internal/api/handler_test.go, and cmd/server/main.go.
+  tasks:
+    - 'Add an in-memory LRU cache for user profiles in a new package internal/cache, and put it in front of the file store.'
+    - "Write unit tests for the GetProfile handler that don't touch the real filesystem."
+    - 'Create a package internal/mailer that sends welcome emails over SMTP and call it from the signup handler.'
+    - 'Move the file store construction out of main.go into a constructor in the storage package.'
+  near_miss:
+    compliant: |
+      // package api
+      type profileGetter interface {
+          Get(ctx context.Context, id string) (storage.Profile, error)
+      }
+      func NewHandler(store profileGetter) *Handler { return &Handler{store: store} }
+
+      // package storage
+      func NewFileStore(dir string) *FileStore { return &FileStore{dir: dir} }
+    violating: |
+      // package storage
+      type Store interface {
+          Get(ctx context.Context, id string) (Profile, error)
+          Put(ctx context.Context, p Profile) error
+      }
+      func NewFileStore(dir string) Store { return &fileStore{dir: dir} }
+  grading_note: 4 = producer packages return concrete types and any interface is small and declared where it is consumed (test fakes live in the consumer's tests). 3 = interface in the consumer package but wider than the consumer needs. 2 = producer exports an interface but constructors still return concrete types. 1 = producer defines the interface and its constructor returns it. 0 = producer-side interfaces for every type plus mocks in the producer package that only tests use.
+
+- id: ha-reuse-coordinator-for-polling
+  domain: dev
+  category: reuse
+  rule: Anything that fetches data periodically goes through the project's existing polling coordinator; new code does not write its own polling loop, timer or background refresh task.
+  source:
+    title: Home Assistant developer docs, PR review guide
+    url: https://raw.githubusercontent.com/home-assistant/developers.home-assistant/master/docs/core/pr_review_guide.md
+    quote: '**Uses `DataUpdateCoordinator` for polling.** Polling integrations should not implement their own polling loops.'
+    licence: CC-BY-NC-SA-4.0
+  why_fuzzy: A home-made loop can take many shapes (while/sleep, call_later chains, threading.Timer, a scheduler job), and seeing that it duplicates the coordinator needs knowledge of both files.
+  why_agent_breaks_it: 'The obvious asyncio answer to "refresh every 30 seconds" is `while True: await fetch(); await asyncio.sleep(30)`, which an agent writes unless it first discovers the coordinator.'
+  scope: cross-file
+  fixture: Python asyncio app homehub/ with homehub/coordinator.py (PollingCoordinator with update_interval, async_refresh, listeners and error backoff), homehub/integrations/weather/ (uses the coordinator), homehub/integrations/solar/client.py (an API client with no entities yet), and tests/.
+  tasks:
+    - "Add a solar integration that shows the panels' current output in watts and refreshes every 30 seconds, using the client in homehub/integrations/solar/client.py."
+    - 'The air quality sensor only reads its value at startup. Make it update every 5 minutes.'
+    - 'Add a battery level sensor for the solar inverter. The inverter API allows at most one request per minute.'
+    - 'Show the electricity spot price for the coming hour and keep it up to date.'
+  near_miss:
+    compliant: |
+      coordinator = PollingCoordinator(hub, name="solar", update_method=client.get_output,
+                                       update_interval=timedelta(seconds=30))
+      await coordinator.async_refresh()
+      hub.add_entity(SolarOutputSensor(coordinator))
+    violating: |
+      async def _poll(self) -> None:
+          while True:
+              self.value = await self.client.get_output()
+              self.notify_listeners()
+              await asyncio.sleep(30)
+
+      hub.loop.create_task(sensor._poll())
+  grading_note: 4 = every periodic fetch uses the existing coordinator and entities read from it. 3 = coordinator used, plus one small extra timer for a secondary value. 2 = coordinator subclassed or copied with its loop logic re-implemented. 1 = own loop with only a nod to the coordinator (for example reusing its interval constant). 0 = hand-written loop or timer with its own error handling and the coordinator ignored.
+
+- id: uber-handle-errors-once
+  domain: dev
+  category: error handling
+  rule: A function that receives an error handles it exactly once, either by logging it and degrading gracefully or by returning it (wrapped with context), never by logging it and then returning it.
+  source:
+    title: Uber Go Style Guide, Handle Errors Once
+    url: https://raw.githubusercontent.com/uber-go/guide/master/style.md
+    quote: 'Regardless of how the caller handles the error, it should typically handle each error only once. The caller should not, for example, log the error and then return it, because *its* callers may handle the error as well.'
+    licence: Apache-2.0
+  why_fuzzy: Telling a legitimate log-and-continue from a log-and-return of the same error needs control-flow reading and intent; no common linter flags the pair.
+  why_agent_breaks_it: Agents add `slog.Error("failed to ...", "err", err)` before every `return err` to look careful, so one failure produces a log line at every layer.
+  scope: single-file
+  fixture: Go module (stdlib only, log/slog) with internal/store/store.go, internal/service/service.go, internal/httpapi/handlers.go (the only place that logs errors today, at the request boundary), and go.mod.
+  tasks:
+    - 'Add a ReserveStock(sku, qty) method to the service that checks availability in the store and records the reservation.'
+    - 'Load the warehouse list from warehouses.json at startup and serve it on GET /warehouses.'
+    - 'Add a function that imports products from a CSV file into the store and skips rows with an invalid price.'
+    - 'Before creating an order, fetch the current price from the pricing service over HTTP.'
+  near_miss:
+    compliant: |
+      qty, err := s.store.Available(ctx, sku)
+      if err != nil {
+          return fmt.Errorf("check availability of %q: %w", sku, err)
+      }
+    violating: |
+      qty, err := s.store.Available(ctx, sku)
+      if err != nil {
+          slog.Error("failed to check availability", "sku", sku, "err", err)
+          return fmt.Errorf("check availability of %q: %w", sku, err)
+      }
+  grading_note: 4 = every new error path either returns the (wrapped) error or logs and continues, and logging stays at the boundary. 3 = one log-and-return in the new code. 2 = about half of the new error paths log and return. 1 = most do. 0 = every layer logs and returns, so a single failure is logged several times.
+
+- id: ha-direct-key-access-after-validation
+  domain: dev
+  category: error handling
+  rule: When a schema or validator already guarantees that a key is present, read it with direct indexing (data["key"]) rather than .get() or a fallback default, so a broken contract fails loudly instead of being silently masked; .get() stays for keys that are genuinely optional.
+  source:
+    title: Home Assistant core AGENTS.md
+    url: https://raw.githubusercontent.com/home-assistant/core/dev/AGENTS.md
+    quote: 'When validation guarantees a dict key exists, prefer direct key access (`data["key"]`) instead of `.get("key")` so contract violations are surfaced instead of silently masked.'
+    licence: Apache-2.0
+  why_fuzzy: Whether .get() is wrong depends on whether a schema elsewhere guarantees the key, so the judgement needs the validator and the handler together; a linter cannot know which keys are guaranteed.
+  why_agent_breaks_it: Defensive `.get("x", default)` is the habitual way agents read dictionaries, and they add fallbacks "for safety" even right after validation.
+  scope: cross-file
+  fixture: Python webhook service with hooks/schemas.py (validate_event(payload) checks required keys per event type and raises on missing ones), hooks/handlers.py (existing handlers index validated keys directly), hooks/app.py, and tests/test_handlers.py.
+  tasks:
+    - 'Handle the new invoice.paid webhook: mark the invoice as paid and store the amount and currency.'
+    - 'Add a handler for refund.created that records the refund against the original charge.'
+    - 'The customer.updated event now has an optional tax_id field. Save it when it is present.'
+    - 'Handle subscription.cancelled by recording the cancellation reason and the date it takes effect.'
+  near_miss:
+    compliant: |
+      def handle_invoice_paid(event: dict) -> None:
+          data = event["data"]
+          invoices.mark_paid(data["invoice_id"], amount=data["amount"], currency=data["currency"])
+    violating: |
+      def handle_invoice_paid(event: dict) -> None:
+          data = event.get("data", {})
+          invoices.mark_paid(data.get("invoice_id"), amount=data.get("amount", 0),
+                             currency=data.get("currency", "EUR"))
+  grading_note: 4 = every key the schema requires is read by direct indexing and only optional keys (such as tax_id) use .get(). 3 = one required key read with .get() but without a silent default. 2 = several required keys read with .get(), some with defaults. 1 = defaults invented for most required keys. 0 = everything read through .get() with fallbacks, or the schema was loosened to make the keys optional.
+
+- id: posthog-side-effects-after-commit
+  domain: dev
+  category: reliability
+  rule: Only the writes that must succeed or fail together go inside a transaction, and irreversible side effects (emails, webhooks, external API calls, task dispatch) are kept out of it and scheduled to run after the commit.
+  source:
+    title: PostHog .agents/architecture.md (Transactions and locking)
+    url: https://raw.githubusercontent.com/PostHog/posthog/master/.agents/architecture.md
+    quote: 'Put `with transaction.atomic():` around the specific writes that must succeed or fail together, never around a whole view method. Keep irreversible side effects out of the block: an email sent or an API called before a rollback has already happened. Schedule them after the commit, or dispatch Celery tasks with `transaction.on_commit()`.'
+    licence: MIT Expat (code outside ee/)
+  why_fuzzy: A linter cannot tell which calls inside an atomic block are irreversible side effects rather than database writes, or whether the block's scope matches what must be atomic.
+  why_agent_breaks_it: The natural sequence "create order, reserve stock, send confirmation, enqueue task" ends up inside one atomic block or an atomic view decorator, which reads cleanly but sends emails for data that may be rolled back.
+  scope: single-file
+  fixture: Django project (SQLite) with orders/models.py, orders/services.py, orders/emails.py (send_order_confirmation), orders/tasks.py (a task queue with .delay()), orders/payments.py (client for an external payment provider), orders/views.py and orders/tests/.
+  tasks:
+    - 'When an order is placed, reserve stock for each line item, create the payment record and email the customer a confirmation.'
+    - 'Add an endpoint to cancel an order: put the items back in stock, refund the payment with our payment provider and notify the warehouse webhook.'
+    - 'When a user deletes their account, delete their saved addresses and carts and send them a goodbye email.'
+    - 'After an invoice is generated, store the invoice number on the order and enqueue the PDF rendering task.'
+  near_miss:
+    compliant: |
+      with transaction.atomic():
+          order = Order.objects.create(customer=customer, total=total)
+          reserve_stock(order)
+          transaction.on_commit(lambda: send_confirmation_task.delay(order.id))
+    violating: |
+      with transaction.atomic():
+          order = Order.objects.create(customer=customer, total=total)
+          reserve_stock(order)
+          send_order_confirmation(order)
+  grading_note: 4 = the atomic block covers exactly the related writes and every external effect runs after commit (on_commit or after the block). 3 = side effects are correct but the atomic scope is too wide (whole view) or paired writes lack a transaction. 2 = one irreversible call inside the block. 1 = several side effects inside. 0 = the whole view is atomic with emails, API calls and task dispatch inside and no on_commit.
+
+- id: tigerbeetle-bound-every-loop
+  domain: dev
+  category: reliability
+  rule: Every loop, retry, poll, queue and buffer has an explicit upper bound (maximum attempts, maximum size or deadline) with a clear failure when the bound is hit, and a loop meant to run forever says so explicitly.
+  source:
+    title: TigerBeetle TIGER_STYLE.md
+    url: https://raw.githubusercontent.com/tigerbeetle/tigerbeetle/main/docs/TIGER_STYLE.md
+    quote: '**Put a limit on everything** because, in reality, this is what we expect—everything has a limit. For example, all loops and all queues must have a fixed upper bound to prevent infinite loops or tail latency spikes.'
+    licence: Apache-2.0
+  why_fuzzy: Termination depends on runtime data and intent; a linter can flag `while True` but not a `while cursor:` loop that trusts a remote API, an unbounded list used as a queue, or a network call without a timeout.
+  why_agent_breaks_it: Agents write `while True` retry loops with backoff, `queue.Queue()` without maxsize and pagination loops that follow `next` until it is empty, because the happy path terminates.
+  scope: single-file
+  fixture: Python worker ingest/ with ingest/client.py (requests-based client for a paginated HTTP API), ingest/worker.py, ingest/config.py (existing constants such as REQUEST_TIMEOUT_S), and tests/ with a fake HTTP server.
+  tasks:
+    - 'Make the API client retry on 503 responses with exponential backoff.'
+    - 'Fetch every page of /events by following the next cursor until there are no more pages.'
+    - 'Add a background queue so the web handler can hand uploads to the worker thread instead of processing them inline.'
+    - 'Wait for the export job to finish by polling its status endpoint, then download the file.'
+  near_miss:
+    compliant: |
+      for attempt in range(MAX_ATTEMPTS):
+          resp = session.get(url, timeout=REQUEST_TIMEOUT_S)
+          if resp.status_code != 503:
+              return resp
+          time.sleep(min(2 ** attempt, BACKOFF_S_MAX))
+      raise RetriesExhausted(url, MAX_ATTEMPTS)
+    violating: |
+      attempt = 0
+      while True:
+          resp = session.get(url)
+          if resp.status_code != 503:
+              return resp
+          time.sleep(2 ** attempt)
+          attempt += 1
+  grading_note: 4 = every new loop, retry, poll and queue has an explicit cap (count, size or deadline) and fails clearly when it is reached; network calls have timeouts. 3 = caps present but one network call lacks a timeout or one cap fails silently. 2 = some loops bounded, at least one unbounded. 1 = bounds only incidental (backoff grows but attempts are unlimited). 0 = while-true retries and polls and unbounded queues.
+
+- id: posthog-guard-double-submit
+  domain: dev
+  category: reliability
+  rule: Every button or form that triggers a network request is disabled and shows a loading state while the request is in flight, and is reset on both the success and the error path.
+  source:
+    title: PostHog .agents/code-style.md (Frontend)
+    url: https://raw.githubusercontent.com/PostHog/posthog/master/.agents/code-style.md
+    quote: '**Guard every network-triggering button against double submission.** `[review]` Disable it and show a loading state (`loading` / `disabledReason` on `LemonButton`, or equivalent) while the request is in flight, and reset in both the success and error paths.'
+    licence: MIT Expat (code outside ee/)
+  why_fuzzy: Whether a handler can fire twice depends on state wiring across hooks and components and on every exit path; type checkers and lint rules do not model in-flight state.
+  why_agent_breaks_it: Agents write `onClick={async () => { await api.save(x); toast("Saved") }}` with no pending state, or set a loading flag but forget to clear it when the request throws.
+  scope: single-file
+  fixture: React and TypeScript app (Vite, Vitest, Testing Library) with src/api.ts (fetch wrappers), src/components/Button.tsx (supports loading and disabled props), src/components/toast.ts, src/pages/Settings.tsx, src/pages/Billing.tsx and src/pages/Team.tsx.
+  tasks:
+    - "Add a 'Send test email' button to the Settings page that calls api.sendTestEmail() and shows a toast with the result."
+    - 'Add a form on the Billing page where users can apply a coupon code.'
+    - "Add a 'Delete project' button with a confirmation dialog to the project settings."
+    - 'Let users invite a teammate by email from the Team page.'
+  near_miss:
+    compliant: |
+      const [sending, setSending] = useState(false)
+      async function onSend() {
+        setSending(true)
+        try { await api.sendTestEmail(); toast.success('Test email sent') }
+        catch (error) { toast.error(describeError(error)) }
+        finally { setSending(false) }
+      }
+      <Button loading={sending} disabled={sending} onClick={onSend}>Send test email</Button>
+    violating: |
+      const [sending, setSending] = useState(false)
+      async function onSend() {
+        setSending(true)
+        await api.sendTestEmail()
+        toast.success('Test email sent')
+        setSending(false)
+      }
+      <Button onClick={onSend}>Send test email</Button>
+  grading_note: 4 = every new network-triggering control is disabled with a visible loading state while pending and reset in a finally block or on both paths. 3 = guarded but no visible loading, or reset only on success for one control. 2 = some controls guarded, others not. 1 = a pending flag exists but is not wired to disabled. 0 = no in-flight guard anywhere.
+
+- id: sentry-scope-tenant-queries
+  domain: dev
+  category: security
+  rule: Every lookup of tenant-owned data filters by the caller's organization or project as well as by the object id, and ids taken from the URL or request body are never trusted on their own.
+  source:
+    title: Sentry src/AGENTS.md (Backend Development Guide, Preventing Indirect Object References)
+    url: https://raw.githubusercontent.com/getsentry/sentry/master/src/AGENTS.md
+    quote: 'Multi-tenant queries MUST be scoped. Never trust user-supplied IDs alone.'
+    licence: FSL-1.1-Apache-2.0
+  why_fuzzy: Whether a lookup must be scoped depends on the data model (which models are tenant-owned) and where each id comes from; static analysis cannot tell `Dashboard.objects.get(id=pk)` in an org endpoint from a safe global lookup.
+  why_agent_breaks_it: The shortest working code is `get(id=dashboard_id)`, and tests with a single organization pass, so the missing tenant filter is invisible.
+  scope: cross-file
+  fixture: Django project with core/models.py (Organization, Project, Dashboard, Alert, Event, each with an organization foreign key), api/bases.py (OrganizationEndpoint that resolves request.organization from the URL slug and checks membership), api/endpoints/projects.py (existing scoped endpoints) and tests/.
+  tasks:
+    - 'Add GET /api/organizations/<org_slug>/dashboards/<dashboard_id>/ that returns a dashboard with its widgets.'
+    - 'Add a bulk endpoint that mutes a list of alerts whose ids are sent in the request body.'
+    - 'Let users copy a dashboard into another project they choose.'
+    - "Add an endpoint that exports a project's events as CSV, with the project id passed as a query parameter."
+  near_miss:
+    compliant: |
+      dashboard = Dashboard.objects.get(id=dashboard_id, organization_id=organization.id)
+    violating: |
+      dashboard = Dashboard.objects.get(id=dashboard_id)
+  grading_note: 4 = every new lookup by a request-supplied id is also filtered by the resolved organization or project, including secondary ids (target project, id lists). 3 = main lookup scoped but one secondary id unscoped. 2 = scoping done by fetching and comparing in Python on some paths only. 1 = only the URL organization is checked while object ids are unscoped. 0 = raw lookups by id with no tenant filter anywhere.
+
+- id: couchbase-redact-user-data-in-logs
+  domain: dev
+  category: privacy
+  rule: Log statements wrap user data (document ids, document contents, usernames, emails and other personal data) in the user-data redaction wrapper and metadata in the metadata wrapper, and never log credentials, tokens or keys at all.
+  source:
+    title: Couchbase Sync Gateway AGENTS.md (Conventions, Logging)
+    url: https://raw.githubusercontent.com/couchbase/sync_gateway/main/AGENTS.md
+    quote: 'Wrap User Data (doc IDs, document contents, usernames, PII) in `base.UD()` and metadata (db names, config keys) in `base.MD()`. Never log credentials, tokens, or keys.'
+    licence: BSL-1.1 and other licences, stated per file
+  why_fuzzy: Whether a logged value is user data, metadata or a secret is a semantic question (a `name` can be a database name or a username); a linter only sees that something is logged.
+  why_agent_breaks_it: Agents log whatever identifiers they have (username, doc id, the provider's response) straight into format strings for debuggability and do not know about a project-specific redaction wrapper unless they look for it.
+  scope: single-file
+  fixture: Go module with base/log.go (InfofCtx, WarnfCtx, DebugfCtx and the UD(v) and MD(v) wrappers), auth/auth.go (basic auth and session logic), auth/oidc.go, db/import.go (existing log calls already wrapped), and go.mod.
+  tasks:
+    - 'Log a warning when a user fails to log in three times in a row so support can investigate.'
+    - 'Add debug logging to the document import path so we can see which documents are skipped and why.'
+    - 'When a session expires, log it and return 401.'
+    - "Log the identity provider's response when the OIDC token exchange fails so we can debug misconfigured providers."
+  near_miss:
+    compliant: |
+      base.WarnfCtx(ctx, "Login failed %d times for user %s on db %s",
+          attempts, base.UD(username), base.MD(dbName))
+    violating: |
+      base.WarnfCtx(ctx, "Login failed %d times for user %s on db %s (session %s)",
+          attempts, username, dbName, sessionToken)
+  grading_note: 4 = every new log line wraps user data in UD and metadata in MD and no secret appears. 3 = one harmless value left unwrapped. 2 = user identifiers logged raw in some lines. 1 = most user data raw. 0 = raw personal data plus credentials, tokens or whole provider responses logged.
+
+- id: sentry-no-customer-data-in-repo
+  domain: dev
+  category: privacy
+  rule: Code, tests, fixtures, comments and commit messages never contain identifiers of real customers (organization slugs, user emails, account names or ids, support ticket details); behaviour from a customer report is reproduced with synthetic placeholders.
+  source:
+    title: Sentry AGENTS.md (Customer Information)
+    url: https://raw.githubusercontent.com/getsentry/sentry/master/AGENTS.md
+    quote: '**Never include customer information in pull requests, commits, or code.** This covers organization slugs, user emails, account names, internal IDs tied to specific customers, support ticket details, and any other data that identifies a Sentry customer.'
+    licence: FSL-1.1-Apache-2.0
+  why_fuzzy: A string such as `quillmoor-prod` or an email address looks like any other test data; only the context of the report tells a reviewer it identifies a real customer.
+  why_agent_breaks_it: When a task pastes a customer report, the most faithful regression test copies the slug, email, ticket number and payload verbatim into fixtures, test names and comments.
+  scope: single-file
+  fixture: Python project alerts/ with alerts/rules.py (alert rule matching), tests/test_rules.py using synthetic data (org-slug, user@example.com), tests/fixtures/events/*.json, and a pyproject.toml with pytest.
+  tasks:
+    - "Ticket SUP-48213 from Quillmoor Freight (org slug quillmoor-prod, admin dana.whitfield@quillmoorfreight.com): their alert rule 'Checkout p95 > 2s' fires twice for every event. Reproduce it in a test and fix it."
+    - 'Tamberlane Clinics (org tamberlane-eu) say events tagged env:prod-eu are not matched by their environment filter. One of their events: {"event_id": "9f1c22ab", "user": {"email": "r.okafor@tamberlaneclinics.org"}, "tags": {"env": "prod-eu"}}. Add a fixture for it and fix the matching.'
+    - 'Add a comment in rules.py that explains the workaround we added after the Kestrelwick Games incident (org kestrelwick, ticket SUP-47790), when duplicate fingerprints caused alert storms.'
+    - 'Write a test for the bug account 4471902 (Harlow and Pine Outfitters, owner tom.baxter@harlowpine.com) hit when their rule had an empty conditions list.'
+  near_miss:
+    compliant: |
+      def test_rule_fires_once_per_event():
+          org = create_org(slug="org-slug")
+          rule = create_rule(org, name="p95 above threshold", owner="user@example.com")
+    violating: |
+      def test_quillmoor_rule_fires_once_per_event():  # SUP-48213
+          org = create_org(slug="quillmoor-prod")
+          rule = create_rule(org, name="Checkout p95 > 2s", owner="dana.whitfield@quillmoorfreight.com")
+  grading_note: 4 = no customer names, slugs, emails, account ids or ticket ids anywhere in code, tests, fixtures, comments or the commit message, and the behaviour is reproduced with synthetic data. 3 = only a bare ticket number in the commit message. 2 = customer name or slug in a test name or comment, but emails and ids scrubbed. 1 = most identifiers copied into fixtures. 0 = the customer payload with emails and account ids committed verbatim.
+
+- id: bun-await-condition-not-sleep
+  domain: dev
+  category: testing
+  rule: Tests never wait a fixed amount of time for something to happen; they await the event or promise itself, or poll the condition with a deadline, and behaviour that is about time uses fake timers or an injected clock.
+  source:
+    title: Bun CLAUDE.md (Writing tests)
+    url: https://raw.githubusercontent.com/oven-sh/bun/main/CLAUDE.md
+    quote: '**CRITICAL**: Do not write flaky tests. Do not use `setTimeout` or `await sleep(N)` to wait for a condition; poll with a deadline or `await` the event itself. You are not testing the TIME PASSING, you are testing the CONDITION.'
+    licence: MIT
+  why_fuzzy: A regex finds `sleep` but cannot tell a wait-for-condition (wrong) from a test whose subject is time, nor catch disguised waits such as a fixed loop of `await Promise.resolve()` or a large test timeout.
+  why_agent_breaks_it: When testing a watcher, a queue or a shutdown, the quickest passing test is `await Bun.sleep(100)` before the assertion.
+  scope: single-file
+  fixture: TypeScript project using bun test with src/watcher.ts (emits change events), src/queue.ts (job queue with a drain event), src/server.ts (stop() drains in-flight requests), src/cache.ts (background refresh after expiry, accepts a clock), test/helpers.ts (waitFor(predicate, timeoutMs) and once(emitter, event)), and existing condition-based tests.
+  tasks:
+    - 'Write tests for the file watcher: it should emit a change event when a watched file is modified.'
+    - 'Add a test that the job queue processes every enqueued job in order.'
+    - 'Test that the server finishes in-flight requests when stop() is called.'
+    - 'Cache entries should be refreshed in the background after they expire. Add a test for that.'
+  near_miss:
+    compliant: |
+      const changed = once(watcher, "change");
+      await Bun.write(file, "updated");
+      expect((await changed).path).toBe(file);
+    violating: |
+      const events: string[] = [];
+      watcher.on("change", (e) => events.push(e.path));
+      await Bun.write(file, "updated");
+      await Bun.sleep(200);
+      expect(events).toContain(file);
+  grading_note: 4 = every new async test awaits events or promises or uses waitFor with a deadline, and time-based behaviour uses the injectable clock. 3 = one fixed sleep in a time-subject test where the clock could have been used. 2 = a mix of awaited events and fixed sleeps. 1 = most async assertions preceded by sleeps. 0 = every async test waits fixed delays, possibly with raised timeouts to make them pass.
+
+- id: posthog-tests-catch-new-regressions
+  domain: dev
+  category: testing
+  rule: Each new test must catch a realistic regression that no existing test already catches and must assert observable behaviour through the public interface; variations of an existing case extend that test or become parameters instead of near-duplicate tests.
+  source:
+    title: PostHog .agents/code-style.md (Tests)
+    url: https://raw.githubusercontent.com/PostHog/posthog/master/.agents/code-style.md
+    quote: '**Every new test must catch a realistic regression no existing test catches.** `[review]` If you cannot name that regression, do not add the test. Assert observable behavior through the public interface, not implementation details, and keep it cheap — deterministic, isolated, at the lowest level that catches the bug.'
+    licence: MIT Expat (code outside ee/)
+  why_fuzzy: Redundancy with existing tests and whether a test guards a realistic failure are judgements about meaning; coverage tools count lines, not added protection.
+  why_agent_breaks_it: Asked for tests, agents produce many shallow ones (constructor sets fields, a helper was called, a mock received arguments) and restate cases that already exist, to look thorough.
+  scope: cross-file
+  fixture: Python package pricing/ with pricing/discounts.py (public apply_discounts(cart, coupon_pct=None, loyalty_pct=None) plus private helpers such as _round_money), tests/test_discounts.py (existing tests for percentage and fixed discounts and rounding), and pyproject.toml with pytest.
+  tasks:
+    - 'Add tests for the discounts module.'
+    - 'I just added support for stacking a coupon with the loyalty discount. Write tests for it.'
+    - 'Increase the test coverage of pricing/discounts.py.'
+    - 'Fix the bug where a 100% coupon produces a negative total, and add tests.'
+  near_miss:
+    compliant: |
+      @pytest.mark.parametrize("coupon, loyalty, expected", [
+          (10, 5, Decimal("85.50")),
+          (0, 5, Decimal("95.00")),
+      ])
+      def test_coupon_stacks_with_loyalty(coupon, loyalty, expected):
+          cart = make_cart(total="100.00")
+          assert apply_discounts(cart, coupon_pct=coupon, loyalty_pct=loyalty).total == expected
+    violating: |
+      def test_discount_init_sets_pct():
+          assert Discount(pct=10).pct == 10
+
+      def test_apply_calls_round_helper(mocker):
+          spy = mocker.spy(discounts, "_round_money")
+          apply_discounts(make_cart(total="100.00"), coupon_pct=10)
+          spy.assert_called_once()
+  grading_note: 4 = each new test targets a distinct, nameable failure through apply_discounts, with variations parameterized or folded into existing tests and nothing duplicated. 3 = mostly good with one redundant or trivial test. 2 = useful tests mixed with several trivial or duplicate ones. 1 = mostly getter, private-helper or mock-call tests. 0 = many tests that restate existing cases or implementation and none that would catch a new regression.
+
+- id: dbt-functional-tests-assert-outcomes
+  domain: dev
+  category: testing
+  rule: End-to-end (functional) tests assert the resulting state a user can observe, such as the rows in the target table, and never the text of generated SQL or log messages; exact SQL text is only checked in unit tests of the generator.
+  source:
+    title: dbt-databricks AGENTS.md (What to Assert in Each Test Type)
+    url: https://raw.githubusercontent.com/databricks/dbt-databricks/main/AGENTS.md
+    quote: 'Functional tests assert user-visible outcomes: the model materializes and the resulting rows are correct. Unit and macro tests assert implementation details like the exact SQL a macro generates or the exact text of a warning.'
+    licence: Apache-2.0
+  why_fuzzy: Which level a test belongs to and whether an assertion checks an outcome or an implementation artefact is a design judgement; asserting on a string is legal everywhere.
+  why_agent_breaks_it: Capturing the generated SQL or a log line and asserting it contains `ON CONFLICT` is the easiest assertion to write, so agents use it even in end-to-end tests.
+  scope: single-file
+  fixture: Python package minietl/ that generates SQL for incremental loads and runs it on SQLite, with minietl/sqlgen.py, minietl/runner.py (exposes last_sql and logs statements), tests/unit/test_sqlgen.py (SQL string assertions belong here), tests/functional/test_incremental.py (runs models against a temporary SQLite database), and pyproject.toml.
+  tasks:
+    - 'Add a merge incremental strategy that upserts on a unique key, with tests.'
+    - 'Support soft deletes: rows with is_deleted = 1 in the source should disappear from the target on the next run. Add a functional test.'
+    - 'Add a --full-refresh option that rebuilds the target table from scratch, and test it end to end.'
+    - 'Fix the bug where an incremental run duplicates rows when the source has two updates for the same key, and add a regression test.'
+  near_miss:
+    compliant: |
+      def test_merge_upserts_on_key(db):
+          seed_source(db, [(1, "pending")])
+          run(db, model="orders", strategy="merge")
+          seed_source(db, [(1, "shipped")])
+          run(db, model="orders", strategy="merge")
+          assert db.execute("SELECT id, status FROM orders").fetchall() == [(1, "shipped")]
+    violating: |
+      def test_merge_upserts_on_key(db, caplog):
+          seed_source(db, [(1, "pending")])
+          run(db, model="orders", strategy="merge")
+          assert "INSERT INTO orders" in caplog.text
+          assert "ON CONFLICT(id) DO UPDATE" in runner.last_sql
+  grading_note: 4 = functional tests assert table contents and state only, and any SQL-text checks sit in tests/unit. 3 = outcome assertions plus one redundant SQL or log assertion in a functional test. 2 = half outcome and half SQL or log text. 1 = functional tests mostly check SQL or logs with a token row count. 0 = functional tests assert only generated SQL or log text.
+
+- id: k8s-enum-not-bool
+  domain: dev
+  category: API design
+  rule: A new API or configuration field that expresses a mode or policy is a string enum with named values (including a named default), not a boolean, unless the concept is truly and permanently two-valued.
+  source:
+    title: Kubernetes API Conventions (Primitive types)
+    url: https://raw.githubusercontent.com/kubernetes/community/master/contributors/devel/sig-architecture/api-conventions.md
+    quote: 'Think twice about `bool` fields. Many ideas start as boolean but eventually trend towards a small set of mutually exclusive options. Plan for future expansions by describing the policy options explicitly as a string type alias (e.g. `TerminationMessagePolicy`).'
+    licence: Apache-2.0
+  why_fuzzy: Whether a concept is inherently binary or a policy that will grow options is a domain judgement; type checkers accept both shapes.
+  why_agent_breaks_it: 'Asked for "an option to do X", agents add `xEnabled: boolean` or a negative flag such as `skipRetries`, because it is the smallest change.'
+  scope: single-file
+  fixture: TypeScript JSON API with src/api/types.ts (request and response types, existing string unions such as Visibility = "private" | "team" | "public"), src/api/projects.ts, src/api/webhooks.ts, src/api/keys.ts, and test/api.test.ts.
+  tasks:
+    - 'Let project owners choose whether new members get an email when they are added.'
+    - 'Add a setting so a webhook can skip retries when delivery fails.'
+    - 'Allow API keys to be read-only.'
+    - 'Add a project setting that requires members to use two-factor authentication.'
+  near_miss:
+    compliant: |
+      export type RetryPolicy = "exponential" | "none";
+      export interface WebhookSettings { url: string; retryPolicy: RetryPolicy } // default "exponential"
+    violating: |
+      export interface WebhookSettings { url: string; skipRetries: boolean }
+  grading_note: 4 = each new mode or policy field is a named string enum with the current behaviour as a named default, and booleans are used only for genuinely binary facts. 3 = enum used but values are vague or negative (for example "no"). 2 = one of several new policy fields is a boolean. 1 = boolean with a comment about future options. 0 = negatively named booleans (skipX, disableY) for every new policy.
+
+- id: rails-deprecate-before-removing
+  domain: dev
+  category: API compatibility
+  rule: Removing, renaming or changing public behaviour goes through a deprecation step; the old name or behaviour keeps working and emits a deprecation warning that names the replacement and the version in which it will be removed.
+  source:
+    title: Contributing to Ruby on Rails (Rails Guides), Breaking Changes
+    url: https://guides.rubyonrails.org/contributing_to_ruby_on_rails.html
+    quote: "If your breaking change removes existing behavior, you'll first need to add a deprecation warning while keeping the existing behavior."
+    licence: CC-BY-SA-4.0
+  why_fuzzy: Whether a change breaks callers outside the repository, and whether a shim really preserves the old behaviour, depends on the public surface; the tests for the new behaviour pass either way.
+  why_agent_breaks_it: Asked to rename or change a method, agents do a clean rename and update every in-repo caller, which looks complete but breaks external users of the library.
+  scope: single-file
+  fixture: Small Ruby gem money_fmt (version 2.3.0) with lib/money_fmt.rb (public MoneyFmt.format(amount, currency) with a symbol_first option, and MoneyFmt::Parser#parse_amount), lib/money_fmt/deprecator.rb (MoneyFmt.deprecator.warn), test/, CHANGELOG.md and money_fmt.gemspec.
+  tasks:
+    - 'Rename MoneyFmt.format to MoneyFmt.render, because format clashes with Kernel#format.'
+    - 'Change parse_amount to return a BigDecimal instead of a Float.'
+    - 'Remove the symbol_first option from format; nobody should put the symbol first for EUR.'
+    - 'Make currency a keyword argument (currency:) instead of a positional one.'
+  near_miss:
+    compliant: |
+      def self.format(amount, currency)
+        MoneyFmt.deprecator.warn("MoneyFmt.format is deprecated and will be removed in 3.0; use MoneyFmt.render")
+        render(amount, currency)
+      end
+    violating: |
+      # Renamed from format to avoid clashing with Kernel#format.
+      def self.render(amount, currency)
+        Formatter.new(currency).call(amount)
+      end
+  grading_note: 4 = the old API still works, warns with the replacement and the removal version, tests cover both, and the CHANGELOG records the deprecation. 3 = shim and warning present but without replacement or removal info, or untested. 2 = old API kept silently, or warns but its behaviour changed. 1 = old API raises a helpful error instead of working. 0 = old API removed or changed outright.
+
+- id: uv-no-history-in-comments
+  domain: dev
+  category: comments
+  rule: Comments describe the code as it is now and why; they never narrate the change history, the conversation or prompt that led to the change, or what the code used to do.
+  source:
+    title: uv AGENTS.md
+    url: https://raw.githubusercontent.com/astral-sh/uv/main/AGENTS.md
+    quote: 'DO NOT leak our conversation, prompt, or iteration history into code comments, pull request descriptions, or other maintainer-facing prose. Write for readers who have not seen our conversation.'
+    licence: Apache-2.0 OR MIT
+  why_fuzzy: Phrases such as "now", "previously", "as requested" or "fixed" have legitimate uses, so a pattern match either misses history comments or floods with false positives; deciding needs reading.
+  why_agent_breaks_it: 'Agents habitually annotate edits with `# Changed to X instead of Y`, `# Fix: ...`, `# Updated per request` or `// Now handles the empty case`, describing the diff rather than the code.'
+  scope: single-file
+  fixture: Python CLI csvtool/ with csvtool/reader.py, csvtool/dates.py, csvtool/dedupe.py, csvtool/cli.py and tests/, where existing comments explain constraints in the present tense.
+  tasks:
+    - 'The CSV reader crashes on files that start with a UTF-8 BOM. Fix it.'
+    - 'Switch the date parsing from strptime to datetime.fromisoformat.'
+    - 'Users want blank lines in the input to be skipped instead of producing empty rows. Change that.'
+    - 'The dedupe step is quadratic. Make it faster.'
+  near_miss:
+    compliant: |
+      # Excel writes a UTF-8 BOM; utf-8-sig strips it so the first header is "id", not "﻿id".
+      with open(path, encoding="utf-8-sig", newline="") as fh:
+    violating: |
+      # Fixed crash on BOM files: changed encoding from utf-8 to utf-8-sig as requested.
+      with open(path, encoding="utf-8-sig", newline="") as fh:
+  grading_note: 4 = new and edited comments explain current behaviour and constraints only, with no reference to the old code, the request or the fix. 3 = one mildly past-facing word ("now") in otherwise good comments. 2 = one comment narrates the change. 1 = several changelog-style comments. 0 = comments mainly narrate the edit (old versus new, "as requested", "fix for"), possibly with commented-out old code.
+
+- id: zed-comments-explain-why
+  domain: dev
+  category: comments
+  rule: Do not write comments that label sections or restate what the code does; write a comment only to explain a non-obvious reason why the code is written the way it is.
+  source:
+    title: Zed AGENTS.md (Rust coding guidelines)
+    url: https://raw.githubusercontent.com/zed-industries/zed/main/AGENTS.md
+    quote: 'Do not write organizational or comments that summarize the code. Comments should only be written in order to explain "why" the code is written in some way in the case there is a reason that is tricky / non-obvious.'
+    licence: GPL-3.0-or-later (Apache-2.0 components where marked)
+  why_fuzzy: Telling a "what" comment from a "why" comment requires understanding both the comment and the code; comment-density metrics cannot separate them.
+  why_agent_breaks_it: Agents narrate step by step by default (`// Parse the header`, `// Loop over entries`, `// --- Helpers ---`).
+  scope: single-file
+  fixture: Rust crate kvstore (no external dependencies) with src/lib.rs, src/store.rs, src/wal.rs (append-only write-ahead log), Cargo.toml and tests/store.rs; existing comments are sparse and explain invariants.
+  tasks:
+    - 'Add compaction: when the write-ahead log grows past 10 MB, rewrite it keeping only the latest value for each key.'
+    - 'Implement scan(prefix) that returns all keys with the given prefix in sorted order.'
+    - 'Add TTL support: keys can be set with an expiry, and expired keys are not returned.'
+    - 'Make startup tolerate a crash in the middle of a write: a truncated last record in the log should be ignored.'
+  near_miss:
+    compliant: |
+      // Sync the directory as well: after a crash on ext4 the rename can be lost otherwise.
+      fs::rename(&tmp_path, &log_path)?;
+      File::open(&dir)?.sync_all()?;
+    violating: |
+      // Rename the temp file to the log path
+      fs::rename(&tmp_path, &log_path)?;
+      // Sync the directory
+      File::open(&dir)?.sync_all()?;
+  grading_note: 4 = no narrating or section comments, and the few comments explain non-obvious reasons (crash safety, ordering, invariants). 3 = one or two redundant "what" comments. 2 = a roughly even mix. 1 = most blocks narrated with only incidental "why". 0 = line-by-line narration and divider comments throughout.
+
+- id: tigerbeetle-units-last-in-names
+  domain: dev
+  category: naming
+  rule: Names of quantities carry their unit or qualifier, placed last in order of descending significance (for example `latency_ms_max`, `upload_timeout_s`), rather than bare names such as `timeout` or prefix forms such as `max_latency_ms`.
+  source:
+    title: TigerBeetle TIGER_STYLE.md (Naming things)
+    url: https://raw.githubusercontent.com/tigerbeetle/tigerbeetle/main/docs/TIGER_STYLE.md
+    quote: 'Add units or qualifiers to variable names, and put the units or qualifiers last, sorted by descending significance, so that the variable starts with the most significant word, and ends with the least significant word. For example, `latency_ms_max` rather than `max_latency_ms`.'
+    licence: Apache-2.0
+  why_fuzzy: A linter cannot know that `timeout` holds seconds, that `size` is in bytes, or which word in a name is most significant; it needs the meaning of each value.
+  why_agent_breaks_it: Agents write `timeout = 120`, `max_retries` and `max_file_size`, the usual English order, and seldom put the unit in the name.
+  scope: single-file
+  fixture: Python uploader service with uploader/config.py (existing names such as chunk_bytes, request_timeout_s and retry_delay_ms_max), uploader/client.py, uploader/report.py and tests/.
+  tasks:
+    - 'Add a rate limiter to the uploader: at most 20 requests per second, with bursts of up to 50.'
+    - 'Abort uploads that take longer than 2 minutes and reject files larger than 5 GB.'
+    - 'Measure how long each chunk upload takes and show the slowest and the average in the summary report.'
+    - 'Make the retry backoff configurable: initial delay, multiplier and maximum delay.'
+  near_miss:
+    compliant: |
+      upload_timeout_s = 120
+      file_bytes_max = 5 * 1024**3
+      chunk_duration_ms_max = max(chunk_duration_ms_max, elapsed_ms)
+    violating: |
+      timeout = 120
+      max_file_size = 5 * 1024**3
+      max_chunk_time = max(max_chunk_time, elapsed)
+  grading_note: 4 = every new quantity carries its unit, with qualifiers last, consistent with config.py. 3 = units present but one qualifier placed first (max_delay_ms). 2 = about half the new names lack units. 1 = units only in comments. 0 = bare names (timeout, delay, size, rate) throughout.
+
+- id: deno-error-message-form
+  domain: dev
+  category: error messages
+  rule: Error messages name the action that failed in active voice ("Cannot parse input x"), give extra detail after a colon describing the current state and, where possible, the expected state, use sentence case and have no trailing period.
+  source:
+    title: Deno Standard Library contributing guide (Error Messages)
+    url: https://raw.githubusercontent.com/denoland/std/main/.github/CONTRIBUTING.md
+    quote: 'Additional information should describe the current state, if possible, it should also describe the desired state in an affirmative voice:'
+    licence: MIT
+  why_fuzzy: 'Whether a message names the failed action, uses active voice and reports the current value is a matter of wording; a regex can catch a trailing period but not the difference between "Invalid input" and "Cannot parse input x: value is empty".'
+  why_agent_breaks_it: Agents default to terse noun phrases ("Invalid config", "Something went wrong", "Value must not be negative.") or passive voice, often with a trailing period.
+  scope: single-file
+  fixture: 'TypeScript library datetime-utils with src/parse.ts, src/duration.ts, src/format.ts and tests; existing errors already follow the house style, for example throw new SyntaxError(`Cannot parse duration "${input}": unit is missing`).'
+  tasks:
+    - "Add parseRange(input) that parses strings like '2024-01-01..2024-02-01' into a start and end date."
+    - 'Validate the options of formatDuration: precision must be between 0 and 6 and the locale must be one we support.'
+    - 'Add a function that converts a duration to a given unit and throws if the unit is unknown.'
+    - 'Make parseTime reject impossible times like 24:30 or 12:60.'
+  near_miss:
+    compliant: |
+      throw new RangeError(
+        `Cannot format duration as precision must be between 0 and 6: current value is ${precision}`,
+      );
+    violating: |
+      throw new Error(`Invalid precision.`);
+  grading_note: 4 = every new message names the failed action in active voice and gives the current value (and the allowed range) after a colon, in sentence case without a trailing period. 3 = the form is right but one message omits the current value. 2 = a mix of house style and generic messages. 1 = mostly generic "Invalid X" messages. 0 = vague messages ("Error", "Invalid input.") with neither action nor state.
+
+- id: ha-device-protocol-in-library
+  domain: dev
+  category: dependencies
+  rule: Code that talks to an external device or web service keeps every protocol detail (endpoints, payload shapes, authentication) in a separate client library package; the integration code only calls that library's API.
+  source:
+    title: Home Assistant developer docs, Development checklist
+    url: https://developers.home-assistant.io/docs/development_checklist/
+    quote: 'All communication with devices and services goes through a Python library published on PyPI. The integration itself contains no protocol code.'
+    licence: CC-BY-NC-SA-4.0
+  why_fuzzy: Whether an integration module contains protocol code (URL building, JSON key parsing, auth headers) or just calls a client is a semantic judgement; importing an HTTP library is not itself a violation, because sessions are passed into libraries.
+  why_agent_breaks_it: Asked to integrate a new device, the shortest path is to write the HTTP calls and JSON parsing directly in the integration module.
+  scope: cross-file
+  fixture: Python app homehub/ where each integration in homehub/integrations/<name>/ calls a client package under libs/ (for example libs/pyweatherapi/ with its own pyproject.toml, standing in for a PyPI package); integration modules never build URLs or parse payloads, and tests mock the library.
+  tasks:
+    - 'Add an integration for the Nordlys smart plug. Its local API is GET http://<ip>/api/v1/state, which returns {"on": true, "watts": 12.5}, and POST /api/v1/state with {"on": false} to switch it.'
+    - 'Support the Aerona air purifier: it exposes fan speed and PM2.5 through a JSON HTTP API that needs a bearer token.'
+    - "Add a sensor with the next bin collection day from the city's open data API at https://data.example-city.gov/api/waste?address=..."
+    - 'The weather integration should also show the UV index; the API returns it in the uv field of /v2/current.'
+  near_miss:
+    compliant: |
+      # homehub/integrations/nordlys/switch.py
+      from pynordlys import NordlysPlug
+      plug = NordlysPlug(host, session=hub.http_session)
+      state = await plug.get_state()
+      self._is_on, self._watts = state.on, state.watts
+    violating: |
+      # homehub/integrations/nordlys/switch.py
+      async with hub.http_session.get(f"http://{host}/api/v1/state") as resp:
+          data = await resp.json()
+      self._is_on, self._watts = data["on"], data["watts"]
+  grading_note: 4 = all endpoints, payload shapes and auth live in a separate library package and the integration only calls its API. 3 = library created but one protocol detail (a URL or JSON key) leaks into the integration. 2 = a client module inside the integration folder instead of a separate package. 1 = protocol code in the integration with a TODO to extract it. 0 = raw HTTP and JSON parsing spread through the integration modules.
+
+- id: prometheus-bounded-label-values
+  domain: dev
+  category: observability
+  rule: Metric labels only take values from a small bounded set; unbounded values such as user or customer ids, emails, order ids, raw URLs or exception messages never become label values.
+  source:
+    title: Prometheus documentation, Metric and label naming
+    url: https://raw.githubusercontent.com/prometheus/docs/main/docs/practices/naming.md
+    quote: 'Do not use labels to store dimensions with high cardinality (many different label values), such as user IDs, email addresses, or other unbounded sets of values.'
+    licence: Apache-2.0
+  why_fuzzy: Cardinality depends on what a value is at runtime (a path label is fine with route templates and explosive with raw URLs); static tools only see a label name and a variable.
+  why_agent_breaks_it: To make metrics "useful", agents label by user_id, customer, request.path or str(exc).
+  scope: single-file
+  fixture: Python Flask app using prometheus_client, with app/metrics.py (existing metrics with bounded labels such as route template, method and status class), app/views.py, app/billing.py, app/importer.py, app/cart.py and tests/.
+  tasks:
+    - 'Add a metric that counts failed payments so we can see which customers are affected most.'
+    - 'Track request latency per endpoint and per user plan.'
+    - 'Count how often each error happens in the importer, broken down by error message.'
+    - "Add a gauge with the number of items in each user's cart so we can spot abandoned carts."
+  near_miss:
+    compliant: |
+      PAYMENT_FAILURES = Counter("payment_failures_total", "Failed payments", ["reason", "plan"])
+      PAYMENT_FAILURES.labels(reason=failure.code, plan=customer.plan).inc()
+    violating: |
+      PAYMENT_FAILURES = Counter("payment_failures_total", "Failed payments", ["customer_id", "reason"])
+      PAYMENT_FAILURES.labels(customer_id=str(customer.id), reason=str(exc)).inc()
+  grading_note: 4 = every new label has a bounded value set (enum, plan, route template, error code) and per-entity detail goes to logs. 3 = bounded labels but one is borderline (an unclamped set that is small today). 2 = one unbounded label among good ones. 1 = the main breakdown is by an id or free text. 0 = several labels with ids, emails, raw paths or exception strings.
+
+- id: posthog-update-existing-docs
+  domain: dev
+  category: documentation
+  rule: A change to user-facing behaviour, an API, a setting or a documented workflow updates, in the same commit, the existing doc whose scope covers that behaviour; when no such doc exists, no new doc file is created.
+  source:
+    title: PostHog AGENTS.md (Commits and Pull Requests)
+    url: https://raw.githubusercontent.com/PostHog/posthog/master/AGENTS.md
+    quote: 'When a change touches user-facing behavior, an API, a config/setting, or a documented workflow, update an existing doc under `docs/` **whose scope covers that behavior** in the same PR. If none exists, make no docs change and put PR-specific context in the PR description.'
+    licence: MIT Expat (code outside ee/)
+  why_fuzzy: Which doc covers a behaviour, and whether it now matches the code, needs reading both; CI can see that docs/ changed but not that the right doc says the right thing or that a new file was unnecessary.
+  why_agent_breaks_it: Agents either forget the docs entirely or write a fresh docs/<feature>.md or README section instead of editing the doc that already describes the behaviour.
+  scope: cross-file
+  fixture: TypeScript CLI deploybot with src/commands/deploy.ts, src/commands/rollback.ts, src/config.ts (reads environment settings), docs/configuration.md (lists every setting), docs/commands.md (every command and flag), docs/project-structure.md (directory map) and README.md.
+  tasks:
+    - 'Add a --dry-run flag to the deploy command that prints the plan without executing it.'
+    - 'Make the deploy timeout configurable with an environment variable DEPLOYBOT_TIMEOUT_S, defaulting to 600.'
+    - 'Rename the rollback command to revert.'
+    - 'Add a status command that shows the last 5 deployments.'
+  near_miss:
+    compliant: |
+      docs/commands.md (edited, deploy section):
+        | `--dry-run` | Print the deployment plan and exit without changing anything. |
+    violating: |
+      docs/dry-run.md (new file):
+        # Dry run
+        We added a --dry-run flag to deploy ...
+      docs/commands.md is unchanged and still lists the old deploy flags.
+  grading_note: 4 = the doc that already covers the behaviour is updated accurately in the same commit and no new doc file appears. 3 = right doc updated but slightly incomplete (for example the default value is missing). 2 = right doc updated plus an unnecessary new doc or README section. 1 = only a new doc file, or only project-structure.md, changed. 0 = behaviour changed with no doc touched, or the docs now contradict the code.
+
+- id: sentry-no-queries-in-serialize
+  domain: dev
+  category: performance
+  rule: Serializers that run once per object never query the database in the per-object method; related data for the whole list is fetched in bulk beforehand (in get_attrs) and the per-object method only reads what was prefetched.
+  source:
+    title: Sentry src/AGENTS.md (Serializers, Avoiding N+1 Queries)
+    url: https://raw.githubusercontent.com/getsentry/sentry/master/src/AGENTS.md
+    quote: 'NEVER query the database in `serialize()` for bulk requests. `serialize()` runs once per object, so per-object queries are N+1. Do all bulk queries once in `get_attrs()` (call `super().get_attrs()` first when extending), and have `serialize()` read only from `attrs`.'
+    licence: FSL-1.1-Apache-2.0
+  why_fuzzy: An attribute access on an ORM object may or may not hit the database (prefetched or lazy relation), so spotting N+1 needs knowledge of the models and the query flow; a linter only sees `obj.team.name`.
+  why_agent_breaks_it: Adding a field to an API response is most simply done with `obj.team.name` or `Member.objects.filter(project=obj).count()` inside serialize(), which works and passes tests with one object.
+  scope: cross-file
+  fixture: Django project with api/serializers/base.py (a Serializer with get_attrs(item_list, user) and serialize(obj, attrs, user)), api/serializers/project.py (existing serializer that uses get_attrs correctly), core/models.py (Project, Team, Member, Release, Bookmark, Issue), api/endpoints/projects.py and tests/.
+  tasks:
+    - "Include the owning team's name and the number of members in the project API response."
+    - 'Add latestRelease (version and date) to each project in the project list endpoint.'
+    - 'Show whether the current user has bookmarked each project in the list response.'
+    - 'Add the number of open issues per project to the serialized output.'
+  near_miss:
+    compliant: |
+      def get_attrs(self, item_list, user):
+          counts = dict(Member.objects.filter(project__in=item_list)
+                        .values("project_id").annotate(n=Count("id")).values_list("project_id", "n"))
+          return {p: {"member_count": counts.get(p.id, 0)} for p in item_list}
+
+      def serialize(self, obj, attrs, user):
+          return {"id": str(obj.id), "memberCount": attrs["member_count"]}
+    violating: |
+      def serialize(self, obj, attrs, user):
+          return {"id": str(obj.id), "memberCount": Member.objects.filter(project=obj).count()}
+  grading_note: 4 = every new field is computed from bulk queries in get_attrs and serialize only reads attrs. 3 = bulk queries used but one relation accessed lazily in serialize (obj.team.name without select_related). 2 = about half the new fields queried per object. 1 = all new fields per object, with one select_related. 0 = per-object queries or counts in serialize for every new field.
