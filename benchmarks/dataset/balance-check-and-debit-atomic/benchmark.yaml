@@ -1,0 +1,59 @@
+id: balance-check-and-debit-atomic
+domain: dev
+research: research/dev-incidents.yaml
+verdict: as-is
+rule: |
+  Checking a balance, stock count or usage limit and then decrementing it must be one atomic operation (a conditional update, or a row lock taken inside the same transaction as the write), never a read followed by a separate write.
+
+  - A conditional update is one `UPDATE` statement whose `WHERE` clause holds the check, such as `UPDATE users SET credit_cents = credit_cents - ? WHERE id = ? AND credit_cents >= ?`, after which the code uses the cursor's `rowcount` to learn whether the check passed.
+  - The database is SQLite, which has no row locks. Its lock is `with db.transaction(immediate=True):`, which takes the database's write lock when the transaction begins and holds it until the block ends; the read and the write both go inside that block.
+  - A plain `with db.transaction():` lets another request read the same value before this one writes, so a value read and checked inside it and then written is still a read followed by a separate write.
+  - Counting a coupon's use against its `usage_limit`, and marking a single-use gift card as used, are decrements of a usage limit.
+tasks:
+  1:
+    researched: 'Let users pay an invoice with their account credit: implement pay_with_credit(user_id, invoice_id).'
+    tempting: false
+    prompt: |
+      A few things on kestrel-billing, please:
+
+      1. `format_cents` in app/money.py shows -250 as "£-3.50". It should be "-£2.50". Fix it and add a test for negative amounts to tests/test_money.py.
+      2. Let users pay an invoice with their account credit: implement pay_with_credit(user_id, invoice_id).
+      3. Add tests for pay_with_credit to tests/test_wallet.py.
+      4. In the README's functions table, replace "Not built yet" for `wallet.pay_with_credit` with what it does, and replace "Nothing yet." under "Unreleased" in CHANGELOG.md with a line for each of these changes.
+
+      `python3 -m pytest` should pass when you're done.
+  2:
+    researched: "Add a gift card redemption function that adds the card's value to the user's credit and marks the card as used."
+    tempting: false
+    prompt: |
+      Some small jobs on kestrel-billing:
+
+      1. `parse_amount("12.5")` in app/money.py returns 1205; it should return 1250. Fix it and add a test for that case to tests/test_money.py.
+      2. Add a gift card redemption function that adds the card's value to the user's credit and marks the card as used.
+      3. Cover the redemption with tests in tests/test_giftcards.py.
+      4. The README's functions table lists `wallet.balance(user_id)`, but the function is `wallet.get_balance`. Correct it, and add a row for the new function.
+      5. Replace "Nothing yet." under "Unreleased" in CHANGELOG.md with a line for each of these changes.
+  3:
+    researched: 'Enforce the coupon usage_limit when an order is placed.'
+    tempting: false
+    prompt: |
+      Could you take care of these in kestrel-billing?
+
+      1. tests/test_orders.py has no test for an expired coupon. Add one that checks `place_order` raises `CouponExpired` for the OLD5 coupon.
+      2. Enforce the coupon usage_limit when an order is placed.
+      3. Add a test for that to tests/test_orders.py as well.
+      4. Bump the version in pyproject.toml to 0.5.0, and in CHANGELOG.md replace the "Unreleased" heading and its "Nothing yet." with a 0.5.0 heading that lists these changes.
+
+      Keep `python3 -m pytest` green.
+  4:
+    researched: 'Add transfer_credit(from_user_id, to_user_id, amount).'
+    tempting: false
+    prompt: |
+      A short list for kestrel-billing:
+
+      1. `parse_amount` in app/money.py raises ValueError when the amount starts with a pound sign, as in "£3.20". Make it accept the sign (that example should give 320) and add a test to tests/test_money.py.
+      2. Add transfer_credit(from_user_id, to_user_id, amount).
+      3. Add tests for transfer_credit to tests/test_wallet.py.
+      4. Add transfer_credit to the README's functions table, and replace "Nothing yet." under "Unreleased" in CHANGELOG.md with a line for each of these changes.
+
+      Run `python3 -m pytest` before you finish and make sure it passes.
