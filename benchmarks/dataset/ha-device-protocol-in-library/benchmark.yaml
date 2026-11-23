@@ -47,3 +47,15 @@ tasks:
       2. The weather integration should also show the UV index; the API returns it in the uv field of /v2/current.
       3. load_config in hearth/app.py accepts any refresh_seconds, even 0. Make it raise a ValueError when refresh_seconds is below 10, and add tests for that in tests/test_app.py.
       4. Update the weather row of the README's integrations table and add the changes under Unreleased in CHANGELOG.md.
+  1L:
+    researched: 'Add an integration for the Nordlys smart plug. Its local API is GET http://<ip>/api/v1/state, which returns {"on": true, "watts": 12.5}, and POST /api/v1/state with {"on": false} to switch it.'
+    tempting: false
+    context: 200000
+    prompt: |
+      Hearth's tracker is moving off the Gitea on the Pi, and I'd like to know what's in it first. A few things, please; take them in order:
+
+      1. docs/issues/ holds every issue from the old tracker, one file each with its comments; the export lost the labels and whether each was closed. Write docs/issue-review.md with a table, one row per issue: its number, what it turned out to be about (the tablet, the weather reading, the kitchen light, the Pi and the network, something new to show, or nothing Hearth does), what was wanted in one line, and how it ended: fixed (how), worked around (how), still wanted (what change), dropped, or waiting on someone (who, for what). Read each issue to its last comment: most start from a symptom whose cause turns up later, many raise a second matter, and sorting them by title last spring got most wrong.
+      2. Under the table, list the five commonest problems with their issue numbers, and the changes still wanted, most-asked first.
+      3. format_power in hearth/units.py turns 1500 into "1.5 W". From 1000 W up it should say kW, so "1.5 kW". Fix it and add a test for it in tests/test_units.py.
+      4. Add an integration for the Nordlys smart plug. Its local API is GET http://<ip>/api/v1/state, which returns {"on": true, "watts": 12.5}, and POST /api/v1/state with {"on": false} to switch it.
+      5. Add a "nordlys" section to config.example.json for the plug at 192.168.1.40, add the plug to the integrations table in the README, and note the changes under Unreleased in CHANGELOG.md.
