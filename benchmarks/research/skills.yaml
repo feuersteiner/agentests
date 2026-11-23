@@ -1,0 +1,893 @@
+# Research: public skills and rule files for coding agents, as a fair opponent (arm 2).
+# Every URL, star count and quote below was opened in this session on 2026-11-22.
+# Star counts are the numbers GitHub's API returned that day; I did not audit them for inflation.
+
+format:
+  summary: |
+    A project skill is a folder `.claude/skills/<skill-name>/` holding a `SKILL.md` file:
+    YAML frontmatter between `---` markers, then Markdown instructions. Supporting files can sit
+    beside it. Claude Code follows the open Agent Skills standard (agentskills.io) and adds its own
+    fields. When a session starts, only each skill's name and description go into a skill listing
+    in context. The body loads when Claude decides to invoke the skill (a `Skill` tool call), or
+    when the prompt starts with `/skill-name`. Supporting files load only when the body tells Claude
+    to read them. This is "progressive disclosure". Once invoked, the rendered SKILL.md enters the
+    conversation as one message, stays there and is not re-read. After compaction, only the first
+    5,000 tokens of each invoked skill are re-attached. `claude -p` without `--bare` discovers
+    project skills just as an interactive session does. With `--bare` it skips skill discovery, and
+    the model never gets the skill listing.
+  location: |
+    `.claude/skills/<skill-name>/SKILL.md` in the repository. Claude Code loads `.claude/skills/` from
+    the directory where it starts and from every parent directory up to the repository root.
+    A nested `<subdir>/.claude/skills/` loads only after Claude first reads or edits a file in that
+    subdirectory. For the open spec, the frontmatter `name` must match the folder name.
+  frontmatter: |
+    Claude Code: "All fields are optional. Only `description` is recommended so Claude knows when to
+    use the skill." If `description` is missing, Claude Code uses the first non-empty line of the body.
+    Claude Code fields: name (defaults to the directory name), description, when_to_use,
+    argument-hint, arguments, disable-model-invocation (default false), user-invocable (default true),
+    allowed-tools, disallowed-tools, model, effort, context (fork), agent, background, hooks, paths,
+    shell, metadata, license, compatibility. Claude Code ignores unknown field names without an error.
+    It reads frontmatter only when the opening `---` is the first line of the file. If the YAML does
+    not parse, the skill still loads, but with no fields set.
+    Agent Skills open spec: `name` and `description` are required. name is 1-64 characters of
+    lowercase a-z, 0-9 and hyphens, with no hyphen at the start or end, no double hyphen, and it
+    must match the parent directory. description is 1-1024 characters and should say what the skill
+    does and when to use it. The optional spec fields are license, compatibility (at most 500
+    characters), metadata (a map of strings) and allowed-tools (experimental).
+    Anthropic's platform best practices add that name and description cannot contain XML tags, and
+    that name cannot contain the reserved words "anthropic" or "claude".
+    claude.ai uploads and the Skills API accept only the six spec fields, and any other key fails
+    with a hard error. Claude Code accepts all six.
+  triggering: |
+    Before invocation, the model sees only the description and when_to_use text, so they decide
+    whether the skill loads. Claude Code cuts each entry's combined description and when_to_use at
+    1,536 characters. The whole listing has a budget of 1% of the context window. When the listing
+    overflows, Claude Code drops descriptions first for the skills invoked least.
+    Documented advice:
+    - Put the key use case first.
+    - Use keywords that users would naturally say.
+    - Say both what the skill does and when to use it.
+    - Write the description in the third person (platform best practices).
+    - agentskills.io adds: phrase it as an imperative ("Use this skill when..."), focus on what the
+      user is trying to do, and "Err on the side of being pushy".
+    - Anthropic's skill-creator skill says Claude tends to "undertrigger" skills, and so recommends
+      descriptions that are a little "pushy".
+    - obra/superpowers found that a description which summarises the workflow makes the agent follow
+      the summary and skip the body. Its advice is that the description should state only when to use
+      the skill.
+    Agents usually consult a skill only for tasks they cannot easily handle alone. A simple one-step
+    request may not trigger a skill even when the description matches perfectly.
+    Documented ways a skill fails to load or trigger:
+    - Malformed YAML (the body loads, but Claude "can't match against your description").
+    - `---` that is not on the first line.
+    - Misspelled field names.
+    - `disable-model-invocation: true`, which keeps the description out of context.
+    - Listing-budget overflow.
+    - `paths` globs that do not match the files Claude touches.
+    - Forbidden characters or reserved names in the skill name.
+    Making it reliable: measure the trigger rate with about 20 labelled queries, 3 runs each, and
+    look for a `Skill` tool_use in `claude -p --output-format json`. A prompt that starts with
+    `/skill-name` runs the skill directly. For a rule that must hold every time, the docs say to move
+    it into a hook. Guidance that needs judgement should be written to cover the whole task, and the
+    most important instructions should go near the top so that they survive compaction.
+  headless: |
+    Skills do load in headless mode unless you use `--bare`. The headless page says that without
+    `--bare`, "`claude -p` discovers and loads them as an interactive session would, including
+    anything configured in the working directory or `~/.claude`."
+    `--bare` skips auto-discovery of skills, and Claude "doesn't get the list of available skills".
+    The page also says `--bare` "will become the default for `-p` in a future release". Arm 2 must
+    therefore not run with `--bare`, and should pin the Claude Code version.
+    "User-invoked skills and custom commands work. Include `/skill-name` in the prompt string and
+    Claude Code expands it before running." Through `-p`, Claude Code loads only the first of several
+    stacked skills.
+    In the Agent SDK, skills are discovered through the `user` and `project` setting sources, which
+    are loaded by default. "If you set `settingSources`/`setting_sources` explicitly and omit those
+    sources, the SDK doesn't load skills". If you pass an explicit `tools` list, it must include
+    "Skill". For skills in added directories, the CLI docs say `--safe-mode` and a
+    `strictPluginOnlyCustomization` policy restrict loading further.
+    A `-p` session shows no workspace-trust dialog. It applies a project skill's `allowed-tools` even
+    in a folder that was never trusted.
+  sources:
+    - title: 'Extend Claude with skills (Claude Code docs)'
+      url: https://code.claude.com/docs/en/skills
+      quote: 'All fields are optional. Only `description` is recommended so Claude knows when to use the skill.'
+    - title: 'Extend Claude with skills (Claude Code docs) - location table'
+      url: https://code.claude.com/docs/en/skills
+      quote: 'Claude Code loads project skills from `.claude/skills/` in the directory where you start it and in every parent directory up to the repository root'
+    - title: 'Extend Claude with skills (Claude Code docs) - invocation'
+      url: https://code.claude.com/docs/en/skills
+      quote: "In a regular session, skill descriptions are loaded into context so Claude knows what's available, but full skill content only loads when invoked."
+    - title: 'Extend Claude with skills (Claude Code docs) - description field'
+      url: https://code.claude.com/docs/en/skills
+      quote: 'Put the key use case first: the combined `description` and `when_to_use` text is truncated at 1,536 characters in the skill listing to reduce context usage.'
+    - title: 'Extend Claude with skills (Claude Code docs) - Skill not triggering'
+      url: https://code.claude.com/docs/en/skills
+      quote: "If the frontmatter YAML is malformed, Claude Code loads the skill body with empty metadata, so `/skill-name` still works but Claude can't match against your `description`."
+    - title: 'Extend Claude with skills (Claude Code docs) - Claude stops following a skill'
+      url: https://code.claude.com/docs/en/skills
+      quote: 'Claude skipped a rule that must hold every time: move the rule into a hook'
+    - title: 'Extend Claude with skills (Claude Code docs) - skill content lifecycle'
+      url: https://code.claude.com/docs/en/skills
+      quote: 'Claude Code does not re-read the skill file on later turns, so write guidance that should apply throughout a task as standing instructions rather than one-time steps.'
+    - title: 'Run Claude Code programmatically (headless docs)'
+      url: https://code.claude.com/docs/en/headless
+      quote: 'Without it, `claude -p` discovers and loads them as an interactive session would, including anything configured in the working directory or `~/.claude`.'
+    - title: 'Run Claude Code programmatically (headless docs) - bare mode'
+      url: https://code.claude.com/docs/en/headless
+      quote: "it doesn't get the list of available skills, including skills from an `--add-dir` folder."
+    - title: 'Run Claude Code programmatically (headless docs) - commands in -p'
+      url: https://code.claude.com/docs/en/headless
+      quote: 'User-invoked skills and custom commands work. Include `/skill-name` in the prompt string and Claude Code expands it before running.'
+    - title: 'Agent Skills in the SDK'
+      url: https://code.claude.com/docs/en/agent-sdk/skills
+      quote: 'If you also pass an explicit `tools` list, include `"Skill"` in that list so Claude can invoke skills.'
+    - title: 'Agent Skills specification'
+      url: https://agentskills.io/specification
+      quote: 'Metadata (~100 tokens): The `name` and `description` fields are loaded at startup for all skills'
+    - title: 'Optimizing skill descriptions (agentskills.io)'
+      url: https://agentskills.io/skill-creation/optimizing-descriptions
+      quote: 'A simple, one-step request like "read this PDF" may not trigger a PDF skill even if the description matches perfectly, because the agent can handle it with basic tools.'
+    - title: 'Skill authoring best practices (Claude platform docs)'
+      url: https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices
+      quote: 'Always write in third person. The description is injected into the system prompt, and inconsistent point-of-view can cause discovery problems.'
+    - title: 'skill-creator SKILL.md (anthropics/skills)'
+      url: https://github.com/anthropics/skills/blob/main/skills/skill-creator/SKILL.md
+      quote: 'currently Claude has a tendency to "undertrigger" skills -- to not use them when they''d be useful. To combat this, please make the skill descriptions a little bit "pushy".'
+    - title: 'Equipping agents for the real world with Agent Skills (Anthropic engineering, 2025-10-16)'
+      url: https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills
+      quote: 'At startup, the agent pre-loads the `name` and `description` of every installed skill into its system prompt.'
+
+skills:
+  # Ordered by strength as an opponent for fuzzy rules. All stars were read on 2026-11-22.
+  - name: frontend-design
+    repository: anthropics/skills
+    url: https://github.com/anthropics/skills/blob/main/skills/frontend-design/SKILL.md
+    stars: 199078
+    stars_read_on: 2026-11-22
+    licence: Apache-2.0 (LICENSE.txt in the skill folder)
+    kind: fuzzy-guideline
+    domain: dev
+    what_it_says: |
+      Act as the design lead of a studio known for distinctive work. Ground every choice in the
+      subject matter, and avoid the "defaults rather than choices" that AI-generated pages cluster
+      around, which it names with concrete examples such as the cream background, the SaaS-card kit
+      and ALL-CAPS eyebrow labels. It sets a two-pass process (plan, review the plan against the
+      brief, then build), restraint ("spend your boldness in one place"), self-critique and
+      UI-writing rules.
+    length_lines: 71
+    usable_as_opponent: 'yes'
+    why: |
+      This is the best-regarded pure judgement skill: Anthropic-authored, and listed with 1.2M
+      installs on the skills.sh leaderboard. It shows how to state a fuzzy design or brand rule with
+      named failure patterns and a review step, which makes it a model for design-judgement and
+      UI-copy rules.
+  - name: brand-review
+    repository: anthropics/knowledge-work-plugins
+    url: https://github.com/anthropics/knowledge-work-plugins/blob/HEAD/marketing/skills/brand-review/SKILL.md
+    stars: 36701
+    stars_read_on: 2026-11-22
+    licence: Apache-2.0
+    kind: fuzzy-guideline
+    domain: business
+    what_it_says: |
+      Review content against brand voice, terminology, messaging pillars and the style guide, and
+      flag deviations by severity with before/after fixes. A section that is "always checked"
+      flags unsubstantiated superlatives, missing disclaimers, comparative claims, regulatory
+      language and testimonial issues. It also includes voice-attribute spectrums and tone-by-channel
+      tables.
+    length_lines: 276
+    usable_as_opponent: 'yes'
+    why: |
+      Anthropic-authored. It covers two of our business rule families directly, brand voice and
+      marketing claims. It is review-shaped, so for arm 2 the checklist should be reworded as
+      standing instructions for drafting.
+  - name: copywriting
+    repository: coreyhaines31/marketingskills
+    url: https://github.com/coreyhaines31/marketingskills/blob/HEAD/skills/copywriting/SKILL.md
+    stars: 62086
+    stars_read_on: 2026-11-22
+    licence: MIT
+    kind: fuzzy-guideline
+    domain: business
+    what_it_says: |
+      Conversion copywriting principles: clarity over cleverness, benefits over features,
+      specificity, customer language, and one idea per section. Its section "Claims Must Be
+      Supportable" says to write only claims the source supports, and to name each declined claim
+      with the evidence that would unlock it. It also lists AI tells to avoid, and adds page-structure
+      and CTA guidance.
+    length_lines: 343
+    usable_as_opponent: 'yes'
+    why: |
+      This is the most-starred marketing skill collection. Its supportable-claims section is a
+      strong, real version of a "no unsubstantiated marketing claims" rule. It is long, though, so
+      trim it to the claims and voice sections.
+  - name: receiving-code-review
+    repository: obra/superpowers
+    url: https://github.com/obra/superpowers/blob/main/skills/receiving-code-review/SKILL.md
+    stars: 324270
+    stars_read_on: 2026-11-22
+    licence: MIT
+    kind: fuzzy-guideline
+    domain: dev
+    what_it_says: |
+      Treat code review feedback with technical rigour rather than performative agreement. Read,
+      restate, verify against the codebase, evaluate, then respond or push back. Do not say "You're
+      absolutely right!", and stop to ask when any item is unclear.
+    length_lines: 205
+    usable_as_opponent: 'yes'
+    why: |
+      It comes from the most-starred skills framework and states a review-judgement rule in a
+      testable form. It is a template for review-practice rules.
+  - name: test-driven-development
+    repository: obra/superpowers
+    url: https://github.com/obra/superpowers/blob/main/skills/test-driven-development/SKILL.md
+    stars: 324270
+    stars_read_on: 2026-11-22
+    licence: MIT
+    kind: mixed
+    domain: dev
+    what_it_says: |
+      An "Iron Law" that no production code is written without a failing test first. It lays out the
+      red-green-refactor cycle, says code written before its test must be deleted, and lists the
+      allowed exceptions. It also has rationalisation tables and red flags against skipping the
+      discipline.
+    length_lines: 330
+    usable_as_opponent: 'yes'
+    why: |
+      This is the strongest real discipline-enforcing skill. It was written and pressure-tested to
+      resist rationalisation, which makes it a fair opponent for testing-practice rules.
+  - name: verification-before-completion
+    repository: obra/superpowers
+    url: https://github.com/obra/superpowers/blob/main/skills/verification-before-completion/SKILL.md
+    stars: 324270
+    stars_read_on: 2026-11-22
+    licence: MIT
+    kind: fuzzy-guideline
+    domain: dev
+    what_it_says: |
+      "Evidence before claims, always." Do not claim work is complete, fixed or passing until the
+      verification command has been run in this message. It includes a gate function to run before
+      any success claim, before committing or before opening a PR.
+    length_lines: 120
+    usable_as_opponent: 'yes'
+    why: |
+      Compact, and it acts at commit time, the same moment our gate fires. It is a natural opponent
+      for reliability rules and "don't overclaim" rules.
+  - name: codebase-design
+    repository: mattpocock/skills
+    url: https://github.com/mattpocock/skills/blob/HEAD/skills/engineering/codebase-design/SKILL.md
+    stars: 330636
+    stars_read_on: 2026-11-22
+    licence: MIT
+    kind: fuzzy-guideline
+    domain: dev
+    what_it_says: |
+      Design "deep modules": a lot of behaviour behind a small interface, placed at a clean seam and
+      testable through that interface. It gives a strict glossary (module, interface, depth, seam,
+      adapter, leverage, locality) and principles for judging deep versus shallow modules.
+    length_lines: 114
+    usable_as_opponent: 'yes'
+    why: |
+      This is the most-installed architecture judgement skill (985.9K installs on skills.sh) from
+      the most-starred skills repository. It is a good opponent for architecture and modularity rules.
+  - name: release-it
+    repository: ciembor/agent-rules-books
+    url: https://github.com/ciembor/agent-rules-books/blob/HEAD/release-it/release-it.mini.md
+    stars: 3336
+    stars_read_on: 2026-11-22
+    licence: MIT
+    kind: fuzzy-guideline
+    domain: dev
+    what_it_says: |
+      Production-reliability decision rules after Nygard's Release It!: explicit timeouts on every
+      outbound call, bounded retries with backoff that are used only when the call is safe to repeat,
+      circuit breakers and bulkheads, finite queues, and observability at boundaries. It also has
+      trigger rules ("When adding an outbound call... define timeout, retry eligibility...") and a
+      final checklist. A short SKILL.md (11 lines) points to this mini file.
+    length_lines: 48
+    usable_as_opponent: 'yes'
+    why: |
+      This is a near-perfect real version of a reliability rule set. It is also published in nano,
+      mini and full sizes, so the length of arm 2 can be varied.
+  - name: internal-comms
+    repository: anthropics/skills
+    url: https://github.com/anthropics/skills/blob/main/skills/internal-comms/SKILL.md
+    stars: 199078
+    stars_read_on: 2026-11-22
+    licence: Apache-2.0 (LICENSE.txt in the skill folder)
+    kind: mixed
+    domain: business
+    what_it_says: |
+      A router: identify the type of internal communication (3P update, newsletter, FAQ, status or
+      incident report), then load the matching guideline file from `examples/`, and follow its
+      format and tone. The SKILL.md itself carries little of the rule. The guidance lives in the
+      example files.
+    length_lines: 32
+    usable_as_opponent: 'partly'
+    why: |
+      It is the official example of a tone/format skill for business writing, and of how to split a
+      rule into progressive-disclosure files. On its own, though, the router body is too thin to
+      state a rule.
+  - name: humanizer
+    repository: blader/humanizer
+    url: https://github.com/blader/humanizer/blob/HEAD/SKILL.md
+    stars: 72394
+    stars_read_on: 2026-11-22
+    licence: MIT
+    kind: fuzzy-guideline
+    domain: business
+    what_it_says: |
+      Rewrite AI-sounding text so it reads like the writer without changing what it says. It
+      explains why models write that way, then lists 26 numbered patterns, strongest first
+      (not-X-but-Y contrasts, one-line closers, forced triads, inflation, sales language, bold as
+      decoration...). A "how to work" loop ends with a fact-preservation check.
+    length_lines: 504
+    usable_as_opponent: 'partly'
+    why: |
+      This is the most-starred standalone writing-style skill and a good model for voice rules. At
+      504 lines it is over the 500-line guidance and exhaustive, so use it as a source and trim it.
+  - name: api-and-interface-design
+    repository: addyosmani/agent-skills
+    url: https://github.com/addyosmani/agent-skills/blob/HEAD/skills/api-and-interface-design/SKILL.md
+    stars: 119803
+    stars_read_on: 2026-11-22
+    licence: MIT
+    kind: fuzzy-guideline
+    domain: dev
+    what_it_says: |
+      Design interfaces that are hard to misuse. Topics include Hyrum's Law, contract first,
+      consistent error semantics, validating at boundaries, preferring addition over modification,
+      predictable naming and idempotency keys. It also gives REST and TypeScript patterns, a
+      rationalisation table and red flags.
+    length_lines: 369
+    usable_as_opponent: 'yes'
+    why: |
+      A well-regarded architecture skill whose principles can be judged in a diff. It is fairly
+      long, so cut the REST and TypeScript pattern sections for arm 2.
+  - name: code-review-and-quality
+    repository: addyosmani/agent-skills
+    url: https://github.com/addyosmani/agent-skills/blob/HEAD/skills/code-review-and-quality/SKILL.md
+    stars: 119803
+    stars_read_on: 2026-11-22
+    licence: MIT
+    kind: mixed
+    domain: dev
+    what_it_says: |
+      A five-axis review (correctness, readability, architecture, security, performance). Its
+      approval standard is that a change "definitely improves overall code health". It adds change
+      sizing, a review process, dead-code hygiene, honesty in review and a checklist template.
+    length_lines: 402
+    usable_as_opponent: 'partly'
+    why: |
+      It is strong on review judgement, but it is long and shaped for reviewing someone else's
+      change. As a self-review step before commit it is a fair arm-2 source for review rules.
+  - name: tdd
+    repository: mattpocock/skills
+    url: https://github.com/mattpocock/skills/blob/HEAD/skills/engineering/tdd/SKILL.md
+    stars: 330636
+    stars_read_on: 2026-11-22
+    licence: MIT
+    kind: fuzzy-guideline
+    domain: dev
+    what_it_says: |
+      Tests verify behaviour through public interfaces, not implementation details. Tests live only
+      at agreed seams. It names anti-patterns (implementation-coupled, tautological, horizontal
+      slicing) and rules of the loop (red before green, one slice at a time). Its examples are in
+      tests.md and mocking.md.
+    length_lines: 38
+    usable_as_opponent: 'yes'
+    why: |
+      A very compact, judgement-heavy testing rule. It is a good counterpoint to the long superpowers
+      TDD skill if arm 2 needs a short variant. It asks the user to confirm seams, which a headless
+      run cannot do.
+  - name: avoid-ai-writing
+    repository: wshobson/agents
+    url: https://github.com/wshobson/agents/blob/HEAD/plugins/avoid-ai-writing/skills/avoid-ai-writing/SKILL.md
+    stars: 42808
+    stars_read_on: 2026-11-22
+    licence: MIT
+    kind: fuzzy-guideline
+    domain: business
+    what_it_says: |
+      Audit prose for machine-sounding patterns, then rewrite it without "sanding off the author's
+      voice". It has rewrite, detect and edit modes, context profiles (linkedin, docs,
+      investor-email...), and tiered vocabulary and pattern catalogues in reference files. Rhythm is
+      weighted above single words.
+    length_lines: 64
+    usable_as_opponent: 'partly'
+    why: |
+      A good example of a short body plus reference files for writing-voice rules. The rule content
+      lives mostly in references/, so arm 2 would need those files too.
+  - name: brand-voice-enforcement
+    repository: anthropics/knowledge-work-plugins
+    url: https://github.com/anthropics/knowledge-work-plugins/blob/HEAD/partner-built/brand-voice/skills/brand-voice-enforcement/SKILL.md
+    stars: 36701
+    stars_read_on: 2026-11-22
+    licence: Apache-2.0
+    kind: procedure
+    domain: business
+    what_it_says: |
+      Apply existing brand guidelines to any content request. Find the guidelines (session, then
+      `.claude/brand-voice-guidelines.md`, then ask the user), apply voice constants and tone flexes,
+      validate the output and explain the brand choices. Its long description is an example of a
+      very "pushy" trigger list.
+    length_lines: 107
+    usable_as_opponent: 'partly'
+    why: |
+      It shows how a real brand-voice skill is wired to a project guidelines file. The voice itself
+      lives in that file, which we would have to supply, and it may ask the user questions in a
+      headless run.
+  - name: compliance-check
+    repository: anthropics/knowledge-work-plugins
+    url: https://github.com/anthropics/knowledge-work-plugins/blob/HEAD/legal/skills/compliance-check/SKILL.md
+    stars: 36701
+    stars_read_on: 2026-11-22
+    licence: Apache-2.0
+    kind: mixed
+    domain: business
+    what_it_says: |
+      Run a compliance check on an initiative: applicable regulations, requirements, risk areas,
+      approvals. It carries a GDPR/CCPA overview, a DPA review checklist (Article 28 elements) and
+      guidance on handling data-subject requests.
+    length_lines: 274
+    usable_as_opponent: 'partly'
+    why: |
+      A real, Anthropic-authored source for privacy-notice and policy rules. It is reference-heavy
+      and framed as an assessment, so extract the drafting-relevant parts.
+  - name: copy-editing
+    repository: coreyhaines31/marketingskills
+    url: https://github.com/coreyhaines31/marketingskills/blob/HEAD/skills/copy-editing/SKILL.md
+    stars: 62086
+    stars_read_on: 2026-11-22
+    licence: MIT
+    kind: fuzzy-guideline
+    domain: business
+    what_it_says: |
+      Tighten and proofread existing copy without rewriting it from scratch. Every edit removes AI
+      tells, and a request to fix one line gets a point edit to that line only.
+    length_lines: 491
+    usable_as_opponent: 'partly'
+    why: |
+      Relevant to voice and edit-scope rules, but very long. Use it as source material rather than
+      verbatim.
+  - name: ux-copy
+    repository: anthropics/knowledge-work-plugins
+    url: https://github.com/anthropics/knowledge-work-plugins/blob/HEAD/design/skills/ux-copy/SKILL.md
+    stars: 36701
+    stars_read_on: 2026-11-22
+    licence: Apache-2.0
+    kind: fuzzy-guideline
+    domain: both
+    what_it_says: |
+      Five copy principles (clear, concise, consistent, useful, human), plus patterns for CTAs,
+      error messages ("What happened + Why + How to fix"), empty states, confirmation dialogs and
+      loading states. Most patterns come with a worked example or a "this, not that" pair.
+    length_lines: 107
+    usable_as_opponent: 'yes'
+    why: |
+      Short, with concrete good/bad pairs. It fits rules about product copy and error-message tone,
+      in code or in content.
+  - name: unslop
+    repository: heydamir/unslop
+    url: https://github.com/heydamir/unslop/blob/HEAD/skills/unslop/SKILL.md
+    stars: 20349
+    stars_read_on: 2026-11-22
+    licence: CC-BY-4.0
+    kind: fuzzy-guideline
+    domain: dev
+    what_it_says: |
+      Turn AI-looking UI into a designed interface. Find a direction from the product, then fix
+      spacing, colour, icons, copy, type, layout and motion in that order. It describes "what good
+      looks like" (one bright element, quiet chrome, a clear idea, real material).
+    length_lines: 236
+    usable_as_opponent: 'partly'
+    why: |
+      A strong design-judgement skill, but it is redesign-oriented rather than a standing rule. It
+      overlaps frontend-design, and its CC-BY licence requires attribution in any copy.
+  - name: design-taste-frontend
+    repository: Leonxlnx/taste-skill
+    url: https://github.com/Leonxlnx/taste-skill/blob/HEAD/skills/taste-skill/SKILL.md
+    stars: 120203
+    stars_read_on: 2026-11-22
+    licence: MIT
+    kind: mixed
+    domain: dev
+    what_it_says: |
+      An "anti-slop" frontend skill: plain copy, one system, one section per screen, real
+      photographs and product UI, with house rules and reference files. Its frontmatter registers
+      a Stop hook that runs a browser-based checker and finish gate.
+    length_lines: 381
+    usable_as_opponent: 'no'
+    why: |
+      It is popular, but it embeds its own blocking gate (a Stop hook). Using it would blur the line
+      between arm 2 and the gate arms. It is worth citing as evidence that skill authors themselves
+      reach for gates.
+  - name: security-audit
+    repository: cloudflare/security-audit-skill
+    url: https://github.com/cloudflare/security-audit-skill/blob/HEAD/skills/security-audit/SKILL.md
+    stars: 77150
+    stars_read_on: 2026-11-22
+    licence: MIT
+    kind: procedure
+    domain: dev
+    what_it_says: |
+      A source-first defensive security workflow. Find vulnerabilities that break a real trust
+      boundary, with evidence, safe reproduction, priority and the smallest fix. The full workflow
+      runs only for explicit audit requests.
+    length_lines: 192
+    usable_as_opponent: 'partly'
+    why: |
+      High quality, but it is an audit procedure rather than a rule for writing code. It is relevant
+      only if a benchmark rule is security-flavoured.
+  - name: architecture-patterns
+    repository: wshobson/agents
+    url: https://github.com/wshobson/agents/blob/HEAD/plugins/backend-development/skills/architecture-patterns/SKILL.md
+    stars: 42808
+    stars_read_on: 2026-11-22
+    licence: MIT
+    kind: mixed
+    domain: dev
+    what_it_says: |
+      Core concepts of Clean Architecture, Hexagonal Architecture (ports and adapters) and DDD, plus
+      testing with in-memory adapters. A troubleshooting section covers circular imports between
+      layers, framework decorators in domain entities and logic piling up in controllers.
+    length_lines: 164
+    usable_as_opponent: 'partly'
+    why: |
+      More of a pattern catalogue than a judgement rule. Usable for layering and dependency-direction
+      rules after trimming.
+  - name: code-review (knowledge-work engineering)
+    repository: anthropics/knowledge-work-plugins
+    url: https://github.com/anthropics/knowledge-work-plugins/blob/HEAD/engineering/skills/code-review/SKILL.md
+    stars: 36701
+    stars_read_on: 2026-11-22
+    licence: Apache-2.0
+    kind: procedure
+    domain: dev
+    what_it_says: |
+      A slash-command-style review covering security (OWASP), performance (N+1, unbounded queries),
+      correctness (edge cases, error handling) and style, with actionable suggestions.
+    length_lines: 118
+    usable_as_opponent: 'partly'
+    why: |
+      A generic checklist with little judgement content. The superpowers and addyosmani review
+      skills are stronger sources.
+  - name: doc-coauthoring
+    repository: anthropics/skills
+    url: https://github.com/anthropics/skills/blob/main/skills/doc-coauthoring/SKILL.md
+    stars: 199078
+    stars_read_on: 2026-11-22
+    licence: Apache-2.0 per the repository README; no per-skill licence file
+    kind: procedure
+    domain: business
+    what_it_says: |
+      A three-stage interactive workflow for proposals, specs and decision docs: context gathering,
+      refinement and structure, then reader testing.
+    length_lines: 375
+    usable_as_opponent: 'no'
+    why: |
+      It depends on back-and-forth with the user, so it does not suit a headless one-shot task.
+      Its reader-testing idea could still inform a proposal rule.
+  - name: contract-and-proposal-writer
+    repository: alirezarezvani/claude-skills
+    url: https://github.com/alirezarezvani/claude-skills/blob/HEAD/business-growth/skills/contract-and-proposal-writer/SKILL.md
+    stars: 30298
+    stars_read_on: 2026-11-22
+    licence: MIT
+    kind: procedure
+    domain: business
+    what_it_says: |
+      Jurisdiction-aware templates for freelance contracts, proposals, SOWs, NDAs and MSAs (US, EU,
+      UK, DACH), with docx conversion steps and a "not legal advice" disclaimer.
+    length_lines: 423
+    usable_as_opponent: 'partly'
+    why: |
+      Template-heavy rather than a judgement rule. It is useful only as material for proposal-content
+      rules.
+  - name: transparent-communication
+    repository: mukul975/Privacy-Data-Protection-Skills
+    url: https://github.com/mukul975/Privacy-Data-Protection-Skills/blob/HEAD/skills/privacy/transparent-communication/SKILL.md
+    stars: 345
+    stars_read_on: 2026-11-22
+    licence: Apache-2.0
+    kind: mixed
+    domain: business
+    what_it_says: |
+      GDPR Article 12 requirements for privacy notices and data-subject communications: concise,
+      intelligible, plain language, response timelines, fees and refusals, and layered notice design.
+      Much of it quotes the legal text.
+    length_lines: 144
+    usable_as_opponent: 'partly'
+    why: |
+      The closest public skill to a privacy-notice rule, but it is a niche repository and heavy on
+      legal reference. Use it for substance, not as a model of style.
+  - name: differential-review
+    repository: trailofbits/skills
+    url: https://github.com/trailofbits/skills/blob/HEAD/plugins/differential-review/skills/differential-review/SKILL.md
+    stars: 8351
+    stars_read_on: 2026-11-22
+    licence: CC-BY-SA-4.0
+    kind: procedure
+    domain: dev
+    what_it_says: |
+      A security-focused review of a diff: adapt the depth to codebase size, use git blame,
+      calculate the blast radius by counting callers, check test coverage of modified code, and write
+      a markdown report.
+    length_lines: 225
+    usable_as_opponent: 'no'
+    why: |
+      A respected source, but it is a reviewer's procedure with tool steps, not a guideline the
+      authoring agent should follow.
+  - name: web-design-guidelines
+    repository: vercel-labs/agent-skills
+    url: https://github.com/vercel-labs/agent-skills/blob/HEAD/skills/web-design-guidelines/SKILL.md
+    stars: 34757
+    stars_read_on: 2026-11-22
+    licence: unknown (the repository reports no licence; the skill has none in its frontmatter)
+    kind: tool-instructions
+    domain: dev
+    what_it_says: |
+      Read the bundled Web Interface Guidelines file (pinned to an upstream commit), check the given
+      files against every rule, and report findings as `file:line`. The rules themselves are in
+      references/command.md.
+    length_lines: 51
+    usable_as_opponent: 'no'
+    why: |
+      The SKILL.md is only a pointer to a review procedure. It shows a pattern (a pinned external
+      rule file) rather than a usable opponent.
+  - name: job-description (Job Description Generator)
+    repository: claude-office-skills/skills
+    url: https://github.com/claude-office-skills/skills/blob/HEAD/job-description/SKILL.md
+    stars: 592
+    stars_read_on: 2026-11-22
+    licence: MIT
+    kind: mixed
+    domain: business
+    what_it_says: |
+      Generates inclusive, bias-free job postings. It covers role expectations, inclusive language
+      and industry best practice.
+    length_lines: 221
+    usable_as_opponent: 'no'
+    why: |
+      The only job-advert skill I found. Its frontmatter breaks the spec: name is "Job Description
+      Generator" (not kebab-case), the description is the literal string ">", and it carries many
+      custom keys. Claude Code would get no usable description from it, so it is a cautionary
+      example, not an opponent.
+
+neighbouring_formats:
+  - name: AGENTS.md
+    collection: agentsmd/agents.md (spec and site at agents.md)
+    url: https://agents.md/
+    stars: 25665
+    note: |
+      "A simple, open format for guiding coding agents". The site says it is "used by over 60k
+      open-source projects" and is supported by Codex, Cursor, Copilot's coding agent, Gemini CLI,
+      Jules, Aider, Zed and others; the nearest file in the tree wins. Claude Code reads AGENTS.md
+      when there is no CLAUDE.md. Content is mostly commands and conventions. GitHub's analysis of
+      2,500 agents.md files found "Most agent files fail because they're too vague", that code
+      examples beat explanation, and that the best files have explicit "always do, ask first, never
+      do" boundaries
+      (https://github.blog/ai-and-ml/github-copilot/how-to-write-a-great-agents-md-lessons-from-over-2500-repositories/).
+  - name: CLAUDE.md and .claude/rules/
+    collection: Claude Code memory docs; josix/awesome-claude-md (641 stars) curates examples
+    url: https://code.claude.com/docs/en/memory
+    stars: 641
+    note: |
+      Loaded into every session, unlike a skill. The docs say: "Claude treats CLAUDE.md files as
+      context, not enforced configuration". They advise instructions "concrete enough to verify"
+      and "target under 200 lines per CLAUDE.md file. Longer files consume more context and reduce
+      adherence." `.claude/rules/*.md` with a `paths` glob loads only when matching files are opened.
+      For arm 2 this is the main alternative carrier, and Vercel's eval found always-on context beat
+      an on-demand skill (see compliance_evidence).
+  - name: Cursor rules (.cursorrules / .mdc)
+    collection: PatrickJS/awesome-cursorrules
+    url: https://github.com/PatrickJS/awesome-cursorrules
+    stars: 41182
+    note: |
+      The largest public collection (257 entries in rules/). Judging by file names, most are
+      framework- or library-specific. A few carry fuzzy dev judgement, for example rules/clean-code.mdc
+      (56 lines: meaningful names, single responsibility, DRY, comment why not what),
+      code-guidelines, codequality and optimize-dry-solid-principles. In Cursor's current format,
+      rules live in `.cursor/rules/*.mdc` with description, globs and alwaysApply, and four
+      activation modes ("Apply Intelligently" is description-based, like skills). Cursor says to
+      keep rules under 500 lines and also reads AGENTS.md (https://cursor.com/docs/context/rules).
+  - name: Cursor rules (.mdc library collection)
+    collection: sanjeed5/awesome-cursor-rules-mdc
+    url: https://github.com/sanjeed5/awesome-cursor-rules-mdc
+    stars: 3589
+    note: |
+      A generated collection of .mdc files in rules-mdc/, plus a Cursor rules reference document.
+      I did not read individual rule files. The repository framing is library- and framework-
+      specific, so mostly tool instructions rather than fuzzy judgement.
+  - name: GitHub Copilot instructions
+    collection: github/awesome-copilot
+    url: https://github.com/github/awesome-copilot
+    stars: 41450
+    note: |
+      Official community collection: 195 entries in instructions/ and 464 in skills/. Format is
+      `.github/copilot-instructions.md` repo-wide, plus `.github/instructions/NAME.instructions.md`
+      with an `applyTo` glob; Copilot also reads AGENTS.md and a root CLAUDE.md
+      (https://docs.github.com/en/copilot/how-tos/configure-custom-instructions/add-repository-instructions).
+      Fuzzy ones include code-review-generic.instructions.md (418 lines; review priorities from
+      CRITICAL "block merge" down), object-calisthenics, self-explanatory-code-commenting,
+      security-and-owasp and gilfoyle-code-review.
+  - name: Book-derived AGENTS.md rules and skills
+    collection: ciembor/agent-rules-books
+    url: https://github.com/ciembor/agent-rules-books
+    stars: 3336
+    note: |
+      Rules distilled from software books (Clean Code, A Philosophy of Software Design, Clean
+      Architecture, DDIA, Release It!, Refactoring, Working Effectively with Legacy Code...). Each
+      comes in nano, mini and full sizes as AGENTS.md text and as a SKILL.md wrapper. This is the
+      richest public source of fuzzy architecture and reliability rules, and the size variants make
+      a ready-made length ablation.
+  - name: Rules for Claude Code and Cursor
+    collection: steipete/agent-rules
+    url: https://github.com/steipete/agent-rules
+    stars: 5667
+    note: |
+      Described as "Rules and Knowledge to work better with agents such as Claude Code or Cursor".
+      I read only the repository metadata, not the rule files.
+  - name: Skill directories (same SKILL.md format, indexes rather than a new format)
+    collection: skills.sh leaderboard; ComposioHQ/awesome-claude-skills (80085 stars); VoltAgent/awesome-agent-skills (37452); hesreallyhim/awesome-claude-code (58613); travisvn/awesome-claude-skills (15913)
+    url: https://skills.sh/
+    stars: 80085
+    note: |
+      The star count is for ComposioHQ/awesome-claude-skills. On skills.sh (read 2026-11-22) the
+      top installed skills were vercel-labs/skills find-skills (4.5M), several heygen-com/hyperframes
+      and mattpocock/skills entries (grill-me 1.6M), and anthropics/skills frontend-design (1.2M).
+      Few of the top entries are fuzzy guidelines. Most are tools or procedures.
+
+compliance_evidence:
+  - title: 'AGENTS.md outperforms skills in our agent evals (Vercel, 2026-01-27)'
+    url: https://vercel.com/blog/agents-md-outperforms-skills-in-our-agent-evals
+    finding: |
+      Next.js 16 API tasks scored on build, lint and test. Pass rates: no docs 53%, skill with
+      default behaviour 53%, skill plus explicit instructions to use it 79%, and an 8KB docs index in
+      AGENTS.md 100%. With explicit instructions the skill triggered 95%+ of the time. The post does
+      not name the model or eval size.
+    quote: 'In 56% of eval cases, the skill was never invoked.'
+  - title: 'OctoBench: Benchmarking Scaffold-Aware Instruction Following in Repository-Grounded Agentic Coding (arXiv 2601.10343)'
+    url: https://arxiv.org/html/2601.10343v2
+    finding: |
+      217 tasks under Claude Code, Kilo and Droid, with 7,098 objective checks. Check-level
+      compliance is high (79.75-85.64%), but only 9.66-28.11% of instances satisfy every rule; the
+      best model was Claude Opus 4.5. Compliance falls with interaction length for most models, and
+      constraints set in Skill.md are the weakest category (Opus 4.5 at 58.45% ISR on them).
+    quote: 'compliance drops noticeably for constraints specified in Skill.md'
+  - title: 'SkillsBench: Benchmarking How Well Agent Skills Work Across Diverse Tasks (arXiv 2602.12670, v4)'
+    url: https://arxiv.org/abs/2602.12670
+    finding: |
+      Curated skills raise the average pass rate from 33.9% to 50.5% (+16.6 pp). Focused skills of at
+      most three modules beat large bundles, and compact or standard-length skills (+19.0 / +21.5 pp)
+      beat detailed ones (+14.5 pp). Self-generated skills land below the no-skill baseline (-8.1 pp
+      on Claude Code + Opus 4.7). Some harnesses "acknowledge Skills content but proceed without
+      invoking it."
+    quote: 'Focused Skills with at most three modules outperform larger or exhaustive bundles'
+  - title: 'Evaluating AGENTS.md: Are Repository-Level Context Files Helpful for Coding Agents? (arXiv 2602.11988)'
+    url: https://arxiv.org/abs/2602.11988
+    finding: |
+      The agents were Claude Code with Sonnet-4.5, Codex with GPT-5.2 and GPT-5.1 mini, and Qwen Code
+      with Qwen3-30b-coder. Context files did not generally raise task success, and they added over
+      20% to inference cost on average. Developer-written files improved performance by 2.4% on
+      average, which was not significant (p = 21%). The agents did follow the instructions. The
+      authors hypothesise that the extra instructions make tasks harder, and they advise that files
+      should "only contain specific additional instructions beyond what is already available in the
+      codebase".
+    quote: 'instructions in the context files are well followed by coding agents'
+  - title: 'Instruction Adherence in Coding Agent Configuration Files: A Factorial Study of Four File-Structure Variables (arXiv 2605.10039)'
+    url: https://arxiv.org/abs/2605.10039
+    finding: |
+      1,650 Claude Code sessions (16,050 function-level observations) on two TypeScript codebases
+      varied the configuration file's size, instruction position, conflicting instructions and
+      architecture. None of these had a detectable effect. The
+      largest effect was within a session: compliance odds fell about 5.6% with each additional
+      generated function (OR 0.944). This trend was non-monotonic and found post hoc.
+    quote: 'None of the four structural variables or three two-way interactions produces a detectable contrast'
+  - title: 'How Many Instructions Can LLMs Follow at Once? (IFScale, arXiv 2507.11538)'
+    url: https://arxiv.org/abs/2507.11538
+    finding: |
+      Up to 500 keyword-inclusion instructions in a business-report task, across 20 models. Accuracy
+      falls as instruction density rises, models favour earlier instructions, and the best models
+      reach only 68% at 500 instructions.
+    quote: 'even the best frontier models only achieve 68% accuracy at the max density of 500 instructions.'
+  - title: 'When Instructions Multiply: Measuring and Estimating LLM Capabilities of Multiple Instructions Following (ManyIFEval / StyleMBPP, arXiv 2509.21051)'
+    url: https://arxiv.org/abs/2509.21051
+    finding: |
+      Ten LLMs were tested with several simultaneous verifiable instructions, on text (ManyIFEval) and
+      on code (StyleMBPP). Every model got steadily worse as instructions were added. A logistic
+      regression on instruction count predicts the drop, even for unseen combinations of
+      instructions.
+    quote: 'performance consistently degrades as the number of instructions increases.'
+  - title: 'AGENTIF: Benchmarking Instruction Following of Large Language Models in Agentic Scenarios (arXiv 2505.16944)'
+    url: https://arxiv.org/abs/2505.16944
+    finding: |
+      707 instructions from 50 real agentic applications, averaging 1,723 words and 11.9 constraints
+      each. Current models perform poorly, especially on complex constraint structures and tool
+      specifications.
+    quote: 'We observe that current models generally perform poorly, especially in handling complex constraint structures'
+  - title: 'Context Rot: How Increasing Input Tokens Impacts LLM Performance (Chroma, 2025-07-14)'
+    url: https://www.trychroma.com/research/context-rot
+    finding: |
+      18 models, with tasks kept simple so that only input length varied. Performance became less
+      reliable as inputs grew. This bears on long agent sessions in which a skill loaded early
+      competes with growing context.
+    quote: 'model performance degrades as input length increases.'
+  - title: 'Improving skill-creator: Test, measure, and refine Agent Skills (Anthropic, 2026-03-03)'
+    url: https://claude.com/blog/improving-skill-creator-test-measure-and-refine-agent-skills
+    finding: |
+      Tuning skill descriptions against should-trigger and should-not-trigger prompts improved
+      triggering on 5 of 6 public document skills. The post separates "capability uplift" skills
+      from "encoded preference" skills. Our fuzzy-rule skills are the latter.
+    quote: 'We ran it across our document-creation skills and saw improved triggering on 5 out of 6 public skills.'
+  - title: 'writing-skills SKILL.md, Match the Form to the Failure (obra/superpowers; informal, unpublished data)'
+    url: https://github.com/obra/superpowers/blob/main/skills/writing-skills/SKILL.md
+    finding: |
+      In the author's head-to-head wording tests on output-shaping guidance, a prohibition ("don't
+      X") produced more of the unwanted content than a positive recipe, and trended worse than no
+      guidance at all. Adding one nuance clause made a winning recipe noisy. The data is not
+      published, so treat this as a practitioner report.
+    quote: 'the prohibition arm produced clearly more of the unwanted content than the recipe arm (fully separated distributions), and trended worse than even the no-guidance control'
+
+writing_a_fair_skill:
+  - point: |
+      Install it the documented way so a reviewer cannot say it never loaded. Put it at
+      `.claude/skills/<rule-name>/SKILL.md`, with `---` on line 1 and spec-valid frontmatter (a
+      kebab-case `name` matching the folder, plus a `description`). Check that it parses with
+      `claude plugin validate .claude/skills`. Run `claude -p` without `--bare`, with the default
+      setting sources, and pin the Claude Code version.
+    source: https://code.claude.com/docs/en/headless
+  - point: |
+      Write the description as when-to-use triggers, not a summary of the rule. Put the key use case
+      first, use the words the task prompts actually contain (for example "commit", "job advert",
+      "privacy notice", "retry"), write in the third person, keep it well under 1,024 characters,
+      and make it slightly pushy ("Use whenever you write or edit X, even if the request doesn't
+      mention Y").
+    source: https://agentskills.io/skill-creation/optimizing-descriptions
+  - point: |
+      Measure and report whether the skill was invoked in every arm-2 run, by looking for a `Skill`
+      tool_use in stream-json. Pre-register what happens when it is not. Agents undertrigger, and
+      plain tasks may not trigger a skill at all; Vercel saw no invocation in 56% of cases. Consider
+      a second arm-2 variant in which a one-line CLAUDE.md pointer or a `/rule-name` prefix forces
+      the load, so the skill is judged on its content and not only on its discovery.
+    source: https://vercel.com/blog/agents-md-outperforms-skills-in-our-agent-evals
+  - point: |
+      Keep it compact and focused: one rule family per skill, roughly 40-150 lines, far under the
+      500-line / 5,000-token ceiling, and with at most a couple of supporting files. Compact skills
+      beat detailed ones, and skills of three modules or fewer beat exhaustive bundles.
+    source: https://arxiv.org/abs/2602.12670
+  - point: |
+      Put the most important rule at the top and word it as a standing instruction for the whole
+      task, for example "before every commit, check the diff against...". The skill is not re-read,
+      and after compaction only the first 5,000 tokens survive. Use headers and bullets, not dense
+      prose.
+    source: https://code.claude.com/docs/en/skills
+  - point: |
+      Explain why each rule exists rather than stacking ALL-CAPS MUSTs. Anthropic calls rigid
+      ALWAYS/NEVER a "yellow flag", and the Claude Code docs say piled-on emphasis "mostly makes
+      Claude over-apply the rule".
+    source: https://github.com/anthropics/skills/blob/main/skills/skill-creator/SKILL.md
+  - point: |
+      Include one or two concrete good/bad examples per rule, plus a short "gotchas" list of the
+      specific mistakes the agent makes without the skill. Agents pattern-match concrete examples
+      better than prose descriptions, and code examples beat explanation in agent files.
+    source: https://agentskills.io/skill-creation/best-practices
+  - point: |
+      Match the wording to the failure. Use a prohibition plus a rationalisation table and red flags
+      for rules the agent knows but skips under pressure, as in the superpowers TDD skill. Use a
+      positive recipe or template for rules about the shape of the output. State exceptions as
+      conditionals on observable facts, never as "unless it matters" clauses.
+    source: https://github.com/obra/superpowers/blob/main/skills/writing-skills/SKILL.md
+  - point: |
+      Add a self-check loop that is the skill-arm counterpart of the gate: before committing, review
+      the staged diff against the rule checklist, fix any violation and re-check. Validation loops
+      are documented best practice, and leaving one out would weaken arm 2 unfairly.
+    source: https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices
+  - point: |
+      Build it from real public material rather than from scratch, and avoid padding. For example,
+      adapt the claims rules from copywriting and brand-review, the reliability rules from
+      release-it, and the review rules from receiving-code-review. Cut generic advice the model
+      already follows ("Would the agent get this wrong without this instruction?"). Leave out
+      embedded hooks such as taste-skill's Stop gate, which would turn arm 2 into a gate arm. Do not
+      use LLM-generated skills, which scored below the no-skill baseline.
+    source: https://agentskills.io/skill-creation/best-practices
