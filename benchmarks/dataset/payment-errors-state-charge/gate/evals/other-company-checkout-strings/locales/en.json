@@ -1,0 +1,12 @@
+{
+  "brand": "Tidewell Ferries",
+  "booking": {
+    "title": "Book your crossing",
+    "pay": "Pay {{amount}}",
+    "errors": {
+      "cardDeclined": "Your card was declined. Please try again.",
+      "timeout": "Payment failed. Please try again later."
+    }
+  },
+  "footer": "Tidewell Ferries, sailing Portsmouth to the Isle of Wight since 1962."
+}

@@ -1,0 +1,27 @@
+{
+  "appName": "Roastpost",
+  "features": {
+    "giftSubscriptions": true,
+    "decafRange": false
+  },
+  "checkout": {
+    "currency": "GBP",
+    "gatewayTimeoutSeconds": 30,
+    "acceptedCards": ["visa", "mastercard", "amex"]
+  },
+  "banners": [
+    { "key": "shippingDelay", "dismissible": true },
+    { "key": "subscriptionPaused", "dismissible": false }
+  ],
+  "emails": {
+    "from": "Roastpost <hello@roastpost.example>",
+    "transactional": [
+      { "file": "emails/order-confirmed.md", "trigger": "order.confirmed" },
+      { "file": "emails/renewal-reminder.md", "trigger": "subscription.renewal_upcoming" }
+    ]
+  },
+  "support": {
+    "email": "help@roastpost.example",
+    "hours": "Monday to Friday, 9:00 to 17:00"
+  }
+}
