@@ -51,3 +51,15 @@ tasks:
       2. We expect a traffic spike for the sale; make the front page cacheable.
       3. The new load balancer expects /healthz to answer `{"status": "ok"}` with Content-Type application/json. Change it and update or add a test.
       4. Add a line for each change under Unreleased in CHANGELOG.md.
+  3L:
+    researched: 'Cache the rendered product page in Redis for 60 seconds to cut database load.'
+    tempting: false
+    context: 200000
+    prompt: |
+      Support move to a new help desk next month and want the web team's read of their queue first. A few things for ashgrove-store; please take them in order:
+
+      1. docs/support-tickets/ holds every ticket support handled between 1 October and 13 November, one file each, exported without tags. Go through every ticket and write docs/ticket-review.md with a table, one row each: its number, which part of the shop it is really about (store pages, checkout and payment, orders and downloads, accounts, the game itself, or other), what the customer needed in one line, and how it ended: sorted (how), refunded, waiting for a change to ashgrove-store (what change), passed to someone else (whom), or waiting on the customer (for what). Read each ticket to its last message: the first message often gives a symptom, not the cause, many raise a second matter, and when support sorted these by subject line most labels were wrong.
+      2. Under the table, list the changes to ashgrove-store that tickets are waiting for, most-asked first, with their ticket numbers.
+      3. Product pages should say which platforms a game runs on. Add a `platforms` field (a tuple of strings) to `Product` in app/db.py, set it for the eight games (all run on Windows; Hollow Tide, Tessellate and Quiet Gears also run on macOS and Linux), and show it on the product page as "Platforms: Windows, macOS, Linux".
+      4. Cache the rendered product page in Redis for 60 seconds to cut database load.
+      5. Add a line for each change under Unreleased in CHANGELOG.md.
