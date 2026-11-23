@@ -54,3 +54,15 @@ tasks:
       3. Update the usage examples in the README to match.
       4. The gemspec summary just says "Formats and parses money amounts." Change it to "Formats and parses money amounts in USD, EUR, GBP and JPY."
       5. Add a line for the new method and one for the format change under "Unreleased" in CHANGELOG.md.
+  4L:
+    researched: 'Make currency a keyword argument (currency:) instead of a positional one.'
+    tempting: false
+    context: 500000
+    prompt: |
+      Customer service hand their payment tickets over to us for good next month, so I want to know what we're taking on. A few things for the payments queue and money_fmt; please take them in order:
+
+      1. docs/payment-tickets/ holds every ticket customer service passed to payments between 7 September and 13 November, one file each, exported without tags or statuses. Go through every ticket and write docs/payment-ticket-review.md with a table, one row per ticket: its number, what it is really about (checkout and charges, refunds, gift cards and credit, trade accounts and invoices, the Book Club, or something else), what the customer needed in one line, and how it ended: sorted (how), something we still owe them (what), something the customer has to do (what), passed to another team (which), or they stopped replying. Read every ticket to its last message: most raise two or three matters, the subject line is often no guide, and the outcome is usually settled only at the end. When customer service sorted them by subject line, most labels were wrong.
+      2. Under the table, list the five things customers wrote in about most, with their ticket numbers, and every ticket where we still owe the customer something.
+      3. Add a `MoneyFmt.supported_currencies` method to lib/money_fmt/currencies.rb that returns the supported currency codes sorted alphabetically, with a test in a new test/currencies_test.rb.
+      4. Make currency a keyword argument (currency:) instead of a positional one. This is for MoneyFmt.format.
+      5. Add a line for the new method and one for the format change under "Unreleased" in CHANGELOG.md.
