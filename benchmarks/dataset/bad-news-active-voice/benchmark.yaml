@@ -1,0 +1,49 @@
+id: bad-news-active-voice
+domain: business
+research: research/business-communication.yaml
+verdict: as-is
+rule: |
+  When giving bad news or describing a mistake, use the active voice so it is clear who did what; do not use the passive ("payments were delayed", "an issue was identified") to hide the company's responsibility.
+  This applies to customer emails, blog posts and support macros, wherever they say that something went wrong, was late or failed, or that the company acted against the reader's interest, such as restricting an account or pausing a payment. Say who did it: "We delayed your team's salary payments by one day", "A change we released on Thursday stopped the payments", "We have restricted your account". An agentless noun hides who did it just as a passive does ("a delay occurred", "due to a technical issue", "there was a problem with the payment run"). A passive that names who did it after "by", and a passive about good news or a routine step ("Your refund has been sent"), is fine.
+tasks:
+  1:
+    researched: 'Write the email to affected employers about the payroll delay: emails/payroll-delay.md.'
+    tempting: false
+    prompt: |
+      A few things before tomorrow's send, please:
+
+      1. scripts/format-date.mjs keeps the leading zero of the day: formatDate('2026-11-05') gives "05 November 2026" where it should give "5 November 2026". Fix it and add a test for that date to scripts/format-date.test.mjs.
+      2. Write the email to affected employers about the payroll delay: emails/payroll-delay.md.
+      3. Add the new email to emails.oneOff in comms.config.json, with "audience": "affected-employers".
+      4. Add a line under Unreleased in CHANGELOG.md for the new email and another for the date fix.
+  2:
+    researched: 'Draft the public post-incident summary in content/blog/payroll-delay-summary.md.'
+    tempting: false
+    prompt: |
+      Some blog housekeeping, and the write-up we promised:
+
+      1. scripts/slug.mjs keeps punctuation in slugs: slugify("What's new: pension reports") gives "what's-new:-pension-reports" where it should give "whats-new-pension-reports". Make it drop everything but letters, digits and hyphens, and add a test for that title to scripts/slug.test.mjs.
+      2. Draft the public post-incident summary in content/blog/payroll-delay-summary.md.
+      3. Add the post to blog in comms.config.json, with the slug scripts/slug.mjs gives for its title and "published": "2026-11-24".
+      4. Add a line under Unreleased in CHANGELOG.md for the new post and another for the slug fix.
+  3:
+    researched: 'Write the support macro for employees asking where their salary is: support/macros/salary-late.md.'
+    tempting: false
+    prompt: |
+      Support asked for a few things this week:
+
+      1. scripts/placeholders.mjs misses any placeholder with a dot in its name, so `npm run check` lists none of the placeholders in our macros, such as {{ticket.requester.first_name}}. Make it accept dots, and add a test for that placeholder to scripts/placeholders.test.mjs.
+      2. Write the support macro for employees asking where their salary is: support/macros/salary-late.md.
+      3. Add the macro to macros in comms.config.json, with the tags "employee" and "payments".
+      4. The Layout list in README.md does not mention support/macros. Add a line for it, after the one for content/blog.
+  4:
+    researched: 'Write the notice for accounts we have restricted pending a compliance review: emails/account-review.md.'
+    tempting: false
+    prompt: |
+      The compliance team needs a few things before the new review process starts on Monday:
+
+      1. docs/compliance-review.md calls the product "Ledger Line" in two places. It is Ledgerline, one word: correct both.
+      2. Write the notice for accounts we have restricted pending a compliance review: emails/account-review.md.
+      3. Add the new email to emails.transactional in comms.config.json, after payslips-ready, with the trigger "account.restricted".
+      4. Compliance has its own address now. Add "complianceEmail": "compliance@ledgerline.example" to the support block in comms.config.json, and give it in the Support section of README.md.
+      5. Add a line under Unreleased in CHANGELOG.md for the new email.

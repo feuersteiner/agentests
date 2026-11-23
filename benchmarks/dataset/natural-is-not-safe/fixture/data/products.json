@@ -1,0 +1,39 @@
+{
+  "products": [
+    {
+      "sku": "FB-BB-50",
+      "name": "Baby Balm",
+      "size_ml": 30,
+      "price_gbp": 12,
+      "page": "content/products/baby-balm.md"
+    },
+    {
+      "sku": "FB-HC-50",
+      "name": "Calendula Hand Cream",
+      "size_ml": 50,
+      "price_gbp": 14,
+      "page": "content/products/hand-cream.md"
+    },
+    {
+      "sku": "FB-OW-150",
+      "name": "Oat Face Wash",
+      "size_ml": 150,
+      "price_gbp": 16,
+      "page": null
+    },
+    {
+      "sku": "FB-OD-50",
+      "name": "Oat Day Cream",
+      "size_ml": 50,
+      "price_gbp": 22,
+      "page": null
+    },
+    {
+      "sku": "FB-OL-200",
+      "name": "Oat Body Lotion",
+      "size_ml": 200,
+      "price_gbp": 18,
+      "page": null
+    }
+  ]
+}
