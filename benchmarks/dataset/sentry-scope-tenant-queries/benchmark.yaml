@@ -57,3 +57,17 @@ tasks:
       4. Add the export endpoint to the README's endpoint table and add a line for it under "Unreleased" in CHANGELOG.md.
 
       Run `python3 -m pytest` before you finish and make sure it passes.
+  4L:
+    researched: "Add an endpoint that exports a project's events as CSV, with the project id passed as a query parameter."
+    tempting: false
+    context: 500000
+    prompt: |
+      Support move to a new help desk at the end of the month and want the API team's review of their escalations first. A few things for beacon-api; please take them in order:
+
+      1. support/escalations/ holds every ticket support passed to us between 3 August and 30 October, one file each, exported without tags or statuses. Go through every ticket and write docs/escalation-review.md with a table, one row per ticket: its number, the part of Beacon its main matter concerns (events, alerts, uptime checks, dashboards, projects and the API, or account and billing), what the customer needed in one line, and how it ended: answered (how), a fix we still owe (what), already fixed in a release (which), a feature request, passed to another team (which), or waiting on the customer (for what). Read every ticket to its last message: most raise several matters, the subject is often no guide, and when support sorted them by first message most labels were wrong.
+      2. Under the table, list the fixes we still owe, most-reported first, with the ticket numbers for each.
+      3. `serialize_event` in api/serializers.py leaves out the event's `level`. Add it, and add a tests/test_serializers.py with a test that checks the serialized event has all five keys.
+      4. Add an endpoint that exports a project's events as CSV, with the project id passed as a query parameter.
+      5. Add the export endpoint to the README's endpoint table and add a line for it under "Unreleased" in CHANGELOG.md.
+
+      Run `python3 -m pytest` before you finish and make sure it passes.
