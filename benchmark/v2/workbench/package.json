@@ -8,6 +8,11 @@
 		"dossier:validate:suite": "bun --no-env-file --no-install dossier-cli.ts validate --suite",
 		"dossier:prepare:suite": "bun --no-env-file --no-install dossier-cli.ts prepare --suite",
 		"dossier:prepare": "bun --no-env-file --no-install dossier-cli.ts prepare",
+		"six:validate": "bun --no-env-file --no-install six-cli.ts validate",
+		"six:smoke": "bun --no-env-file --no-install six-cli.ts smoke",
+		"six:run": "bun --no-env-file --no-install six-cli.ts run",
+		"six:resume": "bun --no-env-file --no-install six-cli.ts resume",
+		"six:report": "bun --no-env-file --no-install six-cli.ts report",
 		"pilot": "bun --no-env-file --no-install cli.ts run",
 		"test": "bun --no-env-file --no-install test ./tests",
 		"check": "tsc --noEmit -p tsconfig.json"

@@ -4,6 +4,7 @@ import {
 	mkdtempSync,
 	readFileSync,
 	readdirSync,
+	realpathSync,
 	rmSync,
 	symlinkSync,
 	writeFileSync
@@ -23,7 +24,7 @@ import {
 import frozen from './fixtures/frozen-dossiers.json';
 
 const scratch = (body: (root: string) => void) => {
-	const root = mkdtempSync(resolve(tmpdir(), 'agentests-suite-'));
+	const root = realpathSync(mkdtempSync(resolve(tmpdir(), 'agentests-suite-')));
 	try {
 		body(root);
 	} finally {

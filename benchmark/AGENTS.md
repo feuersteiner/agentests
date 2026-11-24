@@ -10,8 +10,9 @@ Normal clones/checks never initialize it. Never upload evidence to a public remo
 
 `v1` is the historical skill-versus-commit-gate experiment, previously called
 `benchmark-v2`. `v2` contains the frozen original five-case evaluator pilot and a
-separate ten-situation complex support suite with offline preparation only. Execution history
-and measured evidence remain private.
+separate ten-situation complex support suite and six-arm agent study. Execution
+history and measured evidence remain private; core keeps its binary runtime
+contract.
 
 ## Layout
 
@@ -50,11 +51,14 @@ and measured evidence remain private.
 - v1: `bun --no-env-file run --cwd benchmark/v1/workbench check` and `test`.
   `benchmark:pick` is offline. `benchmark`, `benchmark:pilot` and `benchmark:prove`
   make paid calls; their help does not. Fixture hydration stays explicit.
-- v2: `bun --no-env-file run --cwd benchmark/v2/workbench check`, `test` and
-  `validate`, plus `dossier:validate` and `dossier:validate:suite`. Preserve the original five pilot cases,
-  packets and harness. Keep the additional suite separate and its provisional
-  reviewer expectations outside evaluator inputs. Dossier preparation is not
-  graded evaluation execution and never authorizes live inference.
+- v2: run workbench `check`, `test`, `validate`, `dossier:validate`,
+  `dossier:validate:suite`, and `six:validate`, plus six-arm CLI help. Six-arm
+  smoke, run and resume make paid calls and require owner authorization; report
+  is offline. Preserve original pilot cases, packets and harness. Keep the
+  additional suite separate and reviewer expectations outside provider inputs.
+  Dossier preparation never authorizes inference. Exclude smoke invocations and
+  retain failures separately from quality judgments. Report missing usage/cost
+  as unavailable rather than zero.
 - The v1 agent loop requires Linux/root for `unshare --mount`, authenticated
   Claude Code, built `core/dist` and decision credentials. Offline checks work
   on macOS. Keys stay in the harness process, outside agent workspaces/transcripts.

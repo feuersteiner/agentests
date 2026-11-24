@@ -6,12 +6,10 @@ external replies and internal plans. The frozen [case 01](complex-support-01/REA
 and the separate [five-refund pilot](README.md) retain their original bytes and
 packet hashes. The refund records do not count toward this suite.
 
-A future complete assessment would request 300 dimensional assessments and fifty
-integrated judgments per model per repeat: six dimensions per candidate pair.
-Those are **ten independent situations**, not 300 independent cases. Repeats and
-alternative drafts do not increase the number of situations. All expectations
-remain **synthetic, provisional, and not human reviewed**. Independent agent
-review does not establish human labels or empirical evaluator validity.
+The five existing alternatives per situation are evaluator controls. The six-arm producer study generates new drafts; those outputs have
+no human labels. There are ten independent situations, regardless of the number
+of drafts or repeats. Expectations and model judgments are provisional, not
+human reviewed, and this development suite is not held out.
 
 ## Offline commands
 
@@ -31,7 +29,7 @@ bun --no-env-file --no-install benchmark/v2/workbench/dossier-cli.ts --help
 ```
 
 The existing `dossier:validate` and `dossier:prepare` commands still default to
-case 01. The CLI exposes only `validate` and `prepare`; no grading command exists.
+case 01. The dossier CLI exposes only `validate` and `prepare`.
 Validation writes nothing. Neither command loads environment files, imports
 provider clients, requests credentials or performs network calls. Research URL
 verification is separate from these offline checks.
@@ -92,16 +90,65 @@ brief factual paraphrases, zero quoted words, and authored fictional records.
 | [complex-support-09](complex-support-09/README.md) | Data residency commitment                   |        20 |         9,790 |        67,422 |          5 | [S01](https://support.atlassian.com/security-and-access-policies/docs/understand-data-residency/), [S02](https://support.atlassian.com/security-and-access-policies/docs/move-data-to-another-location/); [all sources](complex-support-09/sources.json)         |
 | [complex-support-10](complex-support-10/README.md) | Product retirement and migration            |        20 |         9,298 |        63,127 |          5 | [S01](https://devcenter.heroku.com/changelog-items/2461), [S02](https://help.heroku.com/RSBRUH58/removal-of-heroku-free-product-plans-faq); [all sources](complex-support-10/sources.json)                                                                       |
 
-## Capability boundary
+## Six-arm agent study
 
-**Graded evaluation is not implemented.** Core returns binary findings and
-passing probabilities/scores, including from `reason`; its criteria arrays use
-the maximum passing score and a cleared escalation stage skips later stages.
-Neither probabilities nor multiple binary assertions implement the structured
-ordinal assessment contract. A structured-output execution adapter is the next
-separately scoped technical decision, followed by human label review and any
-separately authorized empirical evaluation. No measured runs, producer calls,
-calibration, paid inference or core rewrite are part of this fixture suite.
+Each trial starts from the same initial task, all 20 ordered records and all
+standing rubric criteria for its situation. Every producer is `gpt-6.1-terra`.
+The six arms are:
+
+| Arm                 | Generic method skill | Automatic agentests gate |
+| ------------------- | -------------------- | ------------------------ |
+| `prompt`            | No                   | None                     |
+| `prompt-skill`      | Yes                  | None                     |
+| `prompt-luna`       | No                   | Luna                     |
+| `prompt-jev`        | No                   | Jev                      |
+| `prompt-skill-luna` | Yes                  | Luna                     |
+| `prompt-skill-jev`  | Yes                  | Jev                      |
+
+The two ungated arms produce one submission. The four gated arms can submit up
+to three drafts, revising after feedback. Gates use the shipped core binary
+agentests runtime, with the pass-probability threshold set to 0.8. Feedback
+includes finding IDs, criteria and probabilities, while hiding the gate model
+identity. The gates use Luna and TypeSafe Jev respectively; core probabilities
+are never turned into ordinal grades.
+
+Ten situations, six arms and three repeats yield 180 producer trials. The
+maximum budget is 420 draft calls, 360 gate calls and 180 blind judge calls
+(960 logical calls); provider SDK retries, if any, are separate. The gate arms
+receive extra feedback and may make extra drafts, so comparisons confound the
+gate with additional compute and feedback. Gate acceptance is an operational
+outcome, separate from draft quality.
+
+The protocol sends the exact final draft from each trial to a `gpt-6.1-terra`
+blind judge, including final drafts the gate rejected. Failures and interrupted
+trials can leave drafts or judgments unavailable and must be reported. The judge sees the case and final
+draft, but no arm, skill, gate, repeat or transcript. This avoids selecting only
+accepted outputs for quality analysis. Generated outputs have no human labels;
+posthoc model judgments are provisional, and these ten development situations
+are not held out. Repeats are clustered within situations and cannot establish
+generalization or human-rated quality.
+
+### Commands
+
+See the workbench CLI help for exact options. Validation and reporting are
+offline. Reporting writes `report.json` and `report.md` in the ignored private
+run directory. Smoke, run and resume make paid calls and require authorization; smoke
+is separate from measured evidence. Supply `OPENAI_API_KEY` and
+`TYPESAFE_AI_API_KEY` in the process environment without committing credentials.
+All commands below run from the repository root:
+
+```sh
+bun --no-env-file run --cwd benchmark/v2/workbench six:validate
+bun --no-env-file --no-install benchmark/v2/workbench/six-cli.ts --help
+bun --no-env-file run --cwd benchmark/v2/workbench six:smoke --run-id six-smoke
+bun --no-env-file run --cwd benchmark/v2/workbench six:run --run-id six-study
+bun --no-env-file run --cwd benchmark/v2/workbench six:resume --run-id six-study
+bun --no-env-file run --cwd benchmark/v2/workbench six:report --run-id six-study
+```
+
+The original alternatives are not new producer outputs. Earlier Luna/Sol smoke
+invocations are excluded from measured evidence. Frozen fixtures and reviewer
+controls must not be changed or included in producer or judge inputs.
 
 Measured evidence and construction history follow the
 [private evidence policy](../../evidence/EVIDENCE.md), outside public fixtures.
