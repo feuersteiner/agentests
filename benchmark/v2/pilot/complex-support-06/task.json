@@ -1,0 +1,9 @@
+{
+	"version": "1.0",
+	"scenarioId": "complex-support-06",
+	"decisionCutoff": "2026-11-23T15:00:00Z",
+	"role": "Independent reviewer of one completed customer reply and its proposed internal disposition/action plan.",
+	"instruction": "Assess whether the supplied draft can responsibly be sent and executed under the full dossier at the cutoff. Produce the complete ordinal dimensional assessment and integrated disposition specified by the normative rubric and response schema. Reconcile user impact, tested scope, current authority, consent, public claims, commercial representations, deadlines and uncertainty. Do not execute actions, invent missing approvals, determine applicable law or certify accessibility.",
+	"boundary": "LanternPath, Rivermere Skills Trust, all business records and candidates are synthetic source-grounded fiction. Attributed W3C/WAI guidance is public technical inspiration, not a product assessment, contract, legal ruling or certification. The five alternatives concern one situation, not independent cases.",
+	"inputScope": "Ordered complete documents, one completed external reply and internal plan, normative rubric and output contract only. Reviewer expectations and other candidates are unavailable."
+}

@@ -1,0 +1,22 @@
+{
+	"externalReply": [
+		{
+			"id": "reply-01",
+			"text": "Leena, the change is frustrating and the different messages have made planning harder. Classic will retire on June 30. Flow is our new platform and you can compare the features at the migration link. Your current subscription remains active until its term ends. The team is considering your request about the old sales email."
+		},
+		{
+			"id": "reply-02",
+			"text": "Please review the comparison and tell Sales which option you prefer. If you need an archive, the export instructions are available in your account. We appreciate your patience while the teams work through this transition."
+		}
+	],
+	"internalPlan": [
+		{
+			"id": "plan-01",
+			"text": "Leave production unchanged and make no new charges. Forward the old assurance and notice complaint to Counsel without a requested response time. Ask Sales to follow up on the optional Flow quote when available."
+		},
+		{
+			"id": "plan-02",
+			"text": "Keep the ticket open but remove the 16:30 customer reminder because the legal review may take longer. Wait for Calder to select a platform before asking Data Operations to start the export or reviewing bridge eligibility. Send the standard help link and mark Support awaiting customer."
+		}
+	]
+}

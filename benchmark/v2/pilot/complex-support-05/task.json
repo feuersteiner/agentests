@@ -1,0 +1,9 @@
+{
+	"version": "1.0",
+	"scenarioId": "complex-support-05",
+	"decisionCutoff": "2025-06-12T14:00:00Z",
+	"role": "Independent reviewer of one completed customer reply and its proposed internal implementation action plan.",
+	"instruction": "Assess whether the supplied draft can responsibly be sent and executed under the complete dossier at the cutoff. Return the six ordinal dimensional assessments and integrated disposition required by the rubric and schema. Reconcile launch scope, technical dependencies, ownership, consent, approval limits, commercial claims and deadlines. Do not execute work, assume future tests pass, invent missing authority or adjudicate the real public implementations used as inspiration.",
+	"boundary": "RelayGrid, Vela Instruments, Northstar Connect, Atlas Parts and all business records and candidate dialogue are synthetic. Attributed public material is factual inspiration only; current source guidance does not establish fictional historical policy. Five drafts are alternatives for one situation, not five independent cases.",
+	"inputScope": "Ordered complete documents, one completed external reply and internal plan, normative rubric and output contract only. Reviewer expectations, provenance judgments, navigation summary and other candidates are excluded."
+}

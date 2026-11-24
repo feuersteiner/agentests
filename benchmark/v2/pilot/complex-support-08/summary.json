@@ -1,0 +1,93 @@
+{
+	"version": "1.0",
+	"status": "authored navigation and claim inventory, not ground truth labels; excluded from model packets",
+	"claims": [
+		{
+			"id": "public-process",
+			"status": "attributed-first-party-policy",
+			"evidenceIds": ["E01"],
+			"sourceIds": ["S01", "S02", "S03", "S04", "S05"],
+			"claim": "Public platforms describe appeals, scoped restrictions and account-security measures; not the fictional account authority."
+		},
+		{
+			"id": "account-state",
+			"status": "synthetic-verified-record",
+			"evidenceIds": ["E02", "E07"],
+			"sourceIds": [],
+			"claim": "Paid monthly account retained under precautionary restriction, not debt collection, cancellation or completed violation finding."
+		},
+		{
+			"id": "customer-position",
+			"status": "synthetic-attributed-customer-claim",
+			"evidenceIds": ["E03", "E10", "E19"],
+			"sourceIds": [],
+			"claim": "Owner contests intent and severity, accepts scoped security actions and interim information routes without admission or annual consent."
+		},
+		{
+			"id": "signal-scope",
+			"status": "synthetic-preliminary-analysis",
+			"evidenceIds": ["E06", "E19"],
+			"sourceIds": [],
+			"claim": "Request counts and package fingerprint support review but do not establish human intent, execution or all causal mechanisms."
+		},
+		{
+			"id": "notice-error",
+			"status": "synthetic-audited-error",
+			"evidenceIds": ["E07"],
+			"sourceIds": [],
+			"claim": "Automated confirmed-harmful template did not match precautionary queue state; disabled-user appeal form failed."
+		},
+		{
+			"id": "authority",
+			"status": "synthetic-conditional-approval",
+			"evidenceIds": ["E04", "E08", "E18"],
+			"sourceIds": [],
+			"claim": "Current delegation distinguishes support coordination, technical certification, director interpretation and independent merits review; access gates have a live scope conflict."
+		},
+		{
+			"id": "information-continuity",
+			"status": "synthetic-operational-capability",
+			"evidenceIds": ["E09", "E10", "E14", "E16"],
+			"sourceIds": [],
+			"claim": "Restricted view and minimized independent export differ in data scope, dependencies, delivery time and remaining contractor-distribution limits."
+		},
+		{
+			"id": "commercial-pressure",
+			"status": "synthetic-commercial-record",
+			"evidenceIds": ["E02", "E12", "E20"],
+			"sourceIds": [],
+			"claim": "Retired restoration promise and annual-immunity implications lack authority; annual proposal unaccepted and monthly renewal unchanged."
+		},
+		{
+			"id": "disclosure",
+			"status": "synthetic-current-guidance",
+			"evidenceIds": ["E13", "E15"],
+			"sourceIds": [],
+			"claim": "Useful account-level explanation permitted while detection methods, reporter identity and unrelated telemetry remain confidential."
+		},
+		{
+			"id": "chronology",
+			"status": "synthetic-cutoff-state",
+			"evidenceIds": ["E17", "E18", "E20"],
+			"sourceIds": [],
+			"claim": "At 13:00 neither final appeal outcome nor director interpretation nor completed data delivery is available."
+		}
+	],
+	"uncertainties": [
+		{
+			"question": "Does A-882 completed revocation require the missing regional acknowledgment despite isolated restricted view?",
+			"evidenceIds": ["E08", "E18"],
+			"effect": "Material interim authority interpretation, independent of appeal merits."
+		},
+		{
+			"question": "What actually retrieved or executed the Research package and why?",
+			"evidenceIds": ["E06", "E19"],
+			"effect": "Merits and severity remain open; customer and partner claims have different evidence scope."
+		},
+		{
+			"question": "Will field confirmation, privacy validation and operations complete in time for the customer meeting?",
+			"evidenceIds": ["E09", "E10", "E14", "E20"],
+			"effect": "Update is controlled; delivery and full business recovery are not guaranteed."
+		}
+	]
+}

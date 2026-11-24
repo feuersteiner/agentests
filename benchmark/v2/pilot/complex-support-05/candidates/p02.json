@@ -1,0 +1,42 @@
+{
+	"externalReply": [
+		{
+			"id": "reply-01",
+			"text": "Sera, the joined order-to-invoice implementation is not ready for a full June 16 cutover. RelayGrid reproduced a retry defect that can duplicate a warehouse reservation, and the broader tests remain incomplete. Alec's launch-ready wording went beyond that evidence; the team should have made the distinction clear. Mira Chen owns this response and will send a written status by 16:30 UTC today for your board briefing, even if testing remains open."
+		},
+		{
+			"id": "reply-02",
+			"text": "The proposed next step is a small supervised pilot to learn safely while keeping the legacy feed primary, if you choose it and the approval and test gates pass. It would cover one warehouse and no more than twenty orders daily, with automatic retry and invoice release off, a Vela operator checking each reservation and reconciliation every two hours. That volume does not cover Atlas's workload or demonstrate the full contracted workflow. No commercial pilot is authorized yet, and no production routing will change on this message."
+		},
+		{
+			"id": "reply-03",
+			"text": "Today's 15:00 session will assign the mapping, connector and invoicing work and settle the exact pilot mode and required signatures. RelayGrid owns the retry correction and coordination; Northstar owns its mapping and adapter, and Vela confirms business quantities and access. The late data file does not establish that Vela caused the whole delay. The next evidence review is June 13 at 10:00, followed by a delivery decision at 11:00. Those are decision times, not guaranteed readiness."
+		},
+		{
+			"id": "reply-04",
+			"text": "The final $20,000 milestone remains unissued and blocked pending full acceptance. No new support purchase is required for contracted correction or the sixty approved RelayGrid engineering hours. Premier Care would not guarantee this launch or partner staffing. If you choose the legacy extension, RelayGrid has approved reimbursement of verified cost up to $12,000; the existing quote is $9,600 for June 16–25 and needs your instruction before June 13 noon. Payment has not been made and normal finance processing follows your choice and verification."
+		},
+		{
+			"id": "reply-05",
+			"text": "The Atlas notice deadline is June 13 at 16:00 and its June 16 requirement remains at risk; only Atlas can waive it. The team can supply accurate supplier facts for your notice. Please confirm whether to develop the pilot proposal and who can operate it; the team already has the order, quote and test references. You retain the choice to keep the new route inactive and request a wider commercial review. No scope change or acceptance will be inferred."
+		}
+	],
+	"internalPlan": [
+		{
+			"id": "plan-01",
+			"text": "Mira chairs the 15:00 session and retains H-218. Jules tests C-19 with M9 after Owen validates quantities; Pavel confirms partial shipment adapter availability. Record all results, including failures and the source-to-commit report before sandbox reset. Preserve existing evidence. Correct Alec's readiness statement and keep delay allocation open with the late-file/sandbox-outage overlap recorded."
+		},
+		{
+			"id": "plan-02",
+			"text": "Prepare a written pilot scope only. Require Ivo's current evidence sign-off, Nia's signed R-218 operational exception and Sera's explicit consent before commercial execution; do not rely on the disputed single-signature delegation. Confirm production credential rotation after June 13 08:30. No launch start is promised. Limit one warehouse/twenty daily orders, disable retry and invoice release, name Dana as stop owner and confirm operator staffing."
+		},
+		{
+			"id": "plan-03",
+			"text": "Before any pilot, divert selected references from legacy to prevent double sending, reconcile a reservation before release and check every two hours. On a duplicate, quantity mismatch, missing trace or missed reconciliation window, stop new intake, preserve evidence and reconcile committed work with Dana before any replay. Report the stop; do not promise instant inventory rollback. Keep the full acceptance register and milestone block separate from pilot learning."
+		},
+		{
+			"id": "plan-04",
+			"text": "By 16:00 obtain named actions and evidence times, then send actual status by 16:30 regardless of outcome. If owners miss the session or a prerequisite fails, escalate to Nia and retain legacy primary. At June 13 10:00 review actual test gates; Nia decides next scope at 11:00. Ask Sera about the legacy quote in time for noon procurement, route verified reimbursement to Amira, and support Sera's Atlas risk notice without contacting Atlas directly. No extra purchase, release or acceptance condition. Ren receives real states if Mira is unavailable."
+		}
+	]
+}

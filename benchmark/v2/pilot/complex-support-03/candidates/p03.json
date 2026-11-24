@@ -1,0 +1,30 @@
+{
+	"externalReply": [
+		{
+			"id": "reply-01",
+			"text": "Sera, the team understands the urgency and regrets the disruption. Recovery is being investigated by engineering. There is no confirmed date for a final report, and it would be premature to say your records are permanently lost."
+		},
+		{
+			"id": "reply-02",
+			"text": "Please send all your project exports, the complete approval history, supplier evidence and a description of the deadline so the departments can assess the case. Once the full technical report is available, support can discuss compensation and next steps. You may also wish to consider Recovery Assist for important future projects."
+		},
+		{
+			"id": "reply-03",
+			"text": "No annual order will be signed without your approval. Support will contact you when engineering has a definitive answer. Thank you for your patience."
+		}
+	],
+	"internalPlan": [
+		{
+			"id": "plan-01",
+			"text": "Forward the ticket to the engineering and finance queues. Keep existing data preservation and do not run a production restore or promise compensation. Leave the current annual opportunity lock in place."
+		},
+		{
+			"id": "plan-02",
+			"text": "Wait for a final root-cause report before drafting a detailed customer response. Ask the customer to resend the full export and deadline information in one attachment. Finance can decide any refund after the final report. No specific engineer appointment or update is booked because recovery remains uncertain."
+		},
+		{
+			"id": "plan-03",
+			"text": "Offer the optional future export feature when Sales reconnects. Keep the ticket open, but leave shift handoff to the normal queue process. Avoid committing to the board briefing because the technical team may not have new information."
+		}
+	]
+}

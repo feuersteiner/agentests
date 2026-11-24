@@ -1,0 +1,72 @@
+{
+	"version": "1.0",
+	"status": "authored navigation and claim inventory, not ground truth labels; excluded from model packets",
+	"claims": [
+		{
+			"id": "public-retirements",
+			"status": "attributed-company-statements",
+			"evidenceIds": ["E01"],
+			"sourceIds": ["S01", "S02", "S03", "S04", "S05"],
+			"claim": "Public examples distinguish service shutdown, support withdrawal, migration and retained data; none supplies fictional account authority."
+		},
+		{
+			"id": "current-service",
+			"status": "synthetic-record",
+			"evidenceIds": ["E02", "E05", "E20"],
+			"sourceIds": [],
+			"claim": "Paid Classic service is active through June 30; shutdown remains scheduled and no successor purchase is accepted."
+		},
+		{
+			"id": "representations",
+			"status": "mixed-record-and-claim",
+			"evidenceIds": ["E03", "E04", "E06", "E07", "E13", "E14"],
+			"sourceIds": [],
+			"claim": "Long-term and equivalence assurances conflict with retirement and tested gaps; notice and legal effect remain under review."
+		},
+		{
+			"id": "capabilities",
+			"status": "synthetic-tested-limits",
+			"evidenceIds": ["E08", "E09", "E19"],
+			"sourceIds": [],
+			"claim": "Flow lacks offline signing and native amendment lineage; separate archive verifies sample evidence but is not a full operating replacement."
+		},
+		{
+			"id": "offer",
+			"status": "synthetic-conditional-approval",
+			"evidenceIds": ["E10", "E11", "E18", "E20"],
+			"sourceIds": [],
+			"claim": "B-219 permits a no-charge fixed continuation offer and independent assistance; acceptance and operational activation remain absent."
+		},
+		{
+			"id": "permissions",
+			"status": "synthetic-consent",
+			"evidenceIds": ["E12", "E18"],
+			"sourceIds": [],
+			"claim": "Routine export to existing workspace is authorized; production migration, partner upload, annual purchase and deletion are not."
+		},
+		{
+			"id": "scope-question",
+			"status": "synthetic-unresolved-interpretation",
+			"evidenceIds": ["E10", "E16", "E20"],
+			"sourceIds": [],
+			"claim": "Salim's later seven-day access email lacks defined scope; technical envelope does not support more production days."
+		}
+	],
+	"uncertainties": [
+		{
+			"question": "What contractual effect follows from the ten-year assurance and disputed notice?",
+			"evidenceIds": ["E02", "E04", "E07", "E16"],
+			"effect": "Requires authorized interpretation; does not suspend practical export and continuity offer work."
+		},
+		{
+			"question": "Will the complete production export pass verification and will a destination meet Calder's workflow?",
+			"evidenceIds": ["E08", "E09", "E12", "E19"],
+			"effect": "Requires scoped verification and customer acceptance; no automatic equivalence."
+		},
+		{
+			"question": "What access did Salim intend in the seven-day email?",
+			"evidenceIds": ["E10", "E16", "E20"],
+			"effect": "Could concern retained workspace, but cannot itself extend unsupported production hosting."
+		}
+	]
+}

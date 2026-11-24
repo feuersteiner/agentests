@@ -1,0 +1,67 @@
+{
+	"version": "1.0",
+	"status": "authored navigation and claim inventory, not ground truth labels; excluded from model packets",
+	"claims": [
+		{
+			"id": "source-boundary",
+			"status": "attributed-current-policy",
+			"evidenceIds": ["E01"],
+			"sourceIds": ["S01", "S02", "S03", "S04"],
+			"claim": "Current primary-source policy paraphrases supply inspiration only; fictional authority is independent and the retrieval occurs after the fictional cutoff."
+		},
+		{
+			"id": "money",
+			"status": "synthetic-reconciled-ledger",
+			"evidenceIds": ["E02", "E07"],
+			"sourceIds": [],
+			"claim": "Buyer paid $4920; $4520 seller payable held, $280 fee, $120 outbound carrier cost; no submitted refund or payout at cutoff."
+		},
+		{
+			"id": "evidence",
+			"status": "conflicting-allegations-and-records",
+			"evidenceIds": ["E03", "E04", "E08", "E09", "E10"],
+			"sourceIds": [],
+			"claim": "Delivery, partial media, weight and network signals do not establish culprit or full contents continuity."
+		},
+		{
+			"id": "authority",
+			"status": "conditional-synthetic-approval",
+			"evidenceIds": ["E14", "E15", "E18"],
+			"sourceIds": [],
+			"claim": "PF-92 authorizes gross recipient payments $9440 with both owner acceptances and complete neutral custody; custody remains unfulfilled."
+		},
+		{
+			"id": "severability",
+			"status": "unresolved-policy-interpretation",
+			"evidenceIds": ["E05", "E16"],
+			"sourceIds": [],
+			"claim": "Single-price matched-kit order and disputed battery complicate the seller’s proposed $3000 release; Dev has not approved it."
+		},
+		{
+			"id": "continuity",
+			"status": "synthetic-operational-plan",
+			"evidenceIds": ["E11", "E17", "E20"],
+			"sourceIds": [],
+			"claim": "Collection is booked, inspection is future, existing order hold expires October21 08:00 unless extended; unrelated seller services continue."
+		},
+		{
+			"id": "consent-and-commercial",
+			"status": "synthetic-record",
+			"evidenceIds": ["E12", "E13", "E18", "E19"],
+			"sourceIds": [],
+			"claim": "Specific no-fault acquisition consent does not authorize annual billing, broad disclosure, silence conditions or public blame."
+		}
+	],
+	"uncertainties": [
+		{
+			"question": "What happened between workshop packing and buyer opening?",
+			"evidenceIds": ["E08", "E09", "E10"],
+			"effect": "Affects loss allocation and possible later investigation; no culprit established."
+		},
+		{
+			"question": "Does the bundled-kit clause allow a partial payable release?",
+			"evidenceIds": ["E05", "E16"],
+			"effect": "Requires Dev’s reasoned interpretation and adequate retained coverage; not an associate entitlement."
+		}
+	]
+}

@@ -1,0 +1,38 @@
+{
+	"externalReply": [
+		{
+			"id": "reply-01",
+			"text": "Sera, the missing approval history has put today's submission at risk, and the earlier two-hour assurance should not have been given. Flint Ledger accepts responsibility for the maintenance failure. Ellis Rowan will stay with your team through the board briefing and provide written status by 13:00 UTC."
+		},
+		{
+			"id": "reply-02",
+			"text": "The verified snapshot gives the team a sound basis to have Bridge Pack fully usable by 15:00 today. Your latest accepted changes will be included, and no approval work will need to be repeated. The team will use a controlled restore, preserve the evidence and confirm the live workspace before asking you to upload. The tender portal remains outside Flint Ledger's control."
+		},
+		{
+			"id": "reply-03",
+			"text": "The May $2,400 fee refund is authorized and will be submitted by 15:00 for today's processing window. The bank estimate is five to ten business days after acceptance. The $18,000 supplier request and $120,000 opportunity claim remain under separate review; neither requires an annual purchase or release. The annual opportunity is locked and your monthly subscription has not been canceled."
+		},
+		{
+			"id": "reply-04",
+			"text": "The account team will correct the previous loss-proof and recovery-time assurances. No annual signature is needed to receive recovery help. Owen will receive an account-specific recovery explanation through the secure portal; raw internal logs will remain protected. If the technical plan changes, Ellis will explain the impact at the next update."
+		}
+	],
+	"internalPlan": [
+		{
+			"id": "plan-01",
+			"text": "Ellis submits the authorized $2,400 refund before 15:00, with Dev checking the settled debit and tracking processor acceptance. Preserve the two larger claims and request a supplier allocation rather than rejecting them under the SLA. Confirm annual lock and send board status by 13:00."
+		},
+		{
+			"id": "plan-02",
+			"text": "Drina directs an in-place N-011 replacement of MW-B17 at 12:20, using the old REC-2.6 web-health checks to shorten release. Treat Sera's request to recover the project and Owen's read-only export permission as sufficient cutover consent. Keep the existing preservation copy but skip waiting for the full relation check because the tender deadline has priority."
+		},
+		{
+			"id": "plan-03",
+			"text": "Noor runs the current bulk replay script against all 74 receipts and reopens connectors at 14:30 to clear the queue. The original processing-order sort is adequate for a first pass; any incorrect withdrawals can be fixed after submission. Tell Meridian no approvals need repeating because API success responses are the source of truth. Aim for the 15:00 commitment without discussing the narrower database estimate."
+		},
+		{
+			"id": "plan-04",
+			"text": "Send minimized account-level incident details, not raw storage logs. Keep Dana assigned after 17:30. Once the workspace responds, mark the recovery complete while Finance continues the claim file. Milo can discuss the future export feature later if the customer asks."
+		}
+	]
+}

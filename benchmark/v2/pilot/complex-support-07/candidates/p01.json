@@ -1,0 +1,22 @@
+{
+	"externalReply": [
+		{
+			"id": "reply-01",
+			"text": "Jules, the situation sounds frustrating, especially with your shoot approaching. Your case is still being looked into and the seller has supplied information. The team cannot determine the result until the review is complete."
+		},
+		{
+			"id": "reply-02",
+			"text": "Please upload proof of the serial number, your unboxing clip and purchase receipt so the specialist team can investigate. The team will be in touch when there is an outcome. For now, keep the camera somewhere safe and do not close the case."
+		}
+	],
+	"internalPlan": [
+		{
+			"id": "plan-01",
+			"text": "Leave the case in the investigation queue and request the buyer attachments using the standard evidence macro. Trust can look at both accounts when capacity allows. Do not make another refund guarantee or accuse either party."
+		},
+		{
+			"id": "plan-02",
+			"text": "Do not submit a refund or seller payout without approval. The dispute flag currently excludes the payable, so no manual extension is planned. Wait for Trust to tell Support what to do about the pickup and seller message. Keep the support ticket open."
+		}
+	]
+}

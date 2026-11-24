@@ -1,0 +1,68 @@
+{
+	"files": {
+		"benchmark/v2/pilot/cases.json": "cf7e1ad95267522299a91921aee5291dae49be910643e2dd0542c0a0efd8f0c6",
+		"benchmark/v2/pilot/complex-support-01/README.md": "2d6bbce4b21b4c016cf606dc89a9791761c14c63f5160fdd8c0d275e5f8def2e",
+		"benchmark/v2/pilot/complex-support-01/candidates/p01.json": "44bb3de91bc69baff04ad0ca20c058b586baefeca3c053b60cdaa5b3bcfa7612",
+		"benchmark/v2/pilot/complex-support-01/candidates/p02.json": "4de57c7c1487fcbf8c924fcdd8f7cd6910d345461fe12a7e85faaac6cb43350b",
+		"benchmark/v2/pilot/complex-support-01/candidates/p03.json": "26f9d15a2d68ac2c9a550d410306cb87e16b75ec4f5bfc96c934e03e0e2cc984",
+		"benchmark/v2/pilot/complex-support-01/candidates/p04.json": "352508d9d8d66634149fafcaf436d9b897712f146f08663dd8933eb7a814ea60",
+		"benchmark/v2/pilot/complex-support-01/candidates/p05.json": "21dffca78370c4bdc8fe1c36a6817280bb481720a517c35ac21ce6df08093532",
+		"benchmark/v2/pilot/complex-support-01/documents/01-public-background.md": "65683949b1db6e690655e906546dc8889553898d0ba5fd9a2c2e4a5c2180306e",
+		"benchmark/v2/pilot/complex-support-01/documents/02-account-order.md": "c8d3e9d534d1019d55f3387a93aaad68c1438f56e708374d8c68038f5701698f",
+		"benchmark/v2/pilot/complex-support-01/documents/03-customer-thread.md": "79424601cf6a086300a25e46445aa0d41a8d53b963261e6b58b7b213286287d8",
+		"benchmark/v2/pilot/complex-support-01/documents/04-ledger.md": "289a714a725b80ba9b94118624916a1f9f934d2f30cf3e69be5665a6fb4c6e00",
+		"benchmark/v2/pilot/complex-support-01/documents/05-billing-policy.md": "8aa702b0a410630db0ff9c4085dcd99d446df98d1a828ce08ae588cc36cb6146",
+		"benchmark/v2/pilot/complex-support-01/documents/06-previous-procedure.md": "706d06b148a57de000b740984ec567f0282e3d1fffe4991492805e46b2ada636",
+		"benchmark/v2/pilot/complex-support-01/documents/07-authority-and-approval.md": "56d00d3c356382c22bdd10b77cfa5247a190ba4510232eb1361bc6b68cc6326a",
+		"benchmark/v2/pilot/complex-support-01/documents/08-security-review.md": "0abb852ed90a86b8dd005f38f40bc07db9ed30a32e7796877557a54285778ea3",
+		"benchmark/v2/pilot/complex-support-01/documents/09-mitigation-options.md": "99461012306ab3c1dae5f019d9f469b83804b7e1fcf074c1e138da8c3de85e6d",
+		"benchmark/v2/pilot/complex-support-01/documents/10-notification-audit.md": "0a73e4ca3999bb21a5e35b21f63154eb538ef8c688782a959d9f289c9fdc2ba7",
+		"benchmark/v2/pilot/complex-support-01/documents/11-sales-correspondence.md": "00c361d3388b90ef8a447aee08633b7b64f7adbb479d06e7ba5a951f41b8e7c9",
+		"benchmark/v2/pilot/complex-support-01/documents/12-renewal-and-options.md": "736caba8c75be85b14702498a8a5ff3b5276d332639335275e6082b57f1e3cca",
+		"benchmark/v2/pilot/complex-support-01/documents/13-brand-guidelines.md": "9df5142c10a1e4c799a9e7f9aa42ade8455ec430cd9e0697ef8fca56b739aec2",
+		"benchmark/v2/pilot/complex-support-01/documents/14-support-ownership.md": "ee74f0121f47b06e27c68b2ecf3cdf66e4c7ae46e83e04a9434306097e60cf11",
+		"benchmark/v2/pilot/complex-support-01/documents/15-cancellation-and-data.md": "5e70c31e3bf6e4467f7479f19b7333e04c80e2128bfdc035455ba95b396e4a95",
+		"benchmark/v2/pilot/complex-support-01/documents/16-legal-review-note.md": "4142d0d5306bdbc725f3fa223de4a15c833116a0401f97357decaf8a107b7e2b",
+		"benchmark/v2/pilot/complex-support-01/documents/17-incident-chronology.md": "da16c80b9d9e6ebc2992723fa570a3e7a79978558a53fdcaa075a6092f59a23c",
+		"benchmark/v2/pilot/complex-support-01/documents/18-attestation-and-client-impact.md": "9b3a1f22352c0c25b7e0efae68ddf24533826c11ec3f102dde219a2783d0a5f5",
+		"benchmark/v2/pilot/complex-support-01/documents/19-publishing-records.md": "557524a78a28c8ea189b855c95537a2f987ad2298cfc651fa67ce20efb62edcc",
+		"benchmark/v2/pilot/complex-support-01/documents/20-product-draft-and-handoff.md": "b2484f9e7a393118e2c3cfcbe7f9c8bd14e517889c52d9d5b790486388e0c4ea",
+		"benchmark/v2/pilot/complex-support-01/manifest.json": "7fb6adc9a251d01ef64ae0c200353954d1973771d61f618326a6593f8e78c4b1",
+		"benchmark/v2/pilot/complex-support-01/response.schema.json": "87c2886bc8ae2206daedadce247c683fdce90e7f35c69c80175d7a20c9bd1013",
+		"benchmark/v2/pilot/complex-support-01/reviewer/expectations.json": "8438baa84beb17d9602e319a4bf889beda3d9f1445151200ca960a7bcf177940",
+		"benchmark/v2/pilot/complex-support-01/rubric.json": "80ae5ca06dfa25e0cc2b1ebd3e5c1882c906bc7657185034afede6e23333e4dd",
+		"benchmark/v2/pilot/complex-support-01/sources.json": "b44743b44b1a0b36eea2d24f942cc74c2ddc05b8ed790d65ca46c157576d5ad7",
+		"benchmark/v2/pilot/complex-support-01/summary.json": "a44490c2faf148f2aa881a28a6ba74af9e093136894bbf1fb425b0445c027de3",
+		"benchmark/v2/pilot/complex-support-01/task.json": "cb51358bb2359732440e57ef6a2f0ff1a055da03b89a7b12c4eea0885f387b32",
+		"benchmark/v2/pilot/expectations.json": "4e7cc5d722860da462bdf3a3f1a4e85a79233ea5c423604e0345783d971e275d",
+		"benchmark/v2/pilot/manifest.json": "41977b67ee78dc7dc9f18b37e783f4b870626141d5a77a8629b0208ebb05afa5",
+		"benchmark/v2/pilot/test.json": "ddf1e19009c97bf8dc2193c397f14aa894d86436a5e84e0ac8aab69cafccccac"
+	},
+	"packets": [
+		{
+			"candidateId": "p01",
+			"sha256": "0a3107fee702b5d16342578316f4fe64f7edffb411a43536a4fa926169b366f9",
+			"bytes": 91963
+		},
+		{
+			"candidateId": "p02",
+			"sha256": "c9dc1e5f7603ad6abeec7ee7cbd4b868d70d2c8431a9d9c86adf9977a1d0b5f3",
+			"bytes": 92162
+		},
+		{
+			"candidateId": "p03",
+			"sha256": "e19bf3ff84d2a204dc4f716ec73d79bcd58cf16387f26571c90d9810c8081247",
+			"bytes": 89871
+		},
+		{
+			"candidateId": "p04",
+			"sha256": "1567fe71a7de73a7704373dd80767ed630e49d3dbaa01f185dc03a4ff4d4d8d0",
+			"bytes": 88882
+		},
+		{
+			"candidateId": "p05",
+			"sha256": "20ecb4035c92741511056cda68c6fd3725146814add5a941638027142f0c2b1c",
+			"bytes": 90366
+		}
+	]
+}

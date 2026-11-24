@@ -1,0 +1,65 @@
+{
+	"version": "1.0",
+	"status": "authored navigation and claim inventory, not ground truth labels; excluded from model packets",
+	"claims": [
+		{
+			"id": "process-scope",
+			"status": "attributed-technical-guidance",
+			"evidenceIds": ["E01"],
+			"sourceIds": ["S01", "S02", "S03", "S04", "S05"],
+			"claim": "Primary guidance distinguishes complete processes, quick checks, interim repair, statements and limited user tests; it certifies no fictional service."
+		},
+		{
+			"id": "barrier",
+			"status": "synthetic-reproduced-finding",
+			"evidenceIds": ["E03", "E08"],
+			"sourceIds": [],
+			"claim": "Evidence error path prevents independent completion in tested environments; a mouse success and limited scan do not refute it."
+		},
+		{
+			"id": "authority",
+			"status": "synthetic-conditional-approval",
+			"evidenceIds": ["E04", "E05", "E07", "E18"],
+			"sourceIds": [],
+			"claim": "Protective stop is available; LA-19 has technical, preservation and explicit customer conditions and a limited population and period."
+		},
+		{
+			"id": "operations",
+			"status": "synthetic-record",
+			"evidenceIds": ["E09", "E10", "E15"],
+			"sourceIds": [],
+			"claim": "Same tenant destination confirmed; failure retest and draft-preservation receipt pending; assistance has capacity and privacy limits."
+		},
+		{
+			"id": "claims-and-commerce",
+			"status": "synthetic-record",
+			"evidenceIds": ["E11", "E12", "E14"],
+			"sourceIds": [],
+			"claim": "Certification and signoff claims unsupported; correction pending; no upgrade consent, remedy approval or automatic term change."
+		},
+		{
+			"id": "partner-scope",
+			"status": "synthetic-conflicting-scope",
+			"evidenceIds": ["E07", "E16", "E19"],
+			"sourceIds": [],
+			"claim": "New partner referrals were absent from the signed package; direct-population and associated-administration language require interpretation."
+		}
+	],
+	"uncertainties": [
+		{
+			"question": "Will the failure-path retest pass and saved-draft preservation complete before the decision?",
+			"evidenceIds": ["E10", "E15", "E17"],
+			"effect": "Controls the temporary operational opening; does not prevent a useful bounded response."
+		},
+		{
+			"question": "Can individual partner invitations fit the approved direct-applicant scope without a new affirmative vendor decision?",
+			"evidenceIds": ["E07", "E16", "E19"],
+			"effect": "Material authority interpretation; partner handling and fairness need an explicit owner."
+		},
+		{
+			"question": "What commercial remedy and broader contractual meaning follow from prior representations?",
+			"evidenceIds": ["E04", "E11", "E14", "E16"],
+			"effect": "Reserved to signatories and counsel; factual correction and operational protection can proceed."
+		}
+	]
+}

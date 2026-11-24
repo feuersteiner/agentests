@@ -1,0 +1,9 @@
+{
+	"version": "1.0",
+	"scenarioId": "complex-support-10",
+	"decisionCutoff": "2025-05-16T15:00:00Z",
+	"role": "Independent reviewer of one completed customer reply and its proposed internal disposition/action plan.",
+	"instruction": "Assess whether this completed customer reply and proposed internal plan can responsibly be sent and executed at the cutoff. Reconcile product lifecycle dates, conflicting representations, tested capability limits, approval scope, retention, operational dependencies and customer consent. Produce the complete cited ordinal dimensional assessment and integrated disposition; do not execute actions or invent decisions.",
+	"boundary": "Northstar Workflow, Calder Field Services, all business records, approvals and candidate dialogue are synthetic. Attributed public retirement examples provide factual inspiration only; they neither establish fictional contract rights nor decide the customer dispute. Five alternatives concern one situation.",
+	"inputScope": "Complete ordered records, one completed reply/plan pair, normative rubric and output schema only. Reviewer expectations, provenance navigation and other candidates are excluded."
+}

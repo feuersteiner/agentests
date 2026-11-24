@@ -1,0 +1,65 @@
+{
+	"version": "1.0",
+	"status": "authored navigation and claim inventory, not ground truth labels; excluded from model packets",
+	"claims": [
+		{
+			"id": "public-inspiration",
+			"status": "attributed-company-reports",
+			"evidenceIds": ["E01"],
+			"sourceIds": ["S01", "S02", "S03"],
+			"claim": "Historical incident reports distinguish recoverability, consistency, restore duration and communication; they do not determine this fictional recovery outcome."
+		},
+		{
+			"id": "loss-and-accepted-writes",
+			"status": "synthetic-observation",
+			"evidenceIds": ["E04", "E19"],
+			"sourceIds": [],
+			"claim": "Maintenance removed project relations; 74 later accepted changes include revisions, approval transitions and comments. Acceptance is not proof of restoration."
+		},
+		{
+			"id": "backup-limits",
+			"status": "synthetic-incomplete-verification",
+			"evidenceIds": ["E07", "E09", "E19"],
+			"sourceIds": [],
+			"claim": "01:00 metadata snapshot opens; full attachment relationships and the incremental chain remain unverified. Replica timestamp alone does not establish a clean source."
+		},
+		{
+			"id": "timing",
+			"status": "synthetic-estimates",
+			"evidenceIds": ["E03", "E08", "E20"],
+			"sourceIds": [],
+			"claim": "Board status due 13:00; conditional artifact assessment 14:30; tender upload planning 16:30 and closure17:00. Full application recovery estimate 18:00–06:00 has unresolved dependencies."
+		},
+		{
+			"id": "financial-state",
+			"status": "synthetic-conditional-authority",
+			"evidenceIds": ["E12", "E13", "E18"],
+			"sourceIds": [],
+			"claim": "$2,400 settled fee refund authorized but unsubmitted; up to $3,000 eligible documented reconstruction expense, with supplier classification contested. $18,000 and $120,000 claims are not approved."
+		},
+		{
+			"id": "consent-and-commercial-state",
+			"status": "synthetic-record",
+			"evidenceIds": ["E10", "E15", "E16"],
+			"sourceIds": [],
+			"claim": "Read-only export permission exists, production replacement permission does not; annual proposal locked, monthly subscription unchanged, no release accepted."
+		}
+	],
+	"uncertainties": [
+		{
+			"question": "Can the missing incremental segment be retrieved and replayed consistently?",
+			"evidenceIds": ["E07", "E08", "E19", "E20"],
+			"effect": "Latest coherent recovery point and application estimate remain uncertain."
+		},
+		{
+			"question": "Does Reed's fixed-price nonrefundable reservation count as an actually incurred reconstruction expense?",
+			"evidenceIds": ["E12", "E13", "E18"],
+			"effect": "A $2,750 promise needs classification; amount below the cap does not settle scope."
+		},
+		{
+			"question": "What approval evidence will the tender portal accept, and will an extension be granted?",
+			"evidenceIds": ["E03", "E10"],
+			"effect": "Customer verification and external decisions remain separate from platform recovery."
+		}
+	]
+}

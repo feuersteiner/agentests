@@ -1,0 +1,192 @@
+{
+	"formatVersion": "1.0",
+	"scenarioId": "complex-support-07",
+	"scenarioCount": 1,
+	"status": "offline-prepared-graded-evaluation-not-implemented",
+	"labelStatus": "synthetic-provisional-not-human-reviewed",
+	"inputs": {
+		"task": {
+			"path": "task.json",
+			"sha256": "6785c2a1c1812dfa4345e9f12862299ef07470db897e6e7170b39e840a5bcd39"
+		},
+		"rubric": {
+			"path": "rubric.json",
+			"sha256": "7529d1ee5681a4c3c688b21743e3a86a74f8078f55f77514dd77bc9c70c37bd1"
+		},
+		"responseSchema": {
+			"path": "response.schema.json",
+			"sha256": "664cfdea1afa70d4cb15f8ce7965e270e34379747b56ad32ba9a724db227d023"
+		}
+	},
+	"documents": [
+		{
+			"id": "E01",
+			"version": "1.0",
+			"path": "documents/01-public-background.md",
+			"sha256": "132061884dd3173e0552e82430cc328e5580c7610347b139395c3f44a5a8c87d"
+		},
+		{
+			"id": "E02",
+			"version": "ORD-71.2",
+			"path": "documents/02-order.md",
+			"sha256": "3f7be69b82bc14a93addb74fe1c69772536b47dd430d0f92e90c393a80cb932d"
+		},
+		{
+			"id": "E03",
+			"version": "MSG-B.3",
+			"path": "documents/03-buyer-thread.md",
+			"sha256": "5fdeeed324dceffde42fc89c9377d4502c163839e179c02d88337cf0aa639131"
+		},
+		{
+			"id": "E04",
+			"version": "MSG-S.2",
+			"path": "documents/04-seller-thread.md",
+			"sha256": "4e4804b194eeee2c3590936f88167581c5d11ae1c8e112db75e9af5871818428"
+		},
+		{
+			"id": "E05",
+			"version": "DSP-4.0",
+			"path": "documents/05-current-policy.md",
+			"sha256": "118bcbbc49becdfdfefd9319e9184109004da9d3635d72addd35d24600025ebf"
+		},
+		{
+			"id": "E06",
+			"version": "DSP-3.1",
+			"path": "documents/06-superseded-playbook.md",
+			"sha256": "736e743d5424ce0815db77e4928572703d12649b0bb2f093d0c944501dba5339"
+		},
+		{
+			"id": "E07",
+			"version": "PAY-7714.4",
+			"path": "documents/07-ledger.md",
+			"sha256": "e56d1b360f8c343eed7a69764b8d3289734491c4f0e141a3154d88b3953c6fbe"
+		},
+		{
+			"id": "E08",
+			"version": "EV-7714.3",
+			"path": "documents/08-evidence-register.md",
+			"sha256": "4b8ac6444fdae971c97a85bc196e78fcf36b5297b63fd80d8c26210d7aef6557"
+		},
+		{
+			"id": "E09",
+			"version": "SHIP-7714.2",
+			"path": "documents/09-carrier.md",
+			"sha256": "29e0edd056854f7ee8a4170671f50afa551f24800ffe879df3889e9f717b62c2"
+		},
+		{
+			"id": "E10",
+			"version": "RISK-7714.2",
+			"path": "documents/10-risk-review.md",
+			"sha256": "dda61ee3127ce89952b1d126f7ac814e17b6793153c117c0bdc01bf2fbd9d909"
+		},
+		{
+			"id": "E11",
+			"version": "OPS-7714.3",
+			"path": "documents/11-inspection.md",
+			"sha256": "079c65c1be4c61c0243b7962998b9c04773c6b8aca6c30226268be51f4883817"
+		},
+		{
+			"id": "E12",
+			"version": "CRM-33.2",
+			"path": "documents/12-commercial.md",
+			"sha256": "27955318a003022db740fb9a7af2f1d1d37033313c17bc33879803536b93bee8"
+		},
+		{
+			"id": "E13",
+			"version": "DATA-6.2/7714",
+			"path": "documents/13-privacy.md",
+			"sha256": "1354d70e05d5c45144052973d36aa048592a9b7542864c13914c5a44f8276f24"
+		},
+		{
+			"id": "E14",
+			"version": "AUTH-8.1",
+			"path": "documents/14-authority.md",
+			"sha256": "a887369ad5af999246da286b344ec232c9f1254c6c347ac7df7eca41e18e550a"
+		},
+		{
+			"id": "E15",
+			"version": "APP-7714.1",
+			"path": "documents/15-case-approval.md",
+			"sha256": "f19a9a6270a415f8e90385b4b1bd50c90c81f11c1396fb1f0325d154bbc6a5a4"
+		},
+		{
+			"id": "E16",
+			"version": "LEG-7714.1",
+			"path": "documents/16-interpretation.md",
+			"sha256": "661b4a16095fbc5efb433f0f4482b82aeba500d2a124d4bd0a828707c062b77c"
+		},
+		{
+			"id": "E17",
+			"version": "TIME-7714.2",
+			"path": "documents/17-chronology.md",
+			"sha256": "3b9be44ec5fb62bf4058df8a86d8d97256aa30b1499f3c7381286f2a94f9343c"
+		},
+		{
+			"id": "E18",
+			"version": "CONS-7714.2",
+			"path": "documents/18-consent.md",
+			"sha256": "2f47b63e50dcfdb751a00597dfc8cf1574d8e7834f3e50416a5cfe5347635e3f"
+		},
+		{
+			"id": "E19",
+			"version": "COM-7.0",
+			"path": "documents/19-tone.md",
+			"sha256": "c7ef5ceadb5d3abc75350454790ab7e3efd680c03a99bb7f266883d2da79a432"
+		},
+		{
+			"id": "E20",
+			"version": "HAND-7714.1",
+			"path": "documents/20-handoff.md",
+			"sha256": "dfcd7499d85693b9062d75b73b7babc5873f0c9fb97dd4d92ca5d1ba5df658c9"
+		}
+	],
+	"candidates": [
+		{
+			"id": "p01",
+			"path": "candidates/p01.json",
+			"sha256": "8eb146b8f85d29066ed6e5ef26155d5468cd7367e73159e28af057e415e84993"
+		},
+		{
+			"id": "p02",
+			"path": "candidates/p02.json",
+			"sha256": "14ad5bd7e72c6ca03594a71ab463ba242b32e5c1b7b2f0b354a105d9ee35df94"
+		},
+		{
+			"id": "p03",
+			"path": "candidates/p03.json",
+			"sha256": "57d7b26c2634468babf87031a464c70e22ff0e872f7c700bf01542348eec2fe5"
+		},
+		{
+			"id": "p04",
+			"path": "candidates/p04.json",
+			"sha256": "93fbd3e82b952e49cdbfdf5b3c0784774dafc476c714382abc16af2f78d991c9"
+		},
+		{
+			"id": "p05",
+			"path": "candidates/p05.json",
+			"sha256": "20cb00a0aef2ff8904032b75b6797076a83373ab41c018148abe4badc1fa194e"
+		}
+	],
+	"provenance": {
+		"sources": {
+			"path": "sources.json",
+			"sha256": "d7ed64ffd3905aaa3409620d017f007b2e0197e2d285fa9bcce582abe5b88958"
+		},
+		"summary": {
+			"path": "summary.json",
+			"sha256": "0c472892d80e3cf25d8e9dfa7902f82a6dc9108ee6377db709d3427899db0a81"
+		}
+	},
+	"reviewer": {
+		"path": "reviewer/expectations.json",
+		"sha256": "19dbd5a70062e2de0c0877db49526662113236e770e81f95c9728101b57c8481"
+	},
+	"contextMeasurement": {
+		"method": "UTF-8 bytes and nonempty whitespace-delimited words of ordered document contents; no guessed tokens.",
+		"bytes": 66268,
+		"words": 9958,
+		"tokenizer": null,
+		"tokenCount": null,
+		"reason": "No named tokenizer/encoding is configured or declared for this offline workbench."
+	}
+}

@@ -1,0 +1,9 @@
+{
+	"version": "1.0",
+	"scenarioId": "complex-support-08",
+	"decisionCutoff": "2026-11-12T13:00:00Z",
+	"role": "Independent reviewer of one completed customer reply and its proposed internal disposition/action plan.",
+	"instruction": "Assess whether the supplied reply can responsibly be sent and its internal plan executed at the cutoff. Return all six ordinal dimensional judgments and integrated disposition using the rubric and schema. Reconcile enforcement grounds, appeal authority, credential-control evidence, disclosure boundaries, feature states, customer consent and deadlines. Do not execute actions, invent later findings or grade real platform employees.",
+	"boundary": "RelayQuay, Lattice Field Services and every account record and candidate are synthetic source-grounded fiction. Current primary-source policies are factual inspiration, not this fictional account authority. Public sources are paraphrased, not open-licensed transcript data. Five alternatives concern one situation.",
+	"inputScope": "Complete ordered documents, one completed external reply and internal plan, normative rubric and output schema only. Reviewer expectations, summary and other candidates are excluded."
+}

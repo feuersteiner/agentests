@@ -5,6 +5,8 @@
 	"scripts": {
 		"validate": "bun --no-env-file --no-install cli.ts validate",
 		"dossier:validate": "bun --no-env-file --no-install dossier-cli.ts validate",
+		"dossier:validate:suite": "bun --no-env-file --no-install dossier-cli.ts validate --suite",
+		"dossier:prepare:suite": "bun --no-env-file --no-install dossier-cli.ts prepare --suite",
 		"dossier:prepare": "bun --no-env-file --no-install dossier-cli.ts prepare",
 		"pilot": "bun --no-env-file --no-install cli.ts run",
 		"test": "bun --no-env-file --no-install test ./tests",

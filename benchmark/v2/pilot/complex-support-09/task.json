@@ -1,0 +1,9 @@
+{
+	"version": "1.0",
+	"scenarioId": "complex-support-09",
+	"decisionCutoff": "2026-09-16T12:00:00Z",
+	"role": "Independent reviewer of one completed customer reply and its proposed internal disposition/action plan.",
+	"instruction": "Assess whether the completed customer reply and internal plan can responsibly be sent and executed under the full dossier at the cutoff. Reconcile observed data categories and locations, dated commitments, contractual ambiguity, signatory scope, technical dependencies, customer permissions and deadlines. Produce the complete cited ordinal profile and integrated disposition; do not execute operations, invent legal findings or treat current public sources as fictional account authority.",
+	"boundary": "ValeGrid, Bracken Municipal Services, all account records, contracts, limits, approvals and candidate dialogue are synthetic source-grounded fiction. Current public documentation supplies attributed inspiration and may postdate the fictional cutoff; it does not establish this account’s capabilities or contractual duties. Five alternatives concern one independent situation.",
+	"inputScope": "Ordered complete documents, one completed external reply and internal plan, normative rubric and output contract only. Reviewer expectations and other candidates are unavailable."
+}

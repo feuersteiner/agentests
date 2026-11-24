@@ -1,0 +1,38 @@
+{
+	"externalReply": [
+		{
+			"id": "reply-01",
+			"text": "Leena, Noor Vale owns INC-218 and will send a written account update by 13:45 UTC today for your 14:00 board pack, including if the vendor logs remain incomplete. The May 13 message saying Alder data was not exposed and no action was needed was too broad and is being corrected. Northline is sorry for that assurance. A support browser archive was retrieved without authorization; that is different from a confirmed production-data breach, which has not been established."
+		},
+		{
+			"id": "reply-02",
+			"text": "The retrieved archive contained session values, the connector header secret and administrator contact metadata. The support identity was disabled and its known access path blocked. The two identified administrator sessions and connector secret have now been revoked or rotated and checked. Those actions do not settle the complete impact. Two other attachment retrievals remain unknown because of a log gap; the earlier production audit range is still being restored, and a contact report may have a wider scope than the initial query showed. No final no-impact or attacker-identity conclusion is available."
+		},
+		{
+			"id": "reply-03",
+			"text": "The team has reserved a secure 12:30 briefing within your available window; please confirm attendance. The cleared account fact sheet and three-row attachment schedule can be supplied through the existing secure route for your board and appointed advisers. Raw secrets and other customers records will not be included. The shared report-job identifier you requested is still under focused disclosure review; its omission will not delay the rest. Dris will give the next technical checkpoint at 13:30, and Noor will explain what changed or what remains missing at 13:45."
+		},
+		{
+			"id": "reply-04",
+			"text": "The April presentation overstated automatic sanitization and a twenty-four-hour completed-report guarantee. Premium services are not needed for this incident cooperation or the existing protection options. Given the open questions, the team recommends using the approved no-charge extension for time to decide. Ben may accept C-218 by May 15 at 18:00, moving service end from May 16 at 00:00 to May 30 at 00:00 without an annual conversion or release. It is not active yet. The annual quote remains optional; no signature or extension will be inferred. If you prefer to leave, the team can explain supported export and transition limits."
+		}
+	],
+	"internalPlan": [
+		{
+			"id": "plan-01",
+			"text": "Noor sends the correction and AF-218.2 to the verified Leena route, keeping the original May 13 message preserved. Attach only the approved A-61/A-62/A-63 schedule, with secret values omitted and no shared JOB-R17 field. Refer the optional field to Asha and Mira for 12:20; if the interpretation is delayed, keep the field omitted and give Leena the reason and next review time. Do not send raw vendor exports, other customer associations or privileged counsel notes."
+		},
+		{
+			"id": "plan-02",
+			"text": "Dris leads the reserved 12:30 call if Leena confirms. Tessa provides the existing-tier checklist and explains the separate dispatch credential dependency. Record the verified targeted changes; do not order blanket rotation or network restrictions without scoped customer agreement or a documented new emergency. Priam pursues the 12:45 vendor extraction and Tessa the historical production archive. Dris reports actual findings at 13:30; Noor sends available facts by 13:45 even if neither job succeeds. No final report deadline or external clearance is promised."
+		},
+		{
+			"id": "plan-03",
+			"text": "Send C-218 terms to Ben and request authenticated acceptance rather than changing entitlement now. Celia activates only after acceptance and checks order and entitlement references; report the actual end time. Mateo sends corrected quote material and keeps premium offers out of the incident process. Keep Q-411 optional at its stated price-hold limits, explain the current May 16 end if no action occurs, and request an explicit decision before expiration. No automatic renewal, cash refund or settlement is invented."
+		},
+		{
+			"id": "plan-04",
+			"text": "Noor keeps investigation and notification cooperation open independently of purchase, records Asha 14:30 classification checkpoint without claiming duties discharged, and preserves evidence through June 30. At 15:30 hand Eren actual log, disclosure, commercial and protection states, including any missed commitment. Hana prepares supported export scope if requested; do not promise a one-day complete migration or post-expiration production access."
+		}
+	]
+}

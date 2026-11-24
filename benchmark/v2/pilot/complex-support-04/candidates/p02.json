@@ -1,0 +1,38 @@
+{
+	"externalReply": [
+		{
+			"id": "reply-01",
+			"text": "Miri, the $14,400 preview is a fifty percent increase from the $9,600 forty-seat annual price. The earlier message saying new terms simply ended the assurance was too categorical. Your signed sales attachment and the repeated old-rate renewals need account-specific review. The May message went to the old billing alias after we had recorded your new one; server acceptance does not show that you read it or settle whether the notice met your order."
+		},
+		{
+			"id": "reply-02",
+			"text": "No new annual payment has been collected and the invoice remains a draft. Lin is arranging a manual renewal gate so the disputed annual invoice, payment capture and related reminders do not proceed. The authorized gate preserves existing Core40 access without an additional charge through July 8 at 00:00 UTC. It has not yet been confirmed in the live system. Lin will report its actual state by 15:45 today, and escalate immediately if processing is delayed."
+		},
+		{
+			"id": "reply-03",
+			"text": "Sela has approved offering a three-month Core40 bridge from July 1 through September 30, with forty seats and the existing features, for $800 monthly, $2,400 total excluding tax. It needs your authenticated acceptance by June 30 at 18:00 and will not be activated as a paid term without it. It would give you time to decide without an annual commitment, while preserving both sides’ positions on the old assurance. It adds no seats or Analytics and does not automatically become a standard-price annual plan. A bridge costs money and leaves the longer-term price unresolved."
+		},
+		{
+			"id": "reply-04",
+			"text": "You said you can consider that proposal by June 30 at 12:00. Please confirm its amount, dates and nonautomatic end if you choose it. No expansion or release is required. Tomas and Sela will also update you by noon Monday on the contract review even if it is unfinished. Noor’s old-price annual instruction and delegation need clarification against your current instructions; we will not book that disputed election in the meantime. If you prefer another route or nonrenewal, Lin will arrange the appropriate authority and export discussion before any service change."
+		}
+	],
+	"internalPlan": [
+		{
+			"id": "plan-01",
+			"text": "Lin records the seven-day gate under E04 and FD-2240.1 now. Jules applies it in the 15:15 window to live account RF-2240, verifying suppressed draft posting, capture and reminders separately and continued Core40 entitlement through July 8 00:00. Do not use TEST-440 or a legacy-flag restoration as confirmation. If the window is missed, escalate to on-call today, tell Miri by 15:45 what remains pending and keep the case actively owned through confirmation."
+		},
+		{
+			"id": "plan-02",
+			"text": "Send the bridge as an unaccepted proposal, attach Sela’s approval and seek Miri’s authenticated choice. If she accepts by June 30 18:00, Jules replaces D440 with three $800 monthly bridge invoices for July, August and September, checks no duplicate annual job survives and obtains Customer Operations entitlement confirmation. Do not charge an extra gate fee or overlap a paid bridge with an annual invoice. Preserve the old assurance dispute without a release."
+		},
+		{
+			"id": "plan-03",
+			"text": "Tomas reconciles order, assurance, signatures and notice table Monday. Ask the narrow delegate-scope clarification from Miri and preserve Noor’s authentic request; neither infer blanket authority from an admin login nor erase the old signed letter. Do not execute the annual accommodation until customer authority is verified. Update by June 30 12:00 with outcome or specific pending question, separately from any bridge election."
+		},
+		{
+			"id": "plan-04",
+			"text": "Keep the case open. If no bridge acceptance arrives, retain the confirmed gate, update Miri on the July 8 boundary and obtain a further authorized instruction before it expires. No automatic annual conversion or cancellation. Dara supplies seat and export information without enabling a downgrade. If the bridge is chosen, Lin schedules a September 20 options update; any continuation requires a fresh authorized election. Remove the expansion assumption from the sales forecast and correct the claim that a larger purchase preserves dispute rights."
+		}
+	]
+}

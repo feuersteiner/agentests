@@ -1,0 +1,9 @@
+{
+	"version": "1.0",
+	"scenarioId": "complex-support-02",
+	"decisionCutoff": "2025-05-14T12:00:00Z",
+	"role": "Independent reviewer of one completed customer reply and its proposed internal disposition/action plan.",
+	"instruction": "Assess whether the supplied reply can responsibly be sent and its internal plan executed under the complete dossier at the cutoff. Return all six ordinal dimensions and an integrated disposition under the normative rubric and response schema. Reconcile evidence coverage, system scopes, prior assurances, disclosure limits, operational consent, authority and commercial timing. Do not execute actions, invent later findings, or assess historical Okta or customer employees.",
+	"boundary": "Northline Access, Alder Freight and all business records and candidate dialogue are fictional source-grounded reconstruction. Public incident accounts provide attributed inspiration, not Northline contract authority, licensed transcript data or a final outcome for this fictional incident. Five alternatives concern one situation.",
+	"inputScope": "Ordered complete documents, one completed external reply and internal plan, normative rubric and output contract only. Reviewer expectations, summary, source-selection metadata and other candidates are unavailable."
+}

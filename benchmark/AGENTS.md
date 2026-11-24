@@ -10,7 +10,7 @@ Normal clones/checks never initialize it. Never upload evidence to a public remo
 
 `v1` is the historical skill-versus-commit-gate experiment, previously called
 `benchmark-v2`. `v2` contains the frozen original five-case evaluator pilot and a
-separate complex support dossier with offline preparation only. Execution history
+separate ten-situation complex support suite with offline preparation only. Execution history
 and measured evidence remain private.
 
 ## Layout
@@ -51,8 +51,8 @@ and measured evidence remain private.
   `benchmark:pick` is offline. `benchmark`, `benchmark:pilot` and `benchmark:prove`
   make paid calls; their help does not. Fixture hydration stays explicit.
 - v2: `bun --no-env-file run --cwd benchmark/v2/workbench check`, `test` and
-  `validate`, plus `dossier:validate`. Preserve the original five pilot cases,
-  packets and harness. Keep the additional dossier separate and its provisional
+  `validate`, plus `dossier:validate` and `dossier:validate:suite`. Preserve the original five pilot cases,
+  packets and harness. Keep the additional suite separate and its provisional
   reviewer expectations outside evaluator inputs. Dossier preparation is not
   graded evaluation execution and never authorizes live inference.
 - The v1 agent loop requires Linux/root for `unshare --mount`, authenticated

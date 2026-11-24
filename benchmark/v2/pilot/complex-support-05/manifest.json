@@ -1,0 +1,192 @@
+{
+	"formatVersion": "1.0",
+	"scenarioId": "complex-support-05",
+	"scenarioCount": 1,
+	"status": "offline-prepared-graded-evaluation-not-implemented",
+	"labelStatus": "synthetic-provisional-not-human-reviewed",
+	"inputs": {
+		"task": {
+			"path": "task.json",
+			"sha256": "6e790b659605160fc0f91b6301625d5694bbfe96823d8f46d5331102c74ad0fe"
+		},
+		"rubric": {
+			"path": "rubric.json",
+			"sha256": "d14684b64ad481651e75074739f7ae8748dfdf3e514d4b5a6b0fe941547065b1"
+		},
+		"responseSchema": {
+			"path": "response.schema.json",
+			"sha256": "1f20a2bf75a2d612eb58423fd17a805606f5f41c371c42db15147828ea200d70"
+		}
+	},
+	"documents": [
+		{
+			"id": "E01",
+			"version": "1.0",
+			"path": "documents/01-public-background.md",
+			"sha256": "bc20519e778d47e1b11248fd7396bb35abc4e6e45de8233ed4310954e0278c0d"
+		},
+		{
+			"id": "E02",
+			"version": "ORD-218.2",
+			"path": "documents/02-order-and-signatories.md",
+			"sha256": "0d069b10b905be85ac6b5cbe58b32fa7ad9903d6888f9a478e09d8a59eef05ad"
+		},
+		{
+			"id": "E03",
+			"version": "CS-218.4",
+			"path": "documents/03-customer-deadline-thread.md",
+			"sha256": "8873f02ccdf72355daf655c86f6dc67253039d265c4dae95eeca6907e39362f9"
+		},
+		{
+			"id": "E04",
+			"version": "SOW-218.2.0",
+			"path": "documents/04-signed-scope-and-responsibilities.md",
+			"sha256": "912f2d6cdc7fefa8681bc914cc173f00d1c99b1181fc92a1c3dafcfd4063fe2f"
+		},
+		{
+			"id": "E05",
+			"version": "DEL-4.3",
+			"path": "documents/05-current-delivery-policy.md",
+			"sha256": "2aac8f4ef4c68e4e47572eeda7491975b8010bdaee4e2d97325721b713e406e0"
+		},
+		{
+			"id": "E06",
+			"version": "DEL-3.1",
+			"path": "documents/06-archived-launch-playbook.md",
+			"sha256": "df3cf4fd304679d0c294507d09cc0856cb6c312a7da9b7c6848867af721bdc6e"
+		},
+		{
+			"id": "E07",
+			"version": "AUTH-7/R-218",
+			"path": "documents/07-approval-and-exception-register.md",
+			"sha256": "8c7c6b52337d67876d0d1749985e27323e61d26001ab916df1cc7c48c6c9045c"
+		},
+		{
+			"id": "E08",
+			"version": "ENG-218.6",
+			"path": "documents/08-connector-test-findings.md",
+			"sha256": "781fd66dfbba1621192fa1b2b6dbe96c01df53a8882fcf1e2257c7f90a61c045"
+		},
+		{
+			"id": "E09",
+			"version": "NS-44.3",
+			"path": "documents/09-partner-findings-and-dispute.md",
+			"sha256": "0be6bfb823b9877bcedf51771622e463435d2f8c50d3aee973f9538cc4285163"
+		},
+		{
+			"id": "E10",
+			"version": "OPS-V218.5",
+			"path": "documents/10-customer-operations-and-workload.md",
+			"sha256": "e8fb7de01a3452e269ae1cf11771e3110d9c58c4ae5605e845fa0aef8095f269"
+		},
+		{
+			"id": "E11",
+			"version": "CRM-218.7",
+			"path": "documents/11-sales-promises-and-forecast.md",
+			"sha256": "f5c1f0e9121aab8874c83cece76202da56dd141f425bb3eab4a37482230c523b"
+		},
+		{
+			"id": "E12",
+			"version": "RUN-218.4",
+			"path": "documents/12-recovery-runbook-and-route-controls.md",
+			"sha256": "a3d2f9369d5356e27d202b1a5f816bfe5b0f3b5412c1eadb378d6be29bf7b43c"
+		},
+		{
+			"id": "E13",
+			"version": "COM-6.2",
+			"path": "documents/13-brand-and-accountability-guidance.md",
+			"sha256": "48db838f52d6a8444a43c6663c6c6f299d69cb7f117c66b0bdfef059f71df480"
+		},
+		{
+			"id": "E14",
+			"version": "SUP-218.5",
+			"path": "documents/14-case-ownership-and-staffing.md",
+			"sha256": "65932600ed02fd09f25253253a1e387f0bf0df2584e82d043c357f1d24393aed"
+		},
+		{
+			"id": "E15",
+			"version": "SEC-IMP-3.4",
+			"path": "documents/15-access-and-data-handling.md",
+			"sha256": "740ef3160fdeaf4298b344629182f18bc59b1ac7129fa4dae27b52a1dd67c9ca"
+		},
+		{
+			"id": "E16",
+			"version": "LEG-218.2",
+			"path": "documents/16-counsel-scope-note.md",
+			"sha256": "b11ada5b063f9b5f416a2def7e6d0b5dc949fd5aae9b12ada57aa0b6b557ad49"
+		},
+		{
+			"id": "E17",
+			"version": "TIME-218.8",
+			"path": "documents/17-chronology-and-notice-register.md",
+			"sha256": "d3a4aacf9d065a9e1687cc0a32a9a9cb775abf56e6a76332c0e32d90f28c06d8"
+		},
+		{
+			"id": "E18",
+			"version": "DES-218.2",
+			"path": "documents/18-queue-design-and-exception-question.md",
+			"sha256": "918bd8750fa69f59e181cf2806d18ac38f4e75033907e7a6198e3f91ba0da094"
+		},
+		{
+			"id": "E19",
+			"version": "FIN-218.3",
+			"path": "documents/19-finance-and-procurement-state.md",
+			"sha256": "d61d604abfea8e494b85aaaa79c18ae0b17e991c414adc973100a7efced42b6e"
+		},
+		{
+			"id": "E20",
+			"version": "H-218.6",
+			"path": "documents/20-handoff-and-open-register.md",
+			"sha256": "f1eb152355f074bd704991f561d65f6d2a23e1e2a952b66beec111d115d55b92"
+		}
+	],
+	"candidates": [
+		{
+			"id": "p01",
+			"path": "candidates/p01.json",
+			"sha256": "cfb1b2c1d2fe05e3cf7e92110f583f831e5e6b7647d04cc168e8bf3ce541793e"
+		},
+		{
+			"id": "p02",
+			"path": "candidates/p02.json",
+			"sha256": "801c0c0819641ea069f1caf286f203b84cd593c0ffa423a35c69234efaacf4a0"
+		},
+		{
+			"id": "p03",
+			"path": "candidates/p03.json",
+			"sha256": "1ed2cc3a48508f71633aa69f3032e286bdb5b86739ca11aa7120479693da8bbf"
+		},
+		{
+			"id": "p04",
+			"path": "candidates/p04.json",
+			"sha256": "a25e4cdd1685a7130717f1f4457971976cc7fccfec35e9bf22e3b13633862f5e"
+		},
+		{
+			"id": "p05",
+			"path": "candidates/p05.json",
+			"sha256": "6eedc95804c073b38ef3c9381d33d37465fa7d618b3820e6d857438fb874a387"
+		}
+	],
+	"provenance": {
+		"sources": {
+			"path": "sources.json",
+			"sha256": "c681666fe3d52fb1d1dc994efc086fd0562345b45fbe29978ec5639ad361f5cc"
+		},
+		"summary": {
+			"path": "summary.json",
+			"sha256": "5b8e61deb1d1b0ef6a48f8563f51bd626cffea3618bf54b606ddf1a80ee21a41"
+		}
+	},
+	"reviewer": {
+		"path": "reviewer/expectations.json",
+		"sha256": "73c6a8d04e74f15e16152a4924d596a87456561552aca3c85f64d09cfe38868d"
+	},
+	"contextMeasurement": {
+		"method": "UTF-8 bytes and nonempty whitespace-delimited words of ordered document contents; no guessed tokens.",
+		"bytes": 66038,
+		"words": 9616,
+		"tokenizer": null,
+		"tokenCount": null,
+		"reason": "No named tokenizer/encoding is configured or declared for this offline workbench."
+	}
+}

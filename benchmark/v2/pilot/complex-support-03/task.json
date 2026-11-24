@@ -1,0 +1,9 @@
+{
+	"version": "1.0",
+	"scenarioId": "complex-support-03",
+	"decisionCutoff": "2025-05-14T12:00:00Z",
+	"role": "Independent reviewer of one completed customer reply and its proposed internal disposition/action plan.",
+	"instruction": "Assess whether the supplied draft can responsibly be sent and executed under the complete dossier at the cutoff. Return the six ordinal dimensional judgments and integrated disposition required by the normative rubric and response schema. Reconcile recovery safety, evidence scope, authority, commitments, customer deadlines, commercial interests and informed consent. Do not execute actions, invent recovered data or assess historical employees.",
+	"boundary": "Flint Ledger, Meridian Works, all business records and candidates are synthetic source-grounded reconstruction. Public incident reports provide attributed historical inspiration, not account policy or proof of a fictional recovery outcome. The alternative candidates concern one fictional situation.",
+	"inputScope": "Ordered complete documents, one completed external reply and internal plan, normative rubric and output contract only. Reviewer expectations, summary and other candidates are unavailable."
+}

@@ -1,0 +1,9 @@
+{
+	"version": "1.0",
+	"scenarioId": "complex-support-07",
+	"decisionCutoff": "2026-10-20T13:00:00Z",
+	"role": "Independent reviewer of one completed customer reply and its proposed internal disposition/action plan.",
+	"instruction": "Assess whether the completed buyer-facing reply and proposed internal action plan can responsibly be sent and executed at the cutoff. Apply the six-dimensional normative rubric and response schema to the complete dossier. Reconcile conflicting buyer and seller evidence, goods custody, money states, delegated authority, privacy, consent, deadlines and commercial incentives. Do not execute actions or decide the real policies of the public source companies.",
+	"boundary": "NookMarket, Quay Films, Lumen Workshop and all case records and candidates are fictional. Public policy paraphrases are attributed inspiration, not transaction authority. This is one situation with five alternatives; no public source establishes who caused the fictional discrepancy.",
+	"inputScope": "Ordered complete documents, one completed external reply and internal plan, normative rubric and output contract only. Reviewer expectations and other candidates are unavailable."
+}

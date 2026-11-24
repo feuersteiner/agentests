@@ -1,0 +1,22 @@
+{
+	"externalReply": [
+		{
+			"id": "reply-01",
+			"text": "Selma, the team understands why the location question is concerning. The console says EU and your primary content appears to be there. The contractual wording may mean different things, so Legal and Engineering will investigate and get back to you when they have finished."
+		},
+		{
+			"id": "reply-02",
+			"text": "Please send the order, sales messages and trial spreadsheet again so the teams can compare them. The logs do not prove every viewer, and no final conclusion can be promised. A higher service tier might give you more regional options; Sales can discuss that while the investigation continues."
+		}
+	],
+	"internalPlan": [
+		{
+			"id": "plan-01",
+			"text": "Forward the thread to Legal, Engineering and Sales. Wait for a complete access report and final contract opinion before producing a written location matrix. No owner or specific return time is assigned; ask the customer to resend the contract and support attachment to establish the record."
+		},
+		{
+			"id": "plan-02",
+			"text": "Leave all settings, export work and the renewal draft untouched. Do not use the available export slot until the entire investigation is complete. Sales can discuss a larger annual plan based on the regional badge. Keep the issue pending in the general queue."
+		}
+	]
+}

@@ -1,0 +1,9 @@
+{
+	"version": "1.0",
+	"scenarioId": "complex-support-04",
+	"decisionCutoff": "2025-06-27T14:00:00Z",
+	"role": "Independent reviewer of one completed customer reply and its proposed internal disposition/action plan.",
+	"instruction": "Assess whether the supplied completed customer reply and internal plan can responsibly be sent and executed at the cutoff under the full dossier. Produce all six ordinal dimensional judgments and the integrated disposition in the supplied schema. Reconcile old representations, signatory scope, applicable terms, notice evidence, pending billing, renewal timing and informed customer election. Do not execute actions, invent later approvals or decide any real company customer dispute.",
+	"boundary": "NacreFlow, Rookfield Planning Cooperative, all business records and candidates are synthetic. Public 37signals statements are factual inspiration only, with their own dates, not fictional contract authority or open-licensed transcript data. The five alternatives concern one fictional situation.",
+	"inputScope": "Ordered complete documents, one completed external reply and internal plan, normative rubric and output contract only. Reviewer expectations and other candidates are unavailable."
+}

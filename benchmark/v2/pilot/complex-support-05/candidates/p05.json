@@ -1,0 +1,42 @@
+{
+	"externalReply": [
+		{
+			"id": "reply-01",
+			"text": "Sera, RelayGrid cannot responsibly confirm the full June 16 order-to-invoice launch. The retry defect is reproducible in RelayGrid's connector, mapping correction remains under review, and the broader acceptance tests are unfinished. Alec's earlier launch-ready statement was too broad. Mira Chen will own the response and send a written position by 16:30 UTC today, including what is known and the next decisions."
+		},
+		{
+			"id": "reply-02",
+			"text": "The recommendation is to defer switching the primary route, keep legacy processing active as you instructed and pursue the ten-day legacy continuation while corrective work proceeds. You decide whether to buy the $9,600 extension before its June 13 noon expiry. RelayGrid has authorized reimbursement of verified legacy continuation expense up to $12,000 without a purchase or release condition. The existing quote is already available; Amira will verify your authorized order and company payment details and submit through the normal finance window. No reimbursement has been paid, and bank receipt timing cannot be guaranteed."
+		},
+		{
+			"id": "reply-03",
+			"text": "The old feed does not automatically satisfy Atlas's new requirement. Your June 13 16:00 notice remains necessary unless Atlas changes it, and its June 16 08:00 deadline remains at risk. The team can provide a factual supplier status for your notice and waiver request. This operational recommendation does not amend your signed contract, waive your claims or decide fault for the whole delay."
+		},
+		{
+			"id": "reply-04",
+			"text": "RelayGrid will continue contracted correction using the approved engineering allocation. Jules owns retry tests; Northstar owns mapping and invoice adapter work; Owen and Dana validate business quantities and reconciliation. The schedule impact of Vela's late file is still disputed. The June 13 10:00 evidence review and 11:00 delivery decision will report actual test results and the next supported scope, even if a repair date is still unknown. The final $20,000 milestone remains unissued until full acceptance. Premier Care is optional and would not guarantee this launch."
+		},
+		{
+			"id": "reply-05",
+			"text": "No live pilot or replay is proposed on this route today. If you later want a bounded pilot, it will require a separate scope, test evidence and approval before any commercial use. If you prefer cancellation or a wider compensation discussion, Mira will arrange the proper delivery and counsel review without delaying technical correction. No general acceptance, new purchase or production routing consent is inferred from this exchange."
+		}
+	],
+	"internalPlan": [
+		{
+			"id": "plan-01",
+			"text": "Mira retains H-218, confirms legacy primary/inactive new commercial connector with Jules and Owen, and verifies M3-218 remains blocked with Amira. Correct the readiness email explicitly. Do not mark the full implementation delivered from transport acknowledgments, a tenant tile or the attendance signature. No live replay or queue activation under this route."
+		},
+		{
+			"id": "plan-02",
+			"text": "At 15:00 create the dependency register, compare RelayGrid retry reproduction, Northstar M9 business confirmation and partial shipment adapter availability, and preserve T-40/T-41 plus new test exports before reset. RelayGrid continues its sixty approved hours without a purchase condition. Record the late-file/sandbox-outage overlap for later allocation. Obtain realistic next evidence times and escalate missing owner commitments to Nia."
+		},
+		{
+			"id": "plan-03",
+			"text": "Present Sera the known $9,600 legacy quote and its June 13 noon expiry before she must decide. If she accepts, obtain her company-authorized order, have Amira verify covered period/payee and submit the actual expense within R-218. Do not pay the $12,000 cap automatically, call it damages settlement or promise bank receipt. If she declines or the quote expires, report the continuity gap and ask Nia for a fresh decision; do not buy on her behalf."
+		},
+		{
+			"id": "plan-04",
+			"text": "Send the written status by 16:30 today whether or not tests finish, and hand Sera factual supplier information for the Atlas notice. Seek no direct Atlas contact. Keep June 13 10:00/11:00 checkpoints for evidence and delivery decisions. If a test, access slot or partner window fails, keep the new route inactive and state the next action. Ren receives states and external deadlines if Mira is unavailable. Route any cancellation, platform refund or consequential-loss request to Nia and counsel; do not promise an award or use it to stop correction."
+		}
+	]
+}

@@ -1,0 +1,192 @@
+{
+	"formatVersion": "1.0",
+	"scenarioId": "complex-support-04",
+	"scenarioCount": 1,
+	"status": "offline-prepared-graded-evaluation-not-implemented",
+	"labelStatus": "synthetic-provisional-not-human-reviewed",
+	"inputs": {
+		"task": {
+			"path": "task.json",
+			"sha256": "277ffb963bd0172f90f81063c8e67991ea4b228162a1063306bd77a7c2fe7cc0"
+		},
+		"rubric": {
+			"path": "rubric.json",
+			"sha256": "9963f9b39899b217ab60bfe4fad400be6131b91ab82e03bcdad3733f6b1095b6"
+		},
+		"responseSchema": {
+			"path": "response.schema.json",
+			"sha256": "31dc8e08bcbf43f5d3cbdd9880a7a75998d6e134ad07612b53ad069b1b28bc52"
+		}
+	},
+	"documents": [
+		{
+			"id": "E01",
+			"version": "1.0",
+			"path": "documents/01-public-background.md",
+			"sha256": "62f30fe309c3a6f16ff38ab37ce7da05887c3babbde438eb10bacf1e46a746b1"
+		},
+		{
+			"id": "E02",
+			"version": "ORDER-2022.1",
+			"path": "documents/02-order.md",
+			"sha256": "c4b3c99f16fb58de03b26ce099cea8a1a793852089307b4bc135ea93eed8a591"
+		},
+		{
+			"id": "E03",
+			"version": "SALES-2022.2",
+			"path": "documents/03-sales-assurance.md",
+			"sha256": "74bac1a24a5d07b4c5a9034d1664d5fdda272c75fce2f6cc401babe5e99b3198"
+		},
+		{
+			"id": "E04",
+			"version": "AUTH-2022.4",
+			"path": "documents/04-signature-scope.md",
+			"sha256": "486ab013d3f80c988ad188ca0daa389aba8c887c765e92516fbaeee7a0de5a1e"
+		},
+		{
+			"id": "E05",
+			"version": "LEGACY-2023.3",
+			"path": "documents/05-previous-policy.md",
+			"sha256": "63d3a6a559b374c7088ff93a5a5a12be30e25ba06a7b0fe7c6e21a66eda4028b"
+		},
+		{
+			"id": "E06",
+			"version": "PRICE-2025.1",
+			"path": "documents/06-current-policy.md",
+			"sha256": "adcfa88f06d1c77c74d02aec27f6f3ad3538f0966a210dd1e8eec6182c412928"
+		},
+		{
+			"id": "E07",
+			"version": "NOTICE-2240.2",
+			"path": "documents/07-notice-audit.md",
+			"sha256": "758f54b3c34d7459d2c8a2e437e355d10169a1fcb3885f71ac3d495c2c80fd47"
+		},
+		{
+			"id": "E08",
+			"version": "THREAD-2240.3",
+			"path": "documents/08-customer-thread.md",
+			"sha256": "a637fd3db3e154dcc867fb4554deec4290489ea1f06c57274bf0836e3e45f9c6"
+		},
+		{
+			"id": "E09",
+			"version": "BILL-2240.4",
+			"path": "documents/09-billing-state.md",
+			"sha256": "976199898e13ebb323b82e9777287ea99b8b28d75dea1c184d44d8194aacaf91"
+		},
+		{
+			"id": "E10",
+			"version": "PROD-2240.2",
+			"path": "documents/10-product-scope.md",
+			"sha256": "7416700fcd0a96b88e6d9be09a2a03ca45bb1e1007ac9e99eae89f6f42aa94bb"
+		},
+		{
+			"id": "E11",
+			"version": "REV-2240.3",
+			"path": "documents/11-sales-pressure.md",
+			"sha256": "1a0f77556ad36cbce5a4353f351000f8c8b025e67d7b20baeb04c46e93cd2437"
+		},
+		{
+			"id": "E12",
+			"version": "CONT-2025.2",
+			"path": "documents/12-continuity.md",
+			"sha256": "4046fe623cea5f3f142d47c08a153a26457b25242523ec05e33c0eb4cebd21f2"
+		},
+		{
+			"id": "E13",
+			"version": "COM-2025.4",
+			"path": "documents/13-brand.md",
+			"sha256": "f01b60feb403a2ea95fda465375495fa44401fcba109fac32fdcca5725feb06f"
+		},
+		{
+			"id": "E14",
+			"version": "SUP-2240.2",
+			"path": "documents/14-support-ownership.md",
+			"sha256": "ce386169b5fc178566a9b4790712a6f0cb2fd03e29271d9ec74b4da404f67577"
+		},
+		{
+			"id": "E15",
+			"version": "FD-2240.1",
+			"path": "documents/15-finance-decision.md",
+			"sha256": "891284aba588f4997a9dabb486b46f666f9d477cb82b41a49a218601df7fe6ca"
+		},
+		{
+			"id": "E16",
+			"version": "LEGAL-2240.1",
+			"path": "documents/16-counsel.md",
+			"sha256": "3cdc1901f48b5ba416a751f1f9576a17a33f0a795a25bfaf41d88e6d90ac6473"
+		},
+		{
+			"id": "E17",
+			"version": "TIME-2240.2",
+			"path": "documents/17-timeline.md",
+			"sha256": "47fb8c3b75d95af172882f571d72d590296fd9af4241857e6e7b020e24889e65"
+		},
+		{
+			"id": "E18",
+			"version": "CONSENT-2240.2",
+			"path": "documents/18-customer-authority.md",
+			"sha256": "b422800462b4fd476b0583d4cba6d5d88abe7808895d9cb36e3ce3771cb63860"
+		},
+		{
+			"id": "E19",
+			"version": "DELEGATE-2240.1",
+			"path": "documents/19-delegation.md",
+			"sha256": "19fe2dd63aa816461985af093636dcd0830b794ef88e04083b9681c8227259c9"
+		},
+		{
+			"id": "E20",
+			"version": "HANDOFF-2240.2",
+			"path": "documents/20-test-preview.md",
+			"sha256": "96c3384b75d40b22857e136a08b6f1344aae2a7eb2d96d97c3063f8f4f6ad36d"
+		}
+	],
+	"candidates": [
+		{
+			"id": "p01",
+			"path": "candidates/p01.json",
+			"sha256": "3147cf8f194734b29d2ee6b3caa811bcad05b1272eba4c6bed58209107e7b0ad"
+		},
+		{
+			"id": "p02",
+			"path": "candidates/p02.json",
+			"sha256": "8481192de0d3f033ea0e056e72c3d6411a9cc6f70b632b4eefb40d99f6a0eda5"
+		},
+		{
+			"id": "p03",
+			"path": "candidates/p03.json",
+			"sha256": "cead4ec3cf44f32aea3dc1830b135c1df29496d7feddf242734ec9450987e285"
+		},
+		{
+			"id": "p04",
+			"path": "candidates/p04.json",
+			"sha256": "ba5594762db220c6635d85d9e7684d56eccb7ec714a881ffc826802252b265fc"
+		},
+		{
+			"id": "p05",
+			"path": "candidates/p05.json",
+			"sha256": "00b4c07c902db33e294999196bdde38a8a01e071644932f3e6b6e1f4099763e8"
+		}
+	],
+	"provenance": {
+		"sources": {
+			"path": "sources.json",
+			"sha256": "fa19dc4c8ebed30574b6f3c9f1183b4b0d7e297bc121d2ed7e9f4cddd7fd61b9"
+		},
+		"summary": {
+			"path": "summary.json",
+			"sha256": "10043b7ad264e05a9385081c82a7641d9f60783f345a7f5f3e7bc386533d966c"
+		}
+	},
+	"reviewer": {
+		"path": "reviewer/expectations.json",
+		"sha256": "39a5ea6e9617e06e16f3c4b954afe5f63f344af1df1d7b6b2bfa048bd8813493"
+	},
+	"contextMeasurement": {
+		"method": "UTF-8 bytes and nonempty whitespace-delimited words of ordered document contents; no guessed tokens.",
+		"bytes": 65374,
+		"words": 9775,
+		"tokenizer": null,
+		"tokenCount": null,
+		"reason": "No named tokenizer/encoding is configured or declared for this offline workbench."
+	}
+}

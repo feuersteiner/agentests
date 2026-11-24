@@ -1,0 +1,22 @@
+{
+	"externalReply": [
+		{
+			"id": "reply-01",
+			"text": "Sera, the team understands the pressure of your Atlas launch. The latest technical information is not conclusive enough to give a firm repair date. Please send the order, legacy provider quote and examples of failed transactions so Delivery can investigate the responsibilities with Northstar."
+		},
+		{
+			"id": "reply-02",
+			"text": "The customer success and engineering teams will review the project and come back when they have a complete picture. The legacy route should stay in place for now. There may be value in discussing additional support once the implementation details are settled. Thank you for your patience."
+		}
+	],
+	"internalPlan": [
+		{
+			"id": "plan-01",
+			"text": "Forward H-218 to Engineering and the account executive. Request the signed order, quote and T-41 examples from Vela, then ask the two technical suppliers to agree who owns the remaining work. Keep existing routing and the final invoice block as they are."
+		},
+		{
+			"id": "plan-02",
+			"text": "Wait for the full root-cause and responsibility report before making a substantive response. Leave the support case open. No specialist due time is assigned; the account executive can discuss Premier Care after the report. Do not promise a repair date until Engineering confirms one."
+		}
+	]
+}

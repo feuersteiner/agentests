@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto';
 import { readFileSync, realpathSync } from 'node:fs';
 import { isAbsolute, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { approvedDossierIds } from './dossier-ids.ts';
 
 export const dossierDirectory = fileURLToPath(
 	new URL('../pilot/complex-support-01/', import.meta.url)
@@ -89,7 +90,10 @@ const unique = (values: unknown[]) =>
 	demand(new Set(values).size === values.length, 'Duplicate ID or reference');
 const json = (value: string): unknown => JSON.parse(value);
 const safeFile = (directory: string, path: string): string => {
-	demand(nonempty(path) && !isAbsolute(path), 'Expected relative fixture path');
+	demand(
+		nonempty(path) && !isAbsolute(path) && !path.split(/[\\/]/u).includes('..'),
+		'Expected relative fixture path'
+	);
 	const base = realpathSync(directory);
 	const target = realpathSync(resolve(base, path));
 	const rel = relative(base, target);
@@ -133,7 +137,7 @@ export const pickCandidate = (value: unknown): Candidate => {
 	};
 };
 
-const validateGradeContract = (schema: JsonObject, rubric: JsonObject) => {
+const validateGradeContract = (schema: JsonObject, rubric: JsonObject, scenarioId: unknown) => {
 	keys(rubric, [
 		'version',
 		'scale',
@@ -290,6 +294,86 @@ const validateGradeContract = (schema: JsonObject, rubric: JsonObject) => {
 			JSON.stringify(['ready', 'revise', 'hold-for-review']),
 		'Invalid integrated dispositions'
 	);
+	// Schema keywords alone are not an allowlist: an otherwise valid `properties`
+	// entry or `const` can carry an author verdict. Check every response field and
+	// leaf against the explicit assessment contract, including nested array items.
+	const text = { type: 'string', minLength: 1 };
+	const enumeration = (values: unknown[]) => ({ enum: values });
+	const responseObject = (properties: JsonObject) => ({
+		type: 'object',
+		additionalProperties: false,
+		required: Object.keys(properties),
+		properties
+	});
+	const responseArray = (items: JsonObject, minItems = 1) => ({
+		type: 'array',
+		minItems,
+		items,
+		uniqueItems: true
+	});
+	const evidenceIds = responseArray({ type: 'string', pattern: '^E[0-9]{2}$' });
+	const candidateSpans = responseArray({ type: 'string', pattern: '^(reply|plan)-[0-9]{2}$' });
+	const confidence = responseObject({
+		level: enumeration(['low', 'medium', 'high']),
+		rationale: text
+	});
+	const dimension = responseObject({
+		grade: { type: 'integer', minimum: 0, maximum: 3 },
+		rationale: text,
+		evidenceIds,
+		candidateSpans,
+		confidence
+	});
+	const expected = {
+		$schema: 'https://json-schema.org/draft/2020-12/schema',
+		$id: `urn:agentests:${scenarioId}:assessment:1`,
+		...responseObject({
+			schemaVersion: { const: '1.0' },
+			dimensions: responseObject(Object.fromEntries(dimensionIds.map((id) => [id, dimension]))),
+			integrated: responseObject({
+				disposition: enumeration(['ready', 'revise', 'hold-for-review']),
+				rationale: text,
+				evidenceIds,
+				candidateSpans,
+				hardBreaches: responseArray(
+					responseObject({
+						code: enumeration(array(rubric.hardBreaches).map((entry) => object(entry).code)),
+						rationale: text,
+						evidenceIds,
+						candidateSpans
+					}),
+					0
+				),
+				uncertainties: responseArray(
+					responseObject({ question: text, impact: text, neededToResolve: text, evidenceIds })
+				),
+				tradeoffs: responseArray(
+					responseObject({
+						dimensions: responseArray(enumeration([...dimensionIds]), 2),
+						explanation: text,
+						evidenceIds,
+						candidateSpans
+					})
+				),
+				acceptableAlternatives: responseArray(
+					responseObject({ description: text, limits: text, evidenceIds })
+				),
+				confidence
+			})
+		})
+	};
+	const exactShape = (actual: unknown, expected: unknown): void => {
+		if (Array.isArray(expected)) {
+			const values = array(actual);
+			demand(values.length === expected.length, 'Unexpected response schema contract');
+			expected.forEach((value, index) => exactShape(values[index], value));
+		} else if (expected !== null && typeof expected === 'object') {
+			const value = object(actual);
+			keys(value, Object.keys(expected));
+			for (const [key, child] of Object.entries(expected)) exactShape(value[key], child);
+		} else demand(actual === expected, 'Unexpected response schema contract');
+	};
+	exactShape(schema, expected);
 };
 
 /** No reviewer file, provider, environment lookup or network dependency. */
@@ -310,7 +394,7 @@ export const loadDossierInputs = (directory = dossierDirectory): Dossier => {
 	]);
 	demand(
 		rawManifest.formatVersion === '1.0' &&
-			rawManifest.scenarioId === 'complex-support-01' &&
+			approvedDossierIds.includes(rawManifest.scenarioId as string) &&
 			rawManifest.scenarioCount === 1,
 		'Exactly one versioned complex scenario is required'
 	);
@@ -333,7 +417,11 @@ export const loadDossierInputs = (directory = dossierDirectory): Dossier => {
 		'inputScope'
 	]);
 	demand(
-		Object.values(task).every(nonempty) && task.decisionCutoff === '2024-03-01T15:00:00Z',
+		Object.values(task).every(nonempty) &&
+			/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/u.test(task.decisionCutoff as string) &&
+			Number.isFinite(Date.parse(task.decisionCutoff as string)) &&
+			new Date(task.decisionCutoff as string).toISOString().replace('.000Z', 'Z') ===
+				task.decisionCutoff,
 		'Incomplete task or cutoff'
 	);
 	const rubric = object(json(readRef(directory, manifest.inputs.rubric)));
@@ -342,7 +430,7 @@ export const loadDossierInputs = (directory = dossierDirectory): Dossier => {
 		task.version === '1.0' && task.scenarioId === manifest.scenarioId && rubric.version === '1.0',
 		'Invalid task/rubric version'
 	);
-	validateGradeContract(responseSchema, rubric);
+	validateGradeContract(responseSchema, rubric, task.scenarioId);
 	const context = array(manifest.documents).map((entry, index) => {
 		const ref = object(entry) as unknown as DocumentRef;
 		demand(
@@ -380,7 +468,7 @@ export const loadDossierInputs = (directory = dossierDirectory): Dossier => {
 		);
 		return { id: ref.id, content: pickCandidate(json(readRef(directory, ref))) };
 	});
-	demand(candidates.length >= 5, 'Expected multiple candidate alternatives');
+	demand(candidates.length === 5, 'Expected exactly five candidate alternatives');
 	const paths = [
 		...Object.values(manifest.inputs),
 		...manifest.documents,
@@ -399,7 +487,7 @@ export const loadDossierInputs = (directory = dossierDirectory): Dossier => {
 
 export const packageDossier = (dossier: Dossier) => {
 	// Nested normative fields are strict, including every response-schema node.
-	validateGradeContract(dossier.responseSchema, dossier.rubric);
+	validateGradeContract(dossier.responseSchema, dossier.rubric, dossier.task.scenarioId);
 	return dossier.candidates.map((candidate) => {
 		const packet = JSON.stringify({
 			task: {
@@ -449,11 +537,19 @@ export const validateDossier = (directory = dossierDirectory): Dossier => {
 				nonempty(source.stableIdentifier),
 			'Missing public source URL/identifier'
 		);
-		for (const key of ['publicationDate', 'retrievedDate'])
-			demand(
-				typeof source[key] === 'string' && /^\d{4}-\d{2}-\d{2}$/u.test(source[key]),
-				'Missing source date'
-			);
+		const validDate = (value: unknown) =>
+			typeof value === 'string' &&
+			/^\d{4}-\d{2}-\d{2}$/u.test(value) &&
+			Number.isFinite(Date.parse(value)) &&
+			new Date(value).toISOString().slice(0, 10) === value;
+		demand(validDate(source.retrievedDate), 'Missing source retrieval date');
+		demand(
+			validDate(source.publicationDate) ||
+				(source.publicationDate === null &&
+					typeof source.updateUncertainty === 'string' &&
+					source.updateUncertainty.includes('publication-date-unknown')),
+			'Missing source publication date or explicit publication-date-unknown declaration'
+		);
 		demand(
 			nonempty(source.updateUncertainty) &&
 				source.reuseBasis === 'original factual paraphrase, no transcript license asserted' &&
@@ -476,7 +572,7 @@ export const validateDossier = (directory = dossierDirectory): Dossier => {
 			'Source hash scope missing'
 		);
 	}
-	demand(sourceIds.size === 7, 'Missing source provenance');
+	demand(sourceIds.size > 0, 'Missing source provenance');
 	const summary = object(json(readRef(directory, dossier.manifest.provenance.summary)));
 	demand(summary.version === '1.0', 'Invalid summary version');
 	const claims = array(summary.claims).map(object);

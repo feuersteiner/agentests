@@ -95,6 +95,10 @@ describe('complex dossier offline preparation', () => {
 			}
 			expect(packageDossier(loadDossierInputs(root))).toEqual(before);
 			expect(() => validateDossier(root)).toThrow('Frozen hash mismatch');
+			rmSync(resolve(root, 'reviewer'), { recursive: true });
+			rmSync(resolve(root, 'sources.json'));
+			rmSync(resolve(root, 'summary.json'));
+			expect(packageDossier(loadDossierInputs(root))).toEqual(before);
 		}));
 
 	test('rejects corrupted frozen evidence and unknown cross-references', () =>
@@ -159,6 +163,46 @@ describe('complex dossier offline preparation', () => {
 		expect(() => packageDossier(inMemory)).toThrow('Unexpected contract fields');
 	});
 
+	test('rejects schema property and const canaries inside every integrated response object', () => {
+		for (const field of [
+			'confidence',
+			'hardBreaches',
+			'uncertainties',
+			'tradeoffs',
+			'acceptableAlternatives'
+		]) {
+			const dossier = loadDossierInputs();
+			const integrated = (
+				(dossier.responseSchema.properties as RecordValue).integrated as RecordValue
+			).properties as RecordValue;
+			const definition = integrated[field] as RecordValue;
+			const node = (definition.items ?? definition) as RecordValue;
+			(node.properties as RecordValue).reviewerNote = { const: 'SCHEMA_CANARY p01 ready' };
+			(node.required as string[]).push('reviewerNote');
+			expect(() => packageDossier(dossier)).toThrow(/Unexpected .*contract/u);
+		}
+		const dossier = loadDossierInputs();
+		const integrated = (
+			(dossier.responseSchema.properties as RecordValue).integrated as RecordValue
+		).properties as RecordValue;
+		integrated.rationale = { const: 'SCHEMA_CANARY p01 ready' };
+		expect(() => packageDossier(dossier)).toThrow(/Unexpected .*contract/u);
+	});
+
+	test('schema breach codes follow the case rubric and cannot add author verdicts', () => {
+		const dossier = loadDossierInputs();
+		const integrated = (
+			(dossier.responseSchema.properties as RecordValue).integrated as RecordValue
+		).properties as RecordValue;
+		const breaches = ((integrated.hardBreaches as RecordValue).items as RecordValue)
+			.properties as RecordValue;
+		const codes = (breaches.code as RecordValue).enum as string[];
+		codes[0] = 'case-specific-authority-breach';
+		expect(() => packageDossier(dossier)).toThrow('Unexpected response schema contract');
+		(dossier.rubric.hardBreaches as RecordValue[])[0]!.code = codes[0];
+		expect(packageDossier(dossier)).toHaveLength(5);
+	});
+
 	test('rejects invalid reviewer ranges, source references and local provenance hashes', () => {
 		copied((root) => {
 			const path = 'reviewer/expectations.json';
@@ -186,6 +230,61 @@ describe('complex dossier offline preparation', () => {
 			write(root, path, sources);
 			refresh(root, path);
 			expect(() => validateDossier(root)).toThrow('Invalid local paraphrase');
+		});
+	});
+
+	test('source counts vary without losing provenance, and undated pages require explicit uncertainty', () => {
+		copied((root) => {
+			const path = 'sources.json';
+			const sources = read(root, path);
+			const entries = sources.sources as RecordValue[];
+			entries.pop();
+			entries[0]!.publicationDate = null;
+			entries[0]!.updateUncertainty =
+				'publication-date-unknown: living primary page, no publication date verified';
+			write(root, path, sources);
+			refresh(root, path);
+			const summary = read(root, 'summary.json');
+			for (const claim of summary.claims as RecordValue[])
+				claim.sourceIds = (claim.sourceIds as string[]).filter((id) => id !== 'S07');
+			write(root, 'summary.json', summary);
+			refresh(root, 'summary.json');
+			expect(() => validateDossier(root)).not.toThrow();
+			entries[0]!.updateUncertainty = 'Undated';
+			write(root, path, sources);
+			refresh(root, path);
+			expect(() => validateDossier(root)).toThrow('publication-date-unknown');
+			entries[0]!.publicationDate = '2024-02-30';
+			write(root, path, sources);
+			refresh(root, path);
+			expect(() => validateDossier(root)).toThrow('publication date');
+		});
+	});
+
+	test('exactly five alternatives and valid scenario-specific cutoffs are required', () => {
+		copied((root) => {
+			const manifest = read(root, 'manifest.json');
+			(manifest.candidates as unknown[]).pop();
+			write(root, 'manifest.json', manifest);
+			expect(() => loadDossierInputs(root)).toThrow('exactly five');
+		});
+		copied((root) => {
+			const manifest = read(root, 'manifest.json');
+			const candidates = manifest.candidates as RecordValue[];
+			candidates.push({ ...candidates[0], id: 'p06' });
+			write(root, 'manifest.json', manifest);
+			expect(() => loadDossierInputs(root)).toThrow('exactly five');
+		});
+		copied((root) => {
+			const task = read(root, 'task.json');
+			task.decisionCutoff = '2025-04-12T10:30:00Z';
+			write(root, 'task.json', task);
+			refresh(root, 'task.json');
+			expect(loadDossierInputs(root).task.decisionCutoff).toBe(task.decisionCutoff);
+			task.decisionCutoff = '2025-02-30T10:30:00Z';
+			write(root, 'task.json', task);
+			refresh(root, 'task.json');
+			expect(() => loadDossierInputs(root)).toThrow('cutoff');
 		});
 	});
 

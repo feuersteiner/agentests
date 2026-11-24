@@ -1,0 +1,72 @@
+{
+	"version": "1.0",
+	"status": "Authored reviewer/provenance navigation, not ground truth or evaluator input.",
+	"claims": [
+		{
+			"id": "grounding",
+			"status": "attributed-primary-source-context",
+			"evidenceIds": ["E01"],
+			"sourceIds": ["S01", "S02", "S03", "S04"],
+			"claim": "Official launch guidance, integration semantics and Commissioners assessment inspire a fictional composite; none supplies fictional authority."
+		},
+		{
+			"id": "money",
+			"status": "synthetic-verified-ledger",
+			"evidenceIds": ["E02", "E19"],
+			"sourceIds": [],
+			"claim": "Platform $96000 and implementation $40000 paid; final $20000 draft blocked and unissued, not a collected sum or refund."
+		},
+		{
+			"id": "technical",
+			"status": "synthetic-reproduced-and-limited",
+			"evidenceIds": ["E08", "E09", "E10"],
+			"sourceIds": [],
+			"claim": "Vendor retry duplicate defect and partner mapping defect coexist; narrow patch pass does not establish full workflow readiness."
+		},
+		{
+			"id": "ownership",
+			"status": "synthetic-contract-and-dispute",
+			"evidenceIds": ["E04", "E09", "E16", "E17"],
+			"sourceIds": [],
+			"claim": "Joined coordination and split component ownership apply; critical-path impact of late customer data overlaps sandbox outage and remains disputed."
+		},
+		{
+			"id": "authority",
+			"status": "synthetic-conditional-approval",
+			"evidenceIds": ["E05", "E07", "E18"],
+			"sourceIds": [],
+			"claim": "Sixty engineering hours and capped verified legacy cost are approved; commercial pilot needs scope, evidence, signatures and customer consent; delegation classification remains disputed."
+		},
+		{
+			"id": "deadline",
+			"status": "synthetic-customer-contract",
+			"evidenceIds": ["E03", "E10", "E20"],
+			"sourceIds": [],
+			"claim": "Atlas notice June13 16:00 and operational requirement June16 08:00 remain; no retailer waiver or supplier guarantee exists."
+		},
+		{
+			"id": "sales",
+			"status": "synthetic-correspondence",
+			"evidenceIds": ["E06", "E11", "E13"],
+			"sourceIds": [],
+			"claim": "Launch-ready language exceeded tests; forecast tile and attendance signature do not equal acceptance; paid support does not guarantee launch."
+		}
+	],
+	"uncertainties": [
+		{
+			"question": "How much delay was caused by the late file rather than overlapping sandbox unavailability?",
+			"evidenceIds": ["E09", "E16", "E17"],
+			"effect": "Affects allocation and possible later remedy, not the need for current coordinated correction."
+		},
+		{
+			"question": "Does mode A fall within the nonautomated demonstration delegation?",
+			"evidenceIds": ["E07", "E16", "E18"],
+			"effect": "Material authorization interpretation for one candidate; customer consent and current staging permission alone do not resolve it."
+		},
+		{
+			"question": "Will Atlas accept legacy continuation or grant a waiver?",
+			"evidenceIds": ["E03", "E10", "E20"],
+			"effect": "No route can promise the external contract outcome."
+		}
+	]
+}

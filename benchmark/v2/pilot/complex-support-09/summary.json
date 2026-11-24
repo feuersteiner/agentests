@@ -1,0 +1,60 @@
+{
+	"version": "1.0",
+	"status": "authored navigation and claim inventory, not ground truth labels; excluded from model packets",
+	"claims": [
+		{
+			"id": "source-boundary",
+			"status": "attributed-current-vendor-documentation",
+			"evidenceIds": ["E01"],
+			"sourceIds": ["S01", "S02", "S03", "S04", "S05"],
+			"claim": "Current public sources illustrate scope, access, copy and provider distinctions; they do not establish ValeGrid policy at the fictional cutoff."
+		},
+		{
+			"id": "current-locations",
+			"status": "synthetic-verified-scoped-record",
+			"evidenceIds": ["E06", "E07", "E08", "E15"],
+			"sourceIds": [],
+			"claim": "Primary content and routine replicas are EU; identity and telemetry are global or US; a historical support attachment is US and overseas rendering is recorded with limited detail."
+		},
+		{
+			"id": "authority",
+			"status": "synthetic-dated-approval",
+			"evidenceIds": ["E03", "E09", "E13", "E14"],
+			"sourceIds": [],
+			"claim": "Export preparation and connector disablement have bounded consent; labor and continuation offer are approved; migration, deletion and amendments have separate requirements."
+		},
+		{
+			"id": "migration",
+			"status": "synthetic-conditional-forecast",
+			"evidenceIds": ["E11", "E12", "E20"],
+			"sourceIds": [],
+			"claim": "Production move cannot meet the September 17 review, has testing and outage dependencies, and cannot regionalize global identity or old vendor artifacts."
+		},
+		{
+			"id": "commercial-state",
+			"status": "synthetic-account-record",
+			"evidenceIds": ["E02", "E13", "E17"],
+			"sourceIds": [],
+			"claim": "Current fee paid, next annual invoice unissued and uncollected, extension not active, no renewal purchase needed for approved work."
+		},
+		{
+			"id": "competing-interpretation",
+			"status": "synthetic-disputed-contract-scope",
+			"evidenceIds": ["E04", "E05", "E13", "E14"],
+			"sourceIds": [],
+			"claim": "Broad assurance and signed matrix support customer reliance; content examples and retained DPA support narrower scope. Letter terminology may imply a warranty beyond a factual content statement."
+		}
+	],
+	"uncertainties": [
+		{
+			"question": "Does the annex govern all operational categories or application content?",
+			"evidenceIds": ["E04", "E14"],
+			"effect": "Territorial warranty and letter scope remain subject to interpretation; known locations can still be disclosed."
+		},
+		{
+			"question": "What residual trial, diagnostic and vendor copies remain, and who viewed historic attachments?",
+			"evidenceIds": ["E06", "E07", "E08", "E15"],
+			"effect": "Prevents all-copies and all-history assurances; does not prevent bounded controls or export."
+		}
+	]
+}

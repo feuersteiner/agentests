@@ -1,0 +1,192 @@
+{
+	"formatVersion": "1.0",
+	"scenarioId": "complex-support-03",
+	"scenarioCount": 1,
+	"status": "offline-prepared-graded-evaluation-not-implemented",
+	"labelStatus": "synthetic-provisional-not-human-reviewed",
+	"inputs": {
+		"task": {
+			"path": "task.json",
+			"sha256": "1daa3c9883def70f4712631762d6c2705ff37a04f9017f4b3dda84a76efcacd5"
+		},
+		"rubric": {
+			"path": "rubric.json",
+			"sha256": "02ddc9db430164dd24e9dcccf17141fd5437a8d3114ca7bd9fa4a81670839125"
+		},
+		"responseSchema": {
+			"path": "response.schema.json",
+			"sha256": "56d35669f77b17d2d1c15d0dd4f705d297e6b50895622425840fa7fe4d47d072"
+		}
+	},
+	"documents": [
+		{
+			"id": "E01",
+			"version": "1.0",
+			"path": "documents/01-public-background.md",
+			"sha256": "ac57c10980c33ccada627e43234d6ec97f9687e2e1a6f9c1db428009db49a196"
+		},
+		{
+			"id": "E02",
+			"version": "ORD-7.2",
+			"path": "documents/02-account-and-workflow.md",
+			"sha256": "60c93c70967359f29cf312f689847b2eedf76bfe6f7262ddafdf8f72cbf8355a"
+		},
+		{
+			"id": "E03",
+			"version": "MW-THREAD.3",
+			"path": "documents/03-customer-deadlines.md",
+			"sha256": "d136bc61199151a6f0dc9075d303e5d4ccb0f14ff5329f1551aa75deef3e915f"
+		},
+		{
+			"id": "E04",
+			"version": "IR-619.4",
+			"path": "documents/04-incident-state.md",
+			"sha256": "2c3293fd712b3a7f479f1e073c6a046ffee78136b5cc83d48befe7d47e95fae5"
+		},
+		{
+			"id": "E05",
+			"version": "REC-4.1",
+			"path": "documents/05-current-recovery-policy.md",
+			"sha256": "fbdd89d700bf4bfe49076138475472c2c077e7433def8182000172d9651a70c3"
+		},
+		{
+			"id": "E06",
+			"version": "REC-2.6",
+			"path": "documents/06-superseded-playbook.md",
+			"sha256": "d7acd83fd6d14d3d4116bff09058784edac5a1d1e0c02b9bd43b25ac87a74477"
+		},
+		{
+			"id": "E07",
+			"version": "BK-619.3",
+			"path": "documents/07-backup-inventory.md",
+			"sha256": "f1dc60c93b7b137d72b392cb030914774f3f2e758eaa0891c2f1b224a5a277ce"
+		},
+		{
+			"id": "E08",
+			"version": "EST-619.2",
+			"path": "documents/08-estimates-and-dependencies.md",
+			"sha256": "3a5f1f09d71586251f55c87a382060a713c3448de503931148aedcb82ccf9cab"
+		},
+		{
+			"id": "E09",
+			"version": "VAL-619.2",
+			"path": "documents/09-validation-and-release.md",
+			"sha256": "8f59f46fffad3709f8b4be53f8e9e48eae814660a7dea5e6e40dd2ea816d5dcb"
+		},
+		{
+			"id": "E10",
+			"version": "MW-EVID.2",
+			"path": "documents/10-customer-export-and-gaps.md",
+			"sha256": "377d4bb7ec3b6395e2679c090864ba3feb058d693db832da3a3a0ff255424a9c"
+		},
+		{
+			"id": "E11",
+			"version": "CRM-884.3",
+			"path": "documents/11-sales-and-brand-promises.md",
+			"sha256": "51729248c5e743d56dcafba0acdb52222694531d2e3d455e5d06ac4be9345fb2"
+		},
+		{
+			"id": "E12",
+			"version": "FIN-5.0/CA-619",
+			"path": "documents/12-financial-authority.md",
+			"sha256": "6a77f274abde7edcb72b4c6c8fb208e9daba271c08af4bf356b9e1c1f448a5bb"
+		},
+		{
+			"id": "E13",
+			"version": "LEG-619.1",
+			"path": "documents/13-service-terms-and-claims.md",
+			"sha256": "01c0ae459d27ed4cdd43ef613a1660f73e4cd5a38f99614a3736260012196630"
+		},
+		{
+			"id": "E14",
+			"version": "SUP-8.2",
+			"path": "documents/14-ownership-and-update-controls.md",
+			"sha256": "d3e5bc2f20aacae4f8413c987411c8328ac637a56e524352f456368ee4942871"
+		},
+		{
+			"id": "E15",
+			"version": "REV-619.2",
+			"path": "documents/15-renewal-and-exit.md",
+			"sha256": "6c1a97140b90fae3fc3ef2a530097f7b673b35044574fd93d56cd77f00421039"
+		},
+		{
+			"id": "E16",
+			"version": "DATA-619.1",
+			"path": "documents/16-disclosure-and-minimized-evidence.md",
+			"sha256": "34a4f14d72dbaa9df1704674ce8a215a5b174c2c352d9f2c449834d59d61b2ae"
+		},
+		{
+			"id": "E17",
+			"version": "TIME-619.2",
+			"path": "documents/17-event-chronology.md",
+			"sha256": "6a90da3954eb475611a6bb19fabbd0986887608f9f214a899c13866f6341f99a"
+		},
+		{
+			"id": "E18",
+			"version": "MW-COST.2",
+			"path": "documents/18-supplier-cost-and-consent.md",
+			"sha256": "9bc2546999ea4391d76c0cb0a92bfab1c39576ac442a18728a8e6fc6886f9573"
+		},
+		{
+			"id": "E19",
+			"version": "APP-619.3",
+			"path": "documents/19-bridgepack-evidence-check.md",
+			"sha256": "f05630af6f4f00b8df4b66afac0dc3a763b9f488ac37bd93c982f5af70917566"
+		},
+		{
+			"id": "E20",
+			"version": "HAND-619.1",
+			"path": "documents/20-latest-handoff-and-capacity.md",
+			"sha256": "18bc1265086ffe9a57a8020a63ebfe05c5bfb26a43727c7fa9e4dcb9762f2f5b"
+		}
+	],
+	"candidates": [
+		{
+			"id": "p01",
+			"path": "candidates/p01.json",
+			"sha256": "15c7fad96f7353baa8c0672a660683f4ae9c864a1d4e6e440ac1b39604ff5f1f"
+		},
+		{
+			"id": "p02",
+			"path": "candidates/p02.json",
+			"sha256": "59a5abcb7731ed8bd95f3b98b692effc4b3d746cdece96a7df64826f95f654c4"
+		},
+		{
+			"id": "p03",
+			"path": "candidates/p03.json",
+			"sha256": "8a5391dc705cb9fe80df1a0a564def31f6b83ade5f7d6451970de5d039d0cabd"
+		},
+		{
+			"id": "p04",
+			"path": "candidates/p04.json",
+			"sha256": "a031fbd1d6e35bca8e53dcc3e8a01e3aaa2ae293d61e6d3e4e970be86edd2493"
+		},
+		{
+			"id": "p05",
+			"path": "candidates/p05.json",
+			"sha256": "5914971ce3bfe6768e9c6af3fb12351d16c7a513396163643210fc67a8f2d450"
+		}
+	],
+	"provenance": {
+		"sources": {
+			"path": "sources.json",
+			"sha256": "062f158641723c0bc3fb51a4efe008dedf5667d5a6f0fdb10f4b41bb45f0039f"
+		},
+		"summary": {
+			"path": "summary.json",
+			"sha256": "dab1bcb08c0c020760a84d62dffbd266201dcbd27c7079ae282859d6ad07890a"
+		}
+	},
+	"reviewer": {
+		"path": "reviewer/expectations.json",
+		"sha256": "dc489fb9d56dfef9da00427d20ee12ef8f12e1cb0f70ddafeecdbc7413d366bc"
+	},
+	"contextMeasurement": {
+		"method": "UTF-8 bytes and nonempty whitespace-delimited words of ordered document contents; no guessed tokens.",
+		"bytes": 63728,
+		"words": 9351,
+		"tokenizer": null,
+		"tokenCount": null,
+		"reason": "No named tokenizer/encoding is configured or declared for this offline workbench."
+	}
+}

@@ -1,0 +1,22 @@
+{
+	"externalReply": [
+		{
+			"id": "reply-01",
+			"text": "Leena, the investigation is still open and the team cannot promise that all impact is known. Your concerns have been sent to Security and Legal, who will reply when their review is complete. Please send the original browser archive again, screenshots of the administrator warning and a copy of the signed agreement so they can start a complete assessment."
+		},
+		{
+			"id": "reply-02",
+			"text": "To be cautious, please avoid all account changes for now. Sales can discuss your upcoming renewal separately, and the team will not make a final statement about the incident at this stage. Thank you for your patience while the specialists work through the evidence."
+		}
+	],
+	"internalPlan": [
+		{
+			"id": "plan-01",
+			"text": "Forward the thread to the shared Security and Legal queues. Wait for a final forensic report before sending an account-specific explanation or changing the May 13 assurance. Do not assign a customer update deadline until the report is complete. Ask Theo to upload the original unredacted archive to the normal support attachment route and resend his existing alert references."
+		},
+		{
+			"id": "plan-02",
+			"text": "Leave the commercial record and entitlement as they stand. Tell Owen to handle renewal questions after Security replies; do not send the already approved extension offer because that might look like an admission. Leave case ownership in the specialist queue. No one is assigned to Leena 14:00 board-packet deadline or the May 15 service-decision reminder."
+		}
+	]
+}

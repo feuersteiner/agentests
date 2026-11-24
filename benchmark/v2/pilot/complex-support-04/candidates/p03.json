@@ -1,0 +1,22 @@
+{
+	"externalReply": [
+		{
+			"id": "reply-01",
+			"text": "Miri, thank you for sending the old correspondence. The team understands this is frustrating. No new renewal payment has been collected and your existing annual service is paid until July 1. We have passed the letter and the billing-address issue to Contracts and will let you know when they have reviewed them. Please keep a copy for your records."
+		},
+		{
+			"id": "reply-02",
+			"text": "You can contact Felix if you would like to discuss the latest packages. Support remains available for questions about exporting projects."
+		}
+	],
+	"internalPlan": [
+		{
+			"id": "plan-01",
+			"text": "Attach Miri’s letter and open a Contracts task. Do not quote a final legal interpretation or approve a price change. Record that the invoice is still a draft and no refund is needed."
+		},
+		{
+			"id": "plan-02",
+			"text": "Leave the existing renewal workflow alone until Contracts replies. Orin monitors the support inbox next week and sends the resulting explanation when available. Felix handles any commercial questions. Close the immediate support response task after sending acknowledgment; do not alter current production workspaces."
+		}
+	]
+}

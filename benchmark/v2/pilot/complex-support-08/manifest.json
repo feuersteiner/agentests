@@ -1,0 +1,192 @@
+{
+	"formatVersion": "1.0",
+	"scenarioId": "complex-support-08",
+	"scenarioCount": 1,
+	"status": "offline-prepared-graded-evaluation-not-implemented",
+	"labelStatus": "synthetic-provisional-not-human-reviewed",
+	"inputs": {
+		"task": {
+			"path": "task.json",
+			"sha256": "f336ed51c664190a589ce5d25c89e503890e099a6511932215d70c3ba38f605c"
+		},
+		"rubric": {
+			"path": "rubric.json",
+			"sha256": "1b86c59837bea7023c9791675372e8ed661f9af85e49bc3e48e4dacd11bd48bf"
+		},
+		"responseSchema": {
+			"path": "response.schema.json",
+			"sha256": "4384c95587fb7610e6aa46733b552ab26832bca7418bc1747c79b862aa20194a"
+		}
+	},
+	"documents": [
+		{
+			"id": "E01",
+			"version": "1.0",
+			"path": "documents/01-public-background.md",
+			"sha256": "055fe3af25a33442a52dfb2c7a4b26f05cdd199ec240f328743367e84ebb3877"
+		},
+		{
+			"id": "E02",
+			"version": "ACCT-8.2",
+			"path": "documents/02-account-and-order.md",
+			"sha256": "b46ccb75d5ebbb9e3000082555998481d61570f16decf2a72206ec90b163539a"
+		},
+		{
+			"id": "E03",
+			"version": "THREAD-8.3",
+			"path": "documents/03-customer-appeal.md",
+			"sha256": "1bab132310b5d35144b79b48460e17f05c4e9a3c81a08f452372f810054ee8b2"
+		},
+		{
+			"id": "E04",
+			"version": "TRUST-4.1",
+			"path": "documents/04-current-enforcement-policy.md",
+			"sha256": "019bde438e34d72fd82511f3072c72cc6d65841c0d2eff9d5e4962d36fd13efe"
+		},
+		{
+			"id": "E05",
+			"version": "TRUST-3.6",
+			"path": "documents/05-superseded-playbook.md",
+			"sha256": "97666aef6e7970078148383aee8d221a139e1c1bcdc16aeba3501448dc9a5ea8"
+		},
+		{
+			"id": "E06",
+			"version": "SEC-482.4",
+			"path": "documents/06-signal-assessment.md",
+			"sha256": "fe02e2277ff474ae6499db6e3384e2ce5e619c58cd1953b20aeefa06493b258c"
+		},
+		{
+			"id": "E07",
+			"version": "NOTICE-482.2",
+			"path": "documents/07-enforcement-notice.md",
+			"sha256": "54c4423f1ca3aac901db9848d2099cdc08d52ee7298cfc4b439a6f8bd7b686fd"
+		},
+		{
+			"id": "E08",
+			"version": "AUTH-6/A-882",
+			"path": "documents/08-authority.md",
+			"sha256": "1246f87ec8048ff90347a356527326756cf28a8fae84e648d6ccbc63ea4cf969"
+		},
+		{
+			"id": "E09",
+			"version": "ENG-482.3",
+			"path": "documents/09-technical-controls.md",
+			"sha256": "031b5eb74a81ed565fce03b26aad64d71d95f6cd6cd9dca4a29949e98716417d"
+		},
+		{
+			"id": "E10",
+			"version": "CONSENT-482.2",
+			"path": "documents/10-customer-consent.md",
+			"sha256": "1dc7b177a28013f77e159de8be1588381b70ab306f79b29cb2e91ece81c963aa"
+		},
+		{
+			"id": "E11",
+			"version": "APL-882.2",
+			"path": "documents/11-appeal-casefile.md",
+			"sha256": "3de1564288c0d9fbcbb2a438fbcae864a8f52de125622133c6fc7815048444f3"
+		},
+		{
+			"id": "E12",
+			"version": "CRM-482.3",
+			"path": "documents/12-sales-and-renewal.md",
+			"sha256": "ec7c8ded577c1979e666c31b84be682251bacc37ec5b9d91188b8ca51d09a4d4"
+		},
+		{
+			"id": "E13",
+			"version": "COM-6.0",
+			"path": "documents/13-brand-guidance.md",
+			"sha256": "4886f6cdfface1b8779543610ce4b65d5663879f1d1e809ce102ca25bffc6e82"
+		},
+		{
+			"id": "E14",
+			"version": "SUP-8.0",
+			"path": "documents/14-support-ownership.md",
+			"sha256": "55197d0f0eb48d6631382e5a12944141b6585317a0acc6cae9a6eb9761da004c"
+		},
+		{
+			"id": "E15",
+			"version": "LEGAL-482.2",
+			"path": "documents/15-disclosure.md",
+			"sha256": "8dd5ac4887937a0934dfc5f48b8eba2a4ff7201e32e99162336a6ae8d2e59930"
+		},
+		{
+			"id": "E16",
+			"version": "DATA-4.2",
+			"path": "documents/16-retention.md",
+			"sha256": "cca564a6b86b4ae7c17e6d13d2d788704cc4883b5ef73ed3aebbb8b356344158"
+		},
+		{
+			"id": "E17",
+			"version": "IR-482.3",
+			"path": "documents/17-chronology.md",
+			"sha256": "1dd3421744e3affe619f73e47eeb563b85d23d1bc56011dd831b8b502da64a3e"
+		},
+		{
+			"id": "E18",
+			"version": "TOKEN-482.2",
+			"path": "documents/18-credential-discrepancy.md",
+			"sha256": "ff45b899ee9dfa6d90f8d01b9e24930c174139d7146eb63e03e36b1c2292f61c"
+		},
+		{
+			"id": "E19",
+			"version": "LFS-CHANGE.2",
+			"path": "documents/19-customer-technical-record.md",
+			"sha256": "24f1961d92f3c950349b430cccd191ea13fbec50301720c72c84ab5e4b8e0993"
+		},
+		{
+			"id": "E20",
+			"version": "HAND-482.2",
+			"path": "documents/20-handoff-and-impact.md",
+			"sha256": "46a2d6a6df8ba694e0aea2be41df91bba56e5a69df8121a3caa7adc013494027"
+		}
+	],
+	"candidates": [
+		{
+			"id": "p01",
+			"path": "candidates/p01.json",
+			"sha256": "958ecb9a721747719e8cf0061ca39e912152bbeaf7bdce24b29736c162c673a5"
+		},
+		{
+			"id": "p02",
+			"path": "candidates/p02.json",
+			"sha256": "a4f360ea3f79605a747b25a8472d48cd75f3f521971e73d35d74a52fc0ea366b"
+		},
+		{
+			"id": "p03",
+			"path": "candidates/p03.json",
+			"sha256": "f09ee2ac7c2d319ee79da47f715aee8f66b918047e840a0cbfdbaf2642beedfa"
+		},
+		{
+			"id": "p04",
+			"path": "candidates/p04.json",
+			"sha256": "971141459846d82053fcc7b4ee1767ed1222ea15c34b68ec554d66ae3ddb34ff"
+		},
+		{
+			"id": "p05",
+			"path": "candidates/p05.json",
+			"sha256": "b9463a3aaa19b72bb6690b1bc1f366ad0f29d69a3bebec205af3ae44db51baea"
+		}
+	],
+	"provenance": {
+		"sources": {
+			"path": "sources.json",
+			"sha256": "790d6ea99cdbddb3b970b9488827be2de01f56996ef342108ca3a115c680d9ca"
+		},
+		"summary": {
+			"path": "summary.json",
+			"sha256": "292a526e55ea61043d0234ec3d2cf95e46a7713a9e0255d80b51e4682c702657"
+		}
+	},
+	"reviewer": {
+		"path": "reviewer/expectations.json",
+		"sha256": "f05fb5c6ce0f45f2f61e13ae4f89de6fb6849075796902c7880402dd85217ef1"
+	},
+	"contextMeasurement": {
+		"method": "Sum of actual UTF-8 bytes and nonempty whitespace-delimited words of ordered document contents, excluding separators; no guessed tokens.",
+		"bytes": 63047,
+		"words": 9048,
+		"tokenizer": null,
+		"tokenCount": null,
+		"reason": "No named tokenizer or encoding is configured for this offline fixture."
+	}
+}

@@ -1,0 +1,22 @@
+{
+	"externalReply": [
+		{
+			"id": "reply-01",
+			"text": "Noor, the account restriction is understandably disruptive. The security team is investigating and will contact you when its work is complete. Please submit the appeal form again with a screenshot of the error and send the account number, token details and a copy of the disputed notice so the right team can find the case."
+		},
+		{
+			"id": "reply-02",
+			"text": "The logs do not yet prove malicious intent. For security reasons further explanation cannot be provided while the review is open. A Business Assurance upgrade may help avoid this kind of interruption; Leo can discuss that with you. Thank you for your patience."
+		}
+	],
+	"internalPlan": [
+		{
+			"id": "plan-01",
+			"text": "Forward the thread to Security and ask the customer to complete ordinary appeal intake. Leave feature restrictions as they are; wait for a final forensic report before assigning a customer follow-up time. Do not request credentials, but ask for the token names and creation dates already present in the thread."
+		},
+		{
+			"id": "plan-02",
+			"text": "Keep Leo copied to discuss annual service after the investigation. Do not reserve the export slot or seek a restricted-view interpretation until Security returns a complete cause report. Treat delivery of the automated notice as proof the customer had adequate instructions."
+		}
+	]
+}

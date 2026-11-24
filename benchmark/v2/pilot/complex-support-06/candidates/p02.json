@@ -1,0 +1,22 @@
+{
+	"externalReply": [
+		{
+			"id": "reply-01",
+			"text": "Ruth, thank you for setting out the application difficulty. The specialist team is investigating the accessibility report. It would help to send browser details, screenshots and the steps again so they can assess the issue fully. They will get back to you when the investigation is finished."
+		},
+		{
+			"id": "reply-02",
+			"text": "No complete accessibility assessment is available, so a universal guarantee would be inappropriate. The Trust can consider postponing its notices if it is concerned. The Enhanced Launch package may offer additional help. The sales and technical teams will discuss next steps with you."
+		}
+	],
+	"internalPlan": [
+		{
+			"id": "plan-01",
+			"text": "Forward the complaint to the accessibility queue and request another reproduction from the volunteer. Leave the production scheduler unchanged until a complete assessment establishes the full extent of the problem. The dashboard has a blocked flag, which the next shift can inspect."
+		},
+		{
+			"id": "plan-02",
+			"text": "Ask Owen to discuss the optional package and the old certification wording with procurement. There is no agreed specialist response deadline. Do not give the Trust a specific operational recommendation until the final product-wide report is ready; marketing can review its wording afterward."
+		}
+	]
+}

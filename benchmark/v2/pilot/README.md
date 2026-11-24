@@ -12,8 +12,8 @@ any evaluator output; no producer is evaluated. Expected verdicts and rationales
 are specified separately in [expectations.json](expectations.json), with no model
 run used to select them. They remain synthetic, provisional, and not human reviewed.
 
-The separate [complex support dossier](complex-support-01/README.md) adds one
-source-grounded fictional situation and five alternative reply/plan candidates.
+The separate [complex support suite](COMPLEX-SUITE.md) contains ten
+source-grounded fictional situations and fifty alternative reply/plan candidates.
 It does not extend this original five-record dataset or use this binary runner.
 Its ordinal rubric and structured output contract have offline preparation only;
 graded execution is not implemented. Historical run evidence remains private;
