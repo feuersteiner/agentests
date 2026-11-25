@@ -1,0 +1,20 @@
+{
+	"name": "agentests-controlled-pilot",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"validate": "bun --no-env-file --no-install cli.ts validate",
+		"judge:validate": "bun --no-env-file --no-install isolated-cli.ts validate",
+		"judge:run": "bun --no-env-file --no-install isolated-cli.ts run",
+		"pilot": "bun --no-env-file --no-install cli.ts run",
+		"test": "bun --no-env-file --no-install test ./tests",
+		"check": "tsc --noEmit -p tsconfig.json"
+	},
+	"dependencies": {
+		"agentests": "workspace:*"
+	},
+	"devDependencies": {
+		"@types/bun": "^1.4.4",
+		"typescript": "^6.0.3"
+	}
+}
