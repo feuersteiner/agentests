@@ -17,18 +17,22 @@ comes next.
 
 ## Try it on your repo first
 
+You wrote rules for your coding agents. Before installing anything, see how often they broke them.
+
 The [agentests-audit](https://github.com/mlgxiii/skills/tree/main/plugins/agentests/skills/agentests-audit)
-skill shows what agentests would catch before you install anything. Your coding agent reads your
-AGENTS.md, turns 5 to 7 rules into Tests, replays your last 50 merged PRs and lists every one that
-broke a rule, with the line and who wrote it. Read-only, no API key.
+skill reads your AGENTS.md, turns 5 to 7 rules into checks and replays your last 50 merged PRs. You
+get every PR that broke a rule, the exact line, and who wrote it. Nothing changes in your repo, and
+you don't need an API key.
 
 ```sh
 /plugin marketplace add mlgxiii/skills
 /plugin install agentests@lastware
 ```
 
-Then ask your agent: "Audit this repo against our agent rules." On Prefect, 4 of the last 50 merged
-PRs broke the project's own rules, all 4 written by Devin.
+Then ask your agent: "Audit this repo against our agent rules."
+
+We ran it on Prefect: 4 of the last 50 merged PRs broke the project's own rules. All 4 were written
+by Devin.
 
 ## See it in 60 seconds
 
