@@ -15,6 +15,21 @@ pre-commit hook then checks every commit and names each file that breaks it. The
 feature-complete; the [roadmap](https://github.com/feuersteiner/agentests/issues/1) lists what
 comes next.
 
+## Try it on your repo first
+
+The [agentests-audit](https://github.com/mlgxiii/skills/tree/main/plugins/agentests/skills/agentests-audit)
+skill shows what agentests would catch before you install anything. Your coding agent reads your
+AGENTS.md, turns 5 to 7 rules into Tests, replays your last 50 merged PRs and lists every one that
+broke a rule, with the line and who wrote it. Read-only, no API key.
+
+```sh
+/plugin marketplace add mlgxiii/skills
+/plugin install agentests@lastware
+```
+
+Then ask your agent: "Audit this repo against our agent rules." On Prefect, 4 of the last 50 merged
+PRs broke the project's own rules, all 4 written by Devin.
+
 ## See it in 60 seconds
 
 https://github.com/user-attachments/assets/b7f71b93-9cb0-4d5e-9825-edc523b0ebdb
